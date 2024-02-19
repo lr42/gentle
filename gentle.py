@@ -253,6 +253,17 @@ glowy = gb.GlowBox()
 print("Showing glowy")
 glowy.show()
 
-sys.exit(app.exec())
+starting_fade_multiplier = 5
+total_time_for_transition = 120
+my_iterable = gb.intervals_decreasing_over_total_time(
+    starting_fade_multiplier,
+    # This needs to be part of the GlowBox object.
+    glowy.steady_pulse_period / 2 / 1_000,
+    total_time_for_transition,
+    glowy.color_main,
+    glowy.color_early,
+)
 
-#time.sleep(60)
+glowy.transition_color_over_iterable(my_iterable, lambda: print("DONE!!!!!!!"))
+
+sys.exit(app.exec())

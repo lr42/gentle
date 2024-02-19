@@ -125,6 +125,41 @@ class GlowBox(QWidget):
         context.addAction(close_action)
         context.exec(ev.globalPos())
 
+    ################  Changing the color
+
+    def transition_to_color(self, transition, on_fade_done=None):
+        logger.info("%s: Transitioning to %s", datetime.datetime.now(), transition)
+        self.color_animation.setEndValue(QColor(transition['new_color']))
+        self.color_animation.setDuration(transition['duration'])
+        # TODO Magic
+        default_transitition = QEasingCurve.InOutSine
+        self.color_animation.setEasingCurve(default_transitition)
+        #if transition['easing curve']:
+        #    self.color_animation.setEasingCurve(transition['easing curve'])
+        #else:
+        #    self.color_animation.setEasingCurve(default_transitition)
+        self.color_animation.start()
+        if on_fade_done:
+            try:
+                self.color_animation.finished.disconnect()
+            except (RuntimeError) as e:
+                logger.info("There was probably nothing connected to the animation finishing.")
+                logger.info(e)
+            self.color_animation.finished.connect(on_fade_done)
+
+    def transition_color_over_iterable(self, transitions, run_on_completion):
+        def handle_next_transition():
+            try:
+                self.transition_to_color(next(transitions), handle_next_transition)
+            except (StopIteration):
+                if run_on_completion:
+                    run_on_completion()
+
+        handle_next_transition()
+
+    ################  The old way
+    # I should be able to remove this soon.
+
     def change_pulse_over_time(self, list_of_intervals, current_interval=0):
         if current_interval % 2 == 0:
             new_color = self.color_early
@@ -220,3 +255,56 @@ class GlowBox(QWidget):
             y = (zsize.height() - glowbox_height) / 2
             print(x, y)
             self.setGeometry(x, y, glowbox_width, glowbox_height)
+
+
+
+def intervals_decreasing_over_total_time(
+    rough_starting_interval, ending_interval, total_time, main_color, secondary_color
+):
+    logger.info("%s  %s  %s", rough_starting_interval, ending_interval, total_time)
+
+    raw = 2 * total_time / (rough_starting_interval + ending_interval)
+    logger.info("raw\t\t%s", raw)
+
+    def nearest_odd(n):
+        return round(n / 2 + 0.5) * 2 - 1
+
+    def nearest_even(n):
+        if n % 2 == 1:
+            return n - 1
+        return int(round(n / 2) * 2)
+
+    num = int(nearest_even(raw))
+    logger.info("num\t\t%s", num)
+
+    new_start = (2 * total_time / num) - ending_interval
+    logger.info("new_start\t%s", new_start)
+
+    total_time / ((new_start / 2) + ending_interval)
+
+    (((new_start - ending_interval) / 2) + ending_interval) * num
+
+    #intervals = []
+    for i in range(num):
+        slope = (ending_interval - new_start) / num
+        # We add 0.5, because we want to get the timing of the interval
+        #  from the slope of the equation at the middle of the interval.
+        #  (Since the slope is linear, you can the whole time taken by
+        #  the interval is the time at the midpoint of the interval...
+        # I dunno how exactly to say what I was saying there.  Imma come
+        #  back to it.  TODO.
+        next = new_start + ((i + 0.5) * slope)
+        next *= 1_000
+        next = int(next)
+
+        #logger.info("i: %s", i)
+        if i % 2 == 0:
+            color = secondary_color
+        else:
+            color = main_color
+
+        yield {'new_color': color, 'duration': next}
+        #intervals.append(next)
+        # logger.info(i, "\t", next, "\t", sum(intervals)/1_000)
+
+    return
