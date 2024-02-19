@@ -31,6 +31,7 @@ import glowbox as gb
 
 
 ################  Config
+
 # TODO Get these from a config file
 short_break_max_spacing_time = 0.5 * 60  # in seconds
 long_break_spacing_time = 25 * 60  # in seconds
@@ -43,6 +44,7 @@ length_of_early_notification_to_long_break = 2 * 60  # in seconds
 
 
 ################  States
+
 waiting_for_short_break = sm.State()
 showing_short_break_notif = sm.State()
 short_break_in_progress = sm.State()
@@ -58,6 +60,7 @@ test_for_next_break = sm.ConditionalJunction(waiting_for_long_break)
 
 
 ################  Events for the state machine
+
 time_out = sm.Event()
 break_started = sm.Event()
 break_ended = sm.Event()
@@ -67,6 +70,7 @@ returned_to_computer = sm.Event()
 
 
 ################  Transitions
+
 # fmt: off
 waiting_for_short_break.transitions = {
     time_out:                showing_short_break_notif,
@@ -123,6 +127,7 @@ waiting_after_long_afk.transitions = {
 
 
 ################  Short break state actions
+
 def waiting_for_short_break__on_entry():
     secs_to_long_break = next_long_break_clock_time - time.time()
     num_segments_to_long_break = math.ceil(
@@ -198,6 +203,7 @@ def showing_long_break_notif__on_exit():
 
 
 ################  Long break state actions
+
 def long_break_in_progress__on_entry():
     pass
 
@@ -215,6 +221,7 @@ def waiting_after_long_afk__on_exit():
 
 
 ################  Threads
+
 scheduler = sched.scheduler(time.monotonic, time.sleep)
 scheduler_lock = threading.Lock()
 def scheduler_thread():
@@ -228,6 +235,7 @@ def scheduler_thread():
 
 
 ################  Main
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 logger.info("Logging initialized")
@@ -250,7 +258,7 @@ tray_icon.setContextMenu(tray_menu)
 tray_icon.show()
 
 glowy = gb.GlowBox()
-print("Showing glowy")
+logger.info("Showing glowy")
 glowy.show()
 
 starting_fade_multiplier = 5

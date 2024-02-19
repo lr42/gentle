@@ -76,10 +76,11 @@ class GlowBox(QWidget):
 
         self.use_saved_window_geometry()
 
+        # TODO What the heck is this?
         print("And we're back")
 
         rect = self.geometry()
-        print(rect)
+        logger.info(rect)
         self.starting_geometry = {
             "location_x": rect.x(),
             "location_y": rect.y(),
@@ -92,6 +93,8 @@ class GlowBox(QWidget):
         self.previous_position = None
 
         self.color_animation = QPropertyAnimation(self, b"color")
+
+    ################  QT QWidget overrides
 
     # pylint: disable=invalid-name
     def mousePressEvent(self, event):
@@ -166,7 +169,7 @@ class GlowBox(QWidget):
         else:
             new_color = self.color_main
 
-        # print("Fading to {} over {} ms".format(new_color, list_of_intervals[current_interval]))
+        # logger.info("Fading to {} over {} ms".format(new_color, list_of_intervals[current_interval]))
         if current_interval >= len(list_of_intervals) - 1:
             self.fade_color(
                 new_color, list_of_intervals[current_interval], self.steady_pulse
@@ -197,9 +200,11 @@ class GlowBox(QWidget):
         if on_fade_done:
             self.color_animation.finished.connect(on_fade_done)
 
+    ################  Window geometry
+
     def save_window_geometry(self, filename="geometry.json"):
         rect = self.geometry()
-        # print(rect)
+        # logger.info(rect)
 
         geometry = {
             "location_x": rect.x(),
@@ -214,25 +219,25 @@ class GlowBox(QWidget):
             or geometry["width"] != self.starting_geometry["width"]
             or geometry["height"] != self.starting_geometry["height"]
         ):
-            # print("Saving window geometry")
-            # print(geometry)
+            # logger.info("Saving window geometry")
+            # logger.info(geometry)
             with open(filename, "w", encoding="utf-8") as f:
                 json.dump(geometry, f, indent=2)
         else:
-            # print("Window not moved")
+            # logger.info("Window not moved")
             pass
 
     def close_and_save_geometry(self):
-        # print("Closing time")
+        # logger.info("Closing time")
         self.save_window_geometry()
         self.hide()
 
     def use_saved_window_geometry(self, filename="geometry.json"):
-        # print("Setting geometry", filename)
+        # logger.info("Setting geometry", filename)
         try:
             with open(filename, "r", encoding="utf-8") as f:
                 geometry = json.load(f)
-            # print(geometry)
+            # logger.info(geometry)
             self.setGeometry(
                 geometry["location_x"],
                 geometry["location_y"],
@@ -248,12 +253,12 @@ class GlowBox(QWidget):
             print("Moving on")
             zsize = QApplication.screens()[0].size()
             # TODO Magic numbers
-            print(zsize)
+            logger.info(zsize)
             glowbox_width = 100
             glowbox_height = 100
             x = (zsize.width() - glowbox_width) / 2
             y = (zsize.height() - glowbox_height) / 2
-            print(x, y)
+            logger.info(x, y)
             self.setGeometry(x, y, glowbox_width, glowbox_height)
 
 

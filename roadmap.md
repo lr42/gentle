@@ -24,6 +24,8 @@ Features
 
 - [ ] Round the corners on the glow box rectangle.
 - [ ] Make the glow box optionally resizable from all four corners.
+- [ ] Add a notification sound to indicate when the break is done.
+- [ ] Allow dimming the screen during breaks.
 
 
 Bugs
@@ -36,7 +38,7 @@ Maintenance
 
 
 
-Someday
+Someday/maybe
 ========================================================================
 
 Features
