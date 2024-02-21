@@ -33,8 +33,10 @@ class GlowBox(QWidget):
         lambda self, color: self.setPalette(QPalette(color)),
     )
 
-    def __init__(self):
+    def __init__(self, run_on_click=None):
         super().__init__()
+
+        self.run_on_click = run_on_click
 
         self.color_main = "deepskyblue"
         self.color_early = "white"
@@ -111,9 +113,13 @@ class GlowBox(QWidget):
     def mouseReleaseEvent(self, event):
         if event.globalPosition().toPoint() == self.previous_position:
             # TODO We don't really need this.  We need proper logging.
-            print(datetime.datetime.now())
-            print("BAZINGA!!!")
+            if self.run_on_click is not None:
+                logger.info("Glowbox clicked!  Running: %s", self.run_on_click)
+                self.run_on_click()
+            else:
+                logger.info("Glowbox clicked!")
 
+            # TODO Don't close here.  We'll let the state machine (or whatever) handle that.
             self.close_and_save_geometry()
         self.is_moving = False
 

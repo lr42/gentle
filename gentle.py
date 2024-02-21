@@ -182,6 +182,8 @@ def waiting_for_short_break__on_exit():
 
 
 def early_notification_pulse():
+    glowy.run_on_click = lambda: machine.process_event(break_started)
+
     glowy.show()
 
     # TODO Needs to come from configuration
@@ -208,6 +210,8 @@ def showing_short_break_early_notif__on_exit():
 
 
 def showing_short_break_late_notif__on_entry():
+    glowy.run_on_click = lambda: machine.process_event(break_started)
+
     my_iterable = gb.steady_pulse(glowy.steady_pulse_period, glowy.color_main, glowy.color_late)
     glowy.transition_color_over_iterable(my_iterable, None)
 
