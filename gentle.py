@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (
 
 import stama.stama as sm
 import glowbox as gb
+import breakscreen as bs
 
 
 ################  Config
@@ -212,6 +213,12 @@ def showing_short_break_late_notif__on_entry():
 showing_short_break_late_notif.on_entry = showing_short_break_late_notif__on_entry
 
 
+def show_short_break_screen():
+    breaky.show()
+
+short_break_in_progress.on_entry = show_short_break_screen
+
+
 ################  Long break state actions
 
 ################  Main
@@ -232,6 +239,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     glowy = gb.GlowBox()
+
+    breaky = bs.BreakScreen()
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon('6138023.png'))
