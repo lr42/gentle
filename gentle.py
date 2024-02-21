@@ -71,7 +71,7 @@ afk_long_period_ended = sm.Event("Long AFK period ended")
 returned_to_computer = sm.Event("User returned to computer")
 
 
-################  Transitions
+################  Short break transitions
 
 # fmt: off
 waiting_for_short_break.transitions = {
@@ -107,6 +107,8 @@ waiting_after_short_afk.transitions = {
     returned_to_computer:       test_for_next_break,
 }
 
+
+################  Long break transitions
 
 waiting_for_long_break.transitions = {
     time_out:                   showing_long_break_early_notif,
@@ -173,12 +175,7 @@ def waiting_for_short_break__on_entry():
     #scheduler.enter(secs_to_notification, 1, lambda: machine.process_event(time_out))
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
-
 waiting_for_short_break.on_entry = waiting_for_short_break__on_entry
-
-
-def waiting_for_short_break__on_exit():
-    pass
 
 
 def early_notification_pulse():
@@ -205,9 +202,6 @@ def early_notification_pulse():
 
 showing_short_break_early_notif.on_entry = early_notification_pulse
 
-def showing_short_break_early_notif__on_exit():
-    pass
-
 
 def showing_short_break_late_notif__on_entry():
     glowy.run_on_click = lambda: machine.process_event(break_started)
@@ -217,99 +211,42 @@ def showing_short_break_late_notif__on_entry():
 
 showing_short_break_late_notif.on_entry = showing_short_break_late_notif__on_entry
 
-def showing_short_break_late_notif__on_exit():
-    pass
-
-
-def short_break_in_progress__on_entry():
-    pass
-
-
-def short_break_in_progress__on_exit():
-    pass
-
-
-def waiting_after_short_afk__on_entry():
-    pass
-
-
-def waiting_after_short_afk__on_exit():
-    pass
-
-
-def waiting_for_long_break__on_entry():
-    pass
-
-
-def waiting_for_long_break__on_exit():
-    pass
-
-
-def showing_long_break_notif__on_entry():
-    pass
-
-
-def showing_long_break_notif__on_exit():
-    pass
-
 
 ################  Long break state actions
 
-def long_break_in_progress__on_entry():
-    pass
-
-
-def long_break_in_progress__on_exit():
-    pass
-
-
-def waiting_after_long_afk__on_entry():
-    pass
-
-
-def waiting_after_long_afk__on_exit():
-    pass
-
-
-################  Threads
-
-#scheduler = sched.scheduler(time.monotonic, time.sleep)
-#scheduler_lock = threading.Lock()
-#def scheduler_thread():
-#    while True:
-#        with scheduler_lock:
-#            time_to_next_event = scheduler.run(blocking=False)
-#        if time_to_next_event is None:
-#            time.sleep(1)
-#        else:
-#            time.sleep(time_to_next_event)
-
-
 ################  Main
+if __name__ == '__main__':
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
-logger.info("Logging initialized")
+    ################  Logging
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
+    logger.info("Logging initialized")
 
-#threading.Thread(target=scheduler_thread, daemon=True).start()
-global_timer = QTimer()
+    ################  Set up concurrent activities
+    #threading.Thread(target=scheduler_thread, daemon=True).start()
+    global_timer = QTimer()
 
-next_long_break_clock_time = time.time() + long_break_spacing_time
+    next_long_break_clock_time = time.time() + long_break_spacing_time
 
-app = QApplication(sys.argv)
+    ################  Set up QT
+    app = QApplication(sys.argv)
 
-tray_icon = QSystemTrayIcon(QIcon('6138023.png'))
+    glowy = gb.GlowBox()
 
-tray_menu = QMenu()
-action = QAction('Exit', tray_icon)
-action.triggered.connect(app.quit)
-tray_menu.addAction(action)
-tray_icon.setContextMenu(tray_menu)
+    ################  Add tray icon
+    tray_icon = QSystemTrayIcon(QIcon('6138023.png'))
 
-tray_icon.show()
+    tray_menu = QMenu()
+    action = QAction('Exit', tray_icon)
+    action.triggered.connect(app.quit)
+    tray_menu.addAction(action)
+    tray_icon.setContextMenu(tray_menu)
 
-glowy = gb.GlowBox()
+    tray_icon.show()
 
-machine = sm.StateMachine(waiting_for_short_break)
+    ################  Start state machine
+    machine = sm.StateMachine(waiting_for_short_break)
 
-sys.exit(app.exec())
+    ################  Exit on QT app close
+    sys.exit(app.exec())
+
