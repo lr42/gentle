@@ -214,7 +214,7 @@ showing_short_break_late_notif.on_entry = showing_short_break_late_notif__on_ent
 
 
 def show_short_break_screen():
-    breaky.show()
+    breaky.showFullScreen()
 
 short_break_in_progress.on_entry = show_short_break_screen
 
