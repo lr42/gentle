@@ -185,13 +185,16 @@ def early_notification_pulse():
     glowy.show()
 
     # TODO Needs to come from configuration
+    ending_fade_interval = glowy.steady_pulse_period / 2 / 1_000
     starting_fade_multiplier = 5
-    total_time_for_transition = 60
+    starting_fade_interval = ending_fade_interval * starting_fade_multiplier
+
     my_iterable = gb.intervals_decreasing_over_total_time(
         starting_fade_multiplier,
+        ending_fade_interval,
         # This needs to be part of the GlowBox object.
-        glowy.steady_pulse_period / 2 / 1_000,
-        total_time_for_transition,
+        length_of_early_notification_to_short_break,
+        # TODO These need to be in the main program
         glowy.color_main,
         glowy.color_early,
     )
@@ -200,7 +203,17 @@ def early_notification_pulse():
 
 showing_short_break_early_notif.on_entry = early_notification_pulse
 
-def showing_short_break_notif__on_exit():
+def showing_short_break_early_notif__on_exit():
+    pass
+
+
+def showing_short_break_late_notif__on_entry():
+    my_iterable = gb.steady_pulse(glowy.steady_pulse_period, glowy.color_main, glowy.color_late)
+    glowy.transition_color_over_iterable(my_iterable, None)
+
+showing_short_break_late_notif.on_entry = showing_short_break_late_notif__on_entry
+
+def showing_short_break_late_notif__on_exit():
     pass
 
 

@@ -130,23 +130,25 @@ class GlowBox(QWidget):
 
     ################  Changing the color
 
-    def transition_to_color(self, transition, on_fade_done=None):
-        logger.debug("Transitioning color to %s", transition)
-        self.color_animation.setEndValue(QColor(transition['new_color']))
-        self.color_animation.setDuration(transition['duration'])
-        # TODO Magic
-        default_transitition = QEasingCurve.InOutSine
-        if 'easing curve' in transition:
-            self.color_animation.setEasingCurve(transition['easing curve'])
-        else:
-            self.color_animation.setEasingCurve(default_transitition)
-        self.color_animation.start()
-        if on_fade_done:
-            try:
-                self.color_animation.finished.disconnect()
-            except (RuntimeError) as e:
-                logger.info("%s -- There was probably nothing previously connected to the animation finishing.", e)
-            self.color_animation.finished.connect(on_fade_done)
+    def transition_to_color(self, transition, on_transition_done=None):
+        # TODO If a person really wants to transition the color when the window is hidden, I could add an option for that here.
+        if self.isVisible():
+            logger.debug("Transitioning color to %s", transition)
+            self.color_animation.setEndValue(QColor(transition['new_color']))
+            self.color_animation.setDuration(transition['duration'])
+            # TODO Magic
+            default_transitition = QEasingCurve.InOutSine
+            if 'easing curve' in transition:
+                self.color_animation.setEasingCurve(transition['easing curve'])
+            else:
+                self.color_animation.setEasingCurve(default_transitition)
+            self.color_animation.start()
+            if on_transition_done:
+                try:
+                    self.color_animation.finished.disconnect()
+                except (RuntimeError) as e:
+                    logger.info("%s -- There was probably nothing previously connected to the animation finishing.", e)
+                self.color_animation.finished.connect(on_transition_done)
 
     def transition_color_over_iterable(self, transitions, run_on_completion):
         def handle_next_transition():
@@ -285,7 +287,6 @@ def intervals_decreasing_over_total_time(
 
     (((new_starting_interval - ending_interval) / 2) + ending_interval) * final_number_of_intervals
 
-    #intervals = []
     for i in range(final_number_of_intervals):
         slope = (ending_interval - new_starting_interval) / final_number_of_intervals
         # We add 0.5, because we want to get the timing of the interval
@@ -308,3 +309,18 @@ def intervals_decreasing_over_total_time(
         # logger.info(i, "\t", next, "\t", sum(intervals)/1_000)
 
     return
+
+
+def steady_pulse(
+    interval, main_color, secondary_color
+):
+    on_main_color = True
+    while True:
+        if on_main_color:
+            color = secondary_color
+        else:
+            color = main_color
+        on_main_color = not on_main_color
+
+        yield {'new_color': color, 'duration': interval}
+
