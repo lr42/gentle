@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
 
 
 class BaseBreakScreen(QWidget):
-    def __init__(self):
+    def __init__(self, timeout_length):
         super().__init__()
         layout = QVBoxLayout()
 
@@ -38,7 +38,7 @@ class BaseBreakScreen(QWidget):
         self.countdown_timer = QTimer()
         self.countdown_timer.timeout.connect(self.update_countdown)
         # TODO She's a witch!  Burn her!  She uses magic numbers!
-        self.remaining_time = QTime(0, 5, 0)  # 5 minutes
+        self.remaining_time = QTime(0, timeout_length // 60, timeout_length % 60)
         self.countdown_label.setText(self.remaining_time.toString())
 
         close_button = QPushButton("Let me get back to work!")
@@ -67,5 +67,5 @@ class BaseBreakScreen(QWidget):
 
 
 class ShortBreakScreen(BaseBreakScreen):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, timeout_length):
+        super().__init__(timeout_length)

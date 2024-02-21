@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
     glowy = gb.GlowBox()
 
-    shorty = bs.ShortBreakScreen()
+    shorty = bs.ShortBreakScreen(120)
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon('6138023.png'))
