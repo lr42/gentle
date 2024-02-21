@@ -214,7 +214,7 @@ showing_short_break_late_notif.on_entry = showing_short_break_late_notif__on_ent
 
 
 def show_short_break_screen():
-    breaky.showFullScreen()
+    shorty.showFullScreen()
 
 short_break_in_progress.on_entry = show_short_break_screen
 
@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
     glowy = gb.GlowBox()
 
-    breaky = bs.BreakScreen()
+    shorty = bs.ShortBreakScreen()
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon('6138023.png'))

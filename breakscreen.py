@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 
-class BreakScreen(QWidget):
+class BaseBreakScreen(QWidget):
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout()
@@ -64,3 +64,8 @@ class BreakScreen(QWidget):
     def showEvent(self, event):
         """Start the timer when the window is shown."""
         self.countdown_timer.start(1_000)  # Update every second
+
+
+class ShortBreakScreen(BaseBreakScreen):
+    def __init__(self):
+        super().__init__()
