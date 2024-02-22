@@ -40,7 +40,7 @@ long_break_spacing_time = 25 * 60  # in seconds
 length_of_short_break = 20  # in seconds
 length_of_long_break = 5 * 60  # in seconds
 
-length_of_early_notification_to_short_break = 20
+length_of_early_notification_to_short_break = 25
 length_of_early_notification_to_long_break = 2 * 60  # in seconds
 
 
@@ -60,6 +60,14 @@ waiting_after_long_afk = sm.State("Waiting after AFK for long duration")
 
 # TODO
 test_for_next_break = sm.ConditionalJunction(waiting_for_long_break)
+
+def has_short_break_before_long_break():
+    secs_to_long_break = next_long_break_clock_time - time.time()
+    if short_break_max_spacing_time < secs_to_long_break:
+        return True
+    return False
+
+test_for_next_break.add_condition(has_short_break_before_long_break, waiting_for_short_break)
 
 
 ################  Events for the state machine
@@ -219,6 +227,12 @@ def show_short_break_screen():
 short_break_in_progress.on_entry = show_short_break_screen
 
 
+def hide_short_break_screen():
+    shorty.hide()
+
+short_break_in_progress.on_exit = hide_short_break_screen
+
+
 ################  Long break state actions
 
 ################  Main
@@ -240,7 +254,7 @@ if __name__ == '__main__':
 
     glowy = gb.GlowBox()
 
-    shorty = bs.ShortBreakScreen(120)
+    shorty = bs.ShortBreakScreen(5, lambda: machine.process_event(break_ended))
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon('6138023.png'))

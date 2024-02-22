@@ -29,11 +29,8 @@ class BaseBreakScreen(QWidget):
         ################  Initialize the countdown timer
         self.countdown_timer = QTimer()
         self.countdown_timer.timeout.connect(self.update_countdown)
-        # TODO She's a witch!  Burn her!  She uses magic numbers!
-        self.remaining_time = QTime(0, timeout_length // 60, timeout_length % 60)
-        self.countdown_label.setText(self.remaining_time.toString())
+        self._timeout_length = timeout_length
 
-        self.setLayout(layout)
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowFlag(Qt.FramelessWindowHint, True)
 
@@ -46,12 +43,13 @@ class BaseBreakScreen(QWidget):
 
     def update_countdown(self):
         self.remaining_time = self.remaining_time.addSecs(-1)
-        self.countdown_label.setText(self.remaining_time.toString())
         if self.remaining_time == QTime(0, 0, 0):
             self.countdown_timer.stop()
+            self._run_on_completion()
 
     def showEvent(self, event):
         """Start the timer when the window is shown."""
+        self.remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
         self.countdown_timer.start(1_000)  # Update every second
 
 
@@ -68,11 +66,10 @@ class ShortBreakScreen(BaseBreakScreen):
         # TODO She's a witch!  Burn her!  She uses magic numbers!
         font.setPointSize(128)  # Set font size
         self.big_text_label.setFont(font)
+        self.big_text_label.setText("Hello.")
         layout.addWidget(self.big_text_label)
 
-        close_button = QPushButton("Let me get back to work!")
-        close_button.clicked.connect(self.close)
-        layout.addWidget(close_button)
+        self.setLayout(layout)
 
 
 class LongreakScreen(BaseBreakScreen):
@@ -93,4 +90,11 @@ class LongreakScreen(BaseBreakScreen):
         close_button = QPushButton("Let me get back to work!")
         close_button.clicked.connect(self.close)
         layout.addWidget(close_button)
+
+        self.setLayout(layout)
+
+    def update_countdown(self):
+        super().update_countdown()
+        self.countdown_label.setText(self.remaining_time.toString())
+
 
