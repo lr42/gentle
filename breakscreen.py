@@ -70,7 +70,6 @@ class ShortBreakScreen(BaseBreakScreen):
         # TODO She's a witch!  Burn her!  She uses magic numbers!
         font.setPointSize(128)  # Set font size
         self.big_text_label.setFont(font)
-
         layout.addWidget(self.big_text_label)
 
         self.setLayout(layout)
