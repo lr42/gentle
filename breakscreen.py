@@ -6,7 +6,7 @@ from PySide6.QtCore import (
     QTimer,
     QTime,
 )
-from PySide6.QtGui import QAction, QColor, QPalette, QScreen, QIcon
+from PySide6.QtGui import QAction, QColor, QPalette, QScreen, QIcon, QFontMetrics, QTextOption
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -63,14 +63,57 @@ class ShortBreakScreen(BaseBreakScreen):
         self.big_text_label = QLabel()
         self.big_text_label.setAlignment(Qt.AlignCenter)
         self.big_text_label.setWordWrap(True)
+
+        self.big_text_label.setText("Look at something far away.")
+
         font = self.big_text_label.font()
         # TODO She's a witch!  Burn her!  She uses magic numbers!
         font.setPointSize(128)  # Set font size
         self.big_text_label.setFont(font)
-        self.big_text_label.setText("Look at something far away.")
+
         layout.addWidget(self.big_text_label)
 
         self.setLayout(layout)
+
+        metrics = QFontMetrics(font)
+        text_width = metrics.horizontalAdvance(self.big_text_label.text())
+        bounding_box = metrics.boundingRect(self.big_text_label.text())
+        label_size = metrics.size(0, "Howdy")
+
+        size_hint = self.big_text_label.sizeHint()
+
+        print("metrics: ", metrics)
+        print("text width: ", text_width)
+        print("bounding_box: ", bounding_box)
+        print("label_size: ", label_size)
+        print("size_hint: ", size_hint)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+
+        # All temporary, while figuring out auto adjusting height.
+        font = self.big_text_label.font()
+
+        metrics = QFontMetrics(font)
+        text_width = metrics.horizontalAdvance(self.big_text_label.text())
+        bounding_box = metrics.boundingRect(self.big_text_label.text())
+        label_size = metrics.size(Qt.TextWordWrap, self.big_text_label.text())
+
+        label_height = label_size.height()
+        label_width = label_size.width()
+
+        size_hint = self.big_text_label.sizeHint()
+
+        print("metrics: ", metrics)
+        print("text width: ", text_width)
+        print("bounding_box: ", bounding_box)
+        print("label_size: ", label_size)
+
+        print("size_hint: ", size_hint)
+
+        print("label_height: ", label_height)
+        print("label_width: ", label_width)
+
 
 
 class LongreakScreen(BaseBreakScreen):
