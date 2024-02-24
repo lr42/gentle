@@ -64,58 +64,18 @@ class ShortBreakScreen(BaseBreakScreen):
         self.big_text_label.setAlignment(Qt.AlignCenter)
         self.big_text_label.setWordWrap(True)
 
-        self.big_text_label.setText("Look at something far away.")
+        self.big_text_label.setText("Look at something <s>near</s> <i>far</i> <b>away</b>.")
 
         font = self.big_text_label.font()
         # TODO She's a witch!  Burn her!  She uses magic numbers!
-        font.setPointSize(128)  # Set font size
+        font.setPointSize(96)  # Set font size
         self.big_text_label.setFont(font)
         layout.addWidget(self.big_text_label)
 
         self.setLayout(layout)
 
-        metrics = QFontMetrics(font)
-        text_width = metrics.horizontalAdvance(self.big_text_label.text())
-        bounding_box = metrics.boundingRect(self.big_text_label.text())
-        label_size = metrics.size(0, "Howdy")
 
-        size_hint = self.big_text_label.sizeHint()
-
-        print("metrics: ", metrics)
-        print("text width: ", text_width)
-        print("bounding_box: ", bounding_box)
-        print("label_size: ", label_size)
-        print("size_hint: ", size_hint)
-
-    def showEvent(self, event):
-        super().showEvent(event)
-
-        # All temporary, while figuring out auto adjusting height.
-        font = self.big_text_label.font()
-
-        metrics = QFontMetrics(font)
-        text_width = metrics.horizontalAdvance(self.big_text_label.text())
-        bounding_box = metrics.boundingRect(self.big_text_label.text())
-        label_size = metrics.size(Qt.TextWordWrap, self.big_text_label.text())
-
-        label_height = label_size.height()
-        label_width = label_size.width()
-
-        size_hint = self.big_text_label.sizeHint()
-
-        print("metrics: ", metrics)
-        print("text width: ", text_width)
-        print("bounding_box: ", bounding_box)
-        print("label_size: ", label_size)
-
-        print("size_hint: ", size_hint)
-
-        print("label_height: ", label_height)
-        print("label_width: ", label_width)
-
-
-
-class LongreakScreen(BaseBreakScreen):
+class LongBreakScreen(BaseBreakScreen):
     def __init__(self, timeout_length, run_on_completion):
         super().__init__(timeout_length, run_on_completion)
 
@@ -126,7 +86,7 @@ class LongreakScreen(BaseBreakScreen):
         self.countdown_label.setAlignment(Qt.AlignCenter)
         font = self.countdown_label.font()
         # TODO She's a witch!  Burn her!  She uses magic numbers!
-        font.setPointSize(128)  # Set font size
+        font.setPointSize(96)  # Set font size
         self.countdown_label.setFont(font)
         layout.addWidget(self.countdown_label)
 
