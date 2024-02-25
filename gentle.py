@@ -235,6 +235,20 @@ short_break_in_progress.on_exit = hide_short_break_screen
 
 ################  Long break state actions
 
+def waiting_for_long_break__on_entry():
+    secs_to_long_break = next_long_break_clock_time - time.time()
+    secs_to_notification = (
+        secs_to_long_break - length_of_early_notification_to_long_break
+    )
+
+    logger.info("%sm%ss to next long break", int(secs_to_long_break // 60), secs_to_long_break % 60)
+    logger.info("%sm%ss to notification", int(secs_to_notification // 60), secs_to_notification % 60)
+
+    global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
+
+waiting_for_long_break.on_entry = waiting_for_long_break__on_entry
+
+
 ################  Main
 if __name__ == '__main__':
 
