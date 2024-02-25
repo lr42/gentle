@@ -35,13 +35,13 @@ import breakscreen as bs
 
 # TODO Get these from a config file
 short_break_max_spacing_time = 0.5 * 60  # in seconds
-long_break_spacing_time = 25 * 60  # in seconds
+long_break_spacing_time = 1 * 60  # in seconds
 
 length_of_short_break = 20  # in seconds
 length_of_long_break = 5 * 60  # in seconds
 
-length_of_early_notification_to_short_break = 25
-length_of_early_notification_to_long_break = 2 * 60  # in seconds
+length_of_early_notification_to_short_break = 10  # in seconds
+length_of_early_notification_to_long_break = 10  # in seconds
 
 
 ################  States
@@ -64,7 +64,9 @@ test_for_next_break = sm.ConditionalJunction(waiting_for_long_break)
 def has_short_break_before_long_break():
     secs_to_long_break = next_long_break_clock_time - time.time()
     if short_break_max_spacing_time < secs_to_long_break:
+        logger.debug("has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)", short_break_max_spacing_time, secs_to_long_break)
         return True
+    logger.debug("has_short_break_before_long_break returning False: short_break_max_spacing_time (%s) >= secs_to_long_break (%s)", short_break_max_spacing_time, secs_to_long_break)
     return False
 
 test_for_next_break.add_condition(has_short_break_before_long_break, waiting_for_short_break)
@@ -160,28 +162,42 @@ waiting_after_long_afk.transitions = {
 
 def waiting_for_short_break__on_entry():
     secs_to_long_break = next_long_break_clock_time - time.time()
+    logger.debug("secs_to_long_break:  %s", secs_to_long_break)
+
     num_segments_to_long_break = math.ceil(
         (secs_to_long_break + length_of_short_break)
         / (length_of_short_break + short_break_max_spacing_time)
     )
+    logger.debug("num_segments_to_long_break:  %s", num_segments_to_long_break)
+
     num_short_breaks_to_long_break = num_segments_to_long_break - 1
+    logger.debug("num_short_breaks_to_long_break:  %s", num_short_breaks_to_long_break)
+
     total_short_break_secs_to_long_break = (
         num_short_breaks_to_long_break * length_of_short_break
     )
+    logger.debug("total_short_break_secs_to_long_break:  %s", total_short_break_secs_to_long_break)
+
     working_secs_to_long_break = (
         secs_to_long_break - total_short_break_secs_to_long_break
     )
+    logger.debug("working_secs_to_long_break:  %s", working_secs_to_long_break)
+
     secs_to_short_break = (
         working_secs_to_long_break / num_segments_to_long_break
     )
+    logger.debug("secs_to_short_break:  %s", secs_to_short_break)
+
     secs_to_notification = (
         secs_to_short_break - length_of_early_notification_to_short_break
     )
+    logger.debug("secs_to_notification:  %s", secs_to_notification)
+
+    secs_to_notification = max(secs_to_notification, 0)
 
     logger.info("%sm%ss to next short break", int(secs_to_short_break // 60), secs_to_short_break % 60)
     logger.info("%sm%ss to notification", int(secs_to_notification // 60), secs_to_notification % 60)
 
-    #scheduler.enter(secs_to_notification, 1, lambda: machine.process_event(time_out))
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
 waiting_for_short_break.on_entry = waiting_for_short_break__on_entry
@@ -254,7 +270,10 @@ if __name__ == '__main__':
 
     ################  Logging
     logger = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+            level=logging.DEBUG,
+            #format='%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s',
+            )
     logger.info("Logging initialized")
 
     ################  Set up concurrent activities
