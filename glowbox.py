@@ -38,12 +38,6 @@ class GlowBox(QWidget):
 
         self.run_on_click = run_on_click
 
-        self.color_main = "deepskyblue"
-        self.color_early = "white"
-        self.color_late = "yellow"
-
-        self.steady_pulse_period = 1000
-
         self.setWindowTitle("Gentle break reminder")  # This might be obsolete some day.
 
         ################################################################
@@ -65,10 +59,6 @@ class GlowBox(QWidget):
 
         self.setAutoFillBackground(True)
 
-        palette = self.palette()
-        palette.setColor(QPalette.Window, QColor(self.color_main))
-        self.setPalette(palette)
-
         grip_size = 5
         self.grip = QSizeGrip(self)
         self.grip.resize(grip_size, grip_size)
@@ -77,9 +67,6 @@ class GlowBox(QWidget):
         self.is_cycling_from_main_color = True
 
         self.use_saved_window_geometry()
-
-        # TODO What the heck is this?
-        print("And we're back")
 
         rect = self.geometry()
         logger.debug("Geometry: %s", rect)
@@ -135,6 +122,13 @@ class GlowBox(QWidget):
         context.exec(ev.globalPos())
 
     ################  Changing the color
+
+    def set_main_color(self, color=None):
+        if color is not None:
+            self._color_main = color
+        palette = self.palette()
+        palette.setColor(QPalette.Window, QColor(self._color_main))
+        self.setPalette(palette)
 
     def transition_to_color(self, transition, on_transition_done=None):
         # TODO If a person really wants to transition the color when the window is hidden, I could add an option for that here.

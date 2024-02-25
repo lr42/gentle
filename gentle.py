@@ -34,16 +34,31 @@ import breakscreen as bs
 ################  Config
 
 # TODO Get these from a config file
-short_break_max_spacing_time = 0.5 * 60  # in seconds
+short_break_max_spacing_time = 20  # in seconds
 long_break_spacing_time = 1 * 60  # in seconds
 
-length_of_short_break = 20  # in seconds
+length_of_short_break = 5  # in seconds
 length_of_long_break = 5 * 60  # in seconds
 
 length_of_early_notification_to_short_break = 10  # in seconds
 length_of_early_notification_to_long_break = 10  # in seconds
 
+#short_break_max_spacing_time = 20 * 60  # in seconds
+#long_break_spacing_time = 25 * 60  # in seconds
+#
+#length_of_short_break = 30  # in seconds
+#length_of_long_break = 5 * 60  # in seconds
+#
+#length_of_early_notification_to_short_break = 30  # in seconds
+#length_of_early_notification_to_long_break = 2 * 60  # in seconds
+
 steady_pulse_period = 1_000
+
+# TODO Maybe use separate colors for short and long early and late notifications?
+color_short = "chartreuse"
+color_long = "deepskyblue"
+color_early = "white"
+color_late = "yellow"
 
 
 ################  States
@@ -162,7 +177,7 @@ waiting_after_long_afk.transitions = {
 
 ################  Short break state actions
 
-def waiting_for_short_break__on_entry():
+def set_timer_for_short_break():
     secs_to_long_break = next_long_break_clock_time - time.time()
     logger.debug("secs_to_long_break:  %s", secs_to_long_break)
 
@@ -202,12 +217,14 @@ def waiting_for_short_break__on_entry():
 
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
-waiting_for_short_break.on_entry = waiting_for_short_break__on_entry
+waiting_for_short_break.on_entry = set_timer_for_short_break
 
 
-def early_notification_pulse():
+def short_early_notification_pulse():
+    glowy.set_main_color(color_short)
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
+    # TODO Should this include the color to show it as?
     glowy.show()
 
     # TODO Needs to come from configuration
@@ -222,22 +239,23 @@ def early_notification_pulse():
         # This needs to be part of the GlowBox object.
         length_of_early_notification_to_short_break,
         # TODO These need to be in the main program
-        glowy.color_main,
-        glowy.color_early,
+        color_short,
+        color_early,
     )
 
     glowy.transition_color_over_iterable(my_iterable, lambda: machine.process_event(time_out))
 
-showing_short_break_early_notif.on_entry = early_notification_pulse
+showing_short_break_early_notif.on_entry = short_early_notification_pulse
 
 
-def showing_short_break_late_notif__on_entry():
+def short_late_notification_pulse():
+    glowy.set_main_color(color_short)
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
-    my_iterable = gb.steady_pulse(steady_pulse_period / 2, glowy.color_main, glowy.color_late)
+    my_iterable = gb.steady_pulse(steady_pulse_period / 2, color_short, color_late)
     glowy.transition_color_over_iterable(my_iterable, None)
 
-showing_short_break_late_notif.on_entry = showing_short_break_late_notif__on_entry
+showing_short_break_late_notif.on_entry = short_late_notification_pulse
 
 
 def show_short_break_screen():
@@ -254,21 +272,25 @@ short_break_in_progress.on_exit = hide_short_break_screen
 
 ################  Long break state actions
 
-def waiting_for_long_break__on_entry():
+def set_timer_for_long_break():
     secs_to_long_break = next_long_break_clock_time - time.time()
     secs_to_notification = (
         secs_to_long_break - length_of_early_notification_to_long_break
     )
+
+    secs_to_notification = max(secs_to_notification, 0)
 
     logger.info("%sm%ss to next long break", int(secs_to_long_break // 60), secs_to_long_break % 60)
     logger.info("%sm%ss to notification", int(secs_to_notification // 60), secs_to_notification % 60)
 
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
-waiting_for_long_break.on_entry = waiting_for_long_break__on_entry
+waiting_for_long_break.on_entry = set_timer_for_long_break
 
 
 def long_early_notification_pulse():
+    # TODO Should this be a setter?
+    glowy.set_main_color(color_long)
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
     glowy.show()
@@ -285,13 +307,23 @@ def long_early_notification_pulse():
         # This needs to be part of the GlowBox object.
         length_of_early_notification_to_long_break,
         # TODO These need to be in the main program
-        glowy.color_main,
-        glowy.color_early,
+        color_long,
+        color_early,
     )
 
     glowy.transition_color_over_iterable(my_iterable, lambda: machine.process_event(time_out))
 
 showing_long_break_early_notif.on_entry = long_early_notification_pulse
+
+
+def long_late_notification_pulse():
+    glowy.set_main_color(color_long)
+    glowy.run_on_click = lambda: machine.process_event(break_started)
+
+    my_iterable = gb.steady_pulse(steady_pulse_period / 2, color_long, color_late)
+    glowy.transition_color_over_iterable(my_iterable, None)
+
+showing_long_break_late_notif.on_entry = long_late_notification_pulse
 
 
 ################  Main
@@ -304,6 +336,9 @@ if __name__ == '__main__':
             #format='%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s',
             )
     logger.info("Logging initialized")
+
+    ################  Show colors
+    logger.info("Here's a list of colors:  %s", QColor.colorNames())
 
     ################  Set up concurrent activities
     #threading.Thread(target=scheduler_thread, daemon=True).start()
