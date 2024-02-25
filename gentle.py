@@ -326,6 +326,12 @@ def long_late_notification_pulse():
 showing_long_break_late_notif.on_entry = long_late_notification_pulse
 
 
+def show_long_break_screen():
+    longy.showFullScreen()
+
+long_break_in_progress.on_entry = show_long_break_screen
+
+
 ################  Main
 if __name__ == '__main__':
 
@@ -352,6 +358,7 @@ if __name__ == '__main__':
     glowy = gb.GlowBox()
 
     shorty = bs.ShortBreakScreen(5, lambda: machine.process_event(break_ended))
+    longy = bs.LongBreakScreen(5 * 60, lambda: machine.process_event(break_ended))
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon('6138023.png'))

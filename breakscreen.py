@@ -42,14 +42,14 @@ class BaseBreakScreen(QWidget):
         self.setPalette(palette)
 
     def update_countdown(self):
-        self.remaining_time = self.remaining_time.addSecs(-1)
-        if self.remaining_time == QTime(0, 0, 0):
+        self._remaining_time = self._remaining_time.addSecs(-1)
+        if self._remaining_time == QTime(0, 0, 0):
             self.countdown_timer.stop()
             self._run_on_completion()
 
     def showEvent(self, event):
         """Start the timer when the window is shown."""
-        self.remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
+        self._remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
         self.countdown_timer.start(1_000)  # Update every second
 
 
@@ -88,6 +88,8 @@ class LongBreakScreen(BaseBreakScreen):
         # TODO She's a witch!  Burn her!  She uses magic numbers!
         font.setPointSize(96)  # Set font size
         self.countdown_label.setFont(font)
+        self._remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
+        self.countdown_label.setText(self._remaining_time.toString())
         layout.addWidget(self.countdown_label)
 
         close_button = QPushButton("Let me get back to work!")
@@ -98,6 +100,6 @@ class LongBreakScreen(BaseBreakScreen):
 
     def update_countdown(self):
         super().update_countdown()
-        self.countdown_label.setText(self.remaining_time.toString())
+        self.countdown_label.setText(self._remaining_time.toString())
 
 
