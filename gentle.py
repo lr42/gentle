@@ -43,6 +43,8 @@ length_of_long_break = 5 * 60  # in seconds
 length_of_early_notification_to_short_break = 10  # in seconds
 length_of_early_notification_to_long_break = 10  # in seconds
 
+steady_pulse_period = 1_000
+
 
 ################  States
 
@@ -209,7 +211,8 @@ def early_notification_pulse():
     glowy.show()
 
     # TODO Needs to come from configuration
-    ending_fade_interval = glowy.steady_pulse_period / 2 / 1_000
+    ending_fade_interval = steady_pulse_period / 2 / 1_000
+    logger.debug("ending_fade_interval: %s", ending_fade_interval)
     starting_fade_multiplier = 5
     starting_fade_interval = ending_fade_interval * starting_fade_multiplier
 
@@ -231,7 +234,7 @@ showing_short_break_early_notif.on_entry = early_notification_pulse
 def showing_short_break_late_notif__on_entry():
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
-    my_iterable = gb.steady_pulse(glowy.steady_pulse_period, glowy.color_main, glowy.color_late)
+    my_iterable = gb.steady_pulse(steady_pulse_period / 2, glowy.color_main, glowy.color_late)
     glowy.transition_color_over_iterable(my_iterable, None)
 
 showing_short_break_late_notif.on_entry = showing_short_break_late_notif__on_entry
@@ -263,6 +266,32 @@ def waiting_for_long_break__on_entry():
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
 waiting_for_long_break.on_entry = waiting_for_long_break__on_entry
+
+
+def long_early_notification_pulse():
+    glowy.run_on_click = lambda: machine.process_event(break_started)
+
+    glowy.show()
+
+    # TODO Needs to come from configuration
+    ending_fade_interval = steady_pulse_period / 2 / 1_000
+    logger.debug("ending_fade_interval: %s", ending_fade_interval)
+    starting_fade_multiplier = 5
+    starting_fade_interval = ending_fade_interval * starting_fade_multiplier
+
+    my_iterable = gb.intervals_decreasing_over_total_time(
+        starting_fade_multiplier,
+        ending_fade_interval,
+        # This needs to be part of the GlowBox object.
+        length_of_early_notification_to_long_break,
+        # TODO These need to be in the main program
+        glowy.color_main,
+        glowy.color_early,
+    )
+
+    glowy.transition_color_over_iterable(my_iterable, lambda: machine.process_event(time_out))
+
+showing_long_break_early_notif.on_entry = long_early_notification_pulse
 
 
 ################  Main

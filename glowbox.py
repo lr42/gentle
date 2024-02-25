@@ -166,45 +166,6 @@ class GlowBox(QWidget):
 
         handle_next_transition()
 
-    ################  The old way
-    # I should be able to remove this soon.
-
-    def change_pulse_over_time(self, list_of_intervals, current_interval=0):
-        if current_interval % 2 == 0:
-            new_color = self.color_early
-        else:
-            new_color = self.color_main
-
-        # logger.info("Fading to {} over {} ms".format(new_color, list_of_intervals[current_interval]))
-        if current_interval >= len(list_of_intervals) - 1:
-            self.fade_color(
-                new_color, list_of_intervals[current_interval], self.steady_pulse
-            )
-        else:
-            self.fade_color(
-                new_color,
-                list_of_intervals[current_interval],
-                lambda: self.change_pulse_over_time(
-                    list_of_intervals, current_interval + 1
-                ),
-            )
-
-    def steady_pulse(self):
-        if self.is_cycling_from_main_color:
-            new_color = self.color_late
-        else:
-            new_color = self.color_main
-        self.fade_color(new_color, self.steady_pulse_period / 2, self.steady_pulse)
-        self.is_cycling_from_main_color = not self.is_cycling_from_main_color
-
-    def fade_color(self, new_color, duration, on_fade_done=False):
-        self.color_animation.setEndValue(QColor(new_color))
-        self.color_animation.setDuration(duration)
-        self.color_animation.start()
-        # TODO Magic
-        self.color_animation.setEasingCurve(QEasingCurve.InOutSine)
-        if on_fade_done:
-            self.color_animation.finished.connect(on_fade_done)
 
     ################  Window geometry
 
