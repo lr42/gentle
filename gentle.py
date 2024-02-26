@@ -3,6 +3,7 @@ import sched
 import time
 import threading
 import logging
+from logging.handlers import SocketHandler
 import sys
 
 from PySide6.QtCore import (
@@ -356,11 +357,14 @@ long_break_finished.on_entry = show_long_break_screen_finished
 if __name__ == '__main__':
 
     ################  Logging
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger()
     logging.basicConfig(
             level=logging.DEBUG,
             #format='%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s',
             )
+    # For logging to cutelog
+    socket_handler = SocketHandler('127.0.0.1', 19996)
+    logger.addHandler(socket_handler)
     logger.info("Logging initialized")
 
     ################  Show colors
