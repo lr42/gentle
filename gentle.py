@@ -5,6 +5,7 @@ import threading
 import logging
 from logging.handlers import SocketHandler
 import sys
+import datetime
 
 from PySide6.QtCore import (
     Qt,
@@ -82,8 +83,10 @@ test_for_next_break = sm.ConditionalJunction(waiting_for_long_break)
 
 def has_short_break_before_long_break():
     global next_long_break_clock_time
+    logger.info("Next long break at:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
     if time.time() > next_long_break_clock_time:
         next_long_break_clock_time = time.time() + long_break_spacing_time
+        logger.info("Next long break reset to:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
     secs_to_long_break = next_long_break_clock_time - time.time()
     if short_break_max_spacing_time < secs_to_long_break:
         logger.debug("has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)", short_break_max_spacing_time, secs_to_long_break)
@@ -169,7 +172,7 @@ showing_long_break_late_notif.transitions = {
 
 long_break_in_progress.transitions = {
     time_out:                   long_break_finished,
-    break_ended:                test_for_next_break,
+    break_ended:                test_for_next_break,  # Skipping the break
     afk_short_period_ended:     None,
     afk_long_period_ended:      None,
     returned_to_computer:       None,  #TODO
