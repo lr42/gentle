@@ -50,7 +50,8 @@ class BaseBreakScreen(QWidget):
     def showEvent(self, event):
         """Start the timer when the window is shown."""
         self._remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
-        self.countdown_timer.start(1_000)  # Update every second
+        print("******* Starting timer")
+        self.countdown_timer.start(1_000)
 
 
 class ShortBreakScreen(BaseBreakScreen):
@@ -76,27 +77,44 @@ class ShortBreakScreen(BaseBreakScreen):
 
 
 class LongBreakScreen(BaseBreakScreen):
-    def __init__(self, timeout_length, run_on_completion):
+    def __init__(self, timeout_length, run_on_completion, run_on_finish, run_on_skip=None):
         super().__init__(timeout_length, run_on_completion)
 
-        ################  Create the layout
-        layout = QVBoxLayout()
+        ################  Create the countdown layout
+        self.countdown_layout = QVBoxLayout()
 
         self.countdown_label = QLabel()
         self.countdown_label.setAlignment(Qt.AlignCenter)
         font = self.countdown_label.font()
         # TODO She's a witch!  Burn her!  She uses magic numbers!
-        font.setPointSize(96)  # Set font size
+        font.setPointSize(96)
         self.countdown_label.setFont(font)
         self._remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
         self.countdown_label.setText(self._remaining_time.toString())
-        layout.addWidget(self.countdown_label)
+        self.countdown_layout.addWidget(self.countdown_label)
 
-        close_button = QPushButton("Let me get back to work!")
-        close_button.clicked.connect(self.close)
-        layout.addWidget(close_button)
+        if run_on_skip is not None:
+            skip_button = QPushButton("Skip this break.  :-(")
+            skip_button.clicked.connect(run_on_skip)
+            self.countdown_layout.addWidget(skip_button)
 
-        self.setLayout(layout)
+        self.setLayout(self.countdown_layout)
+
+        ################  Create the finished layout
+        self.finished_layout = QVBoxLayout()
+
+        self.finished_label = QLabel()
+        self.finished_label.setAlignment(Qt.AlignCenter)
+        font = self.finished_label.font()
+        # TODO She's a witch!  Burn her!  She uses magic numbers!
+        font.setPointSize(96)
+        self.finished_label.setFont(font)
+        self.finished_label.setText("Finished!")
+        self.finished_layout.addWidget(self.finished_label)
+
+        finish_button = QPushButton("Let me get back to work!")
+        finish_button.clicked.connect(run_on_finish)
+        self.finished_layout.addWidget(finish_button)
 
     def update_countdown(self):
         super().update_countdown()

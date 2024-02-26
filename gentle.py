@@ -35,7 +35,7 @@ import breakscreen as bs
 
 # TODO Get these from a config file
 short_break_max_spacing_time = 20  # in seconds
-long_break_spacing_time = 1 * 60  # in seconds
+long_break_spacing_time = 0.5 * 60  # in seconds
 
 length_of_short_break = 5  # in seconds
 length_of_long_break = 5 * 60  # in seconds
@@ -73,12 +73,16 @@ waiting_for_long_break = sm.State("Waiting for a long break")
 showing_long_break_early_notif = sm.State("Showing the long break early notification")
 showing_long_break_late_notif = sm.State("Showing the long break late notification")
 long_break_in_progress = sm.State("long break in progress")
+long_break_finished = sm.State("long break finished")
 waiting_after_long_afk = sm.State("Waiting after AFK for long duration")
 
 # TODO
 test_for_next_break = sm.ConditionalJunction(waiting_for_long_break)
 
 def has_short_break_before_long_break():
+    global next_long_break_clock_time
+    if time.time() > next_long_break_clock_time:
+        next_long_break_clock_time = time.time() + long_break_spacing_time
     secs_to_long_break = next_long_break_clock_time - time.time()
     if short_break_max_spacing_time < secs_to_long_break:
         logger.debug("has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)", short_break_max_spacing_time, secs_to_long_break)
@@ -163,6 +167,14 @@ showing_long_break_late_notif.transitions = {
 }
 
 long_break_in_progress.transitions = {
+    time_out:                   long_break_finished,
+    break_ended:                test_for_next_break,
+    afk_short_period_ended:     None,
+    afk_long_period_ended:      None,
+    returned_to_computer:       None,  #TODO
+}
+
+long_break_finished.transitions = {
     break_ended:                test_for_next_break,
     afk_short_period_ended:     None,
     afk_long_period_ended:      None,
@@ -350,6 +362,7 @@ if __name__ == '__main__':
     #threading.Thread(target=scheduler_thread, daemon=True).start()
     global_timer = QTimer()
 
+    global next_long_break_clock_time
     next_long_break_clock_time = time.time() + long_break_spacing_time
 
     ################  Set up QT
@@ -358,7 +371,7 @@ if __name__ == '__main__':
     glowy = gb.GlowBox()
 
     shorty = bs.ShortBreakScreen(5, lambda: machine.process_event(break_ended))
-    longy = bs.LongBreakScreen(5 * 60, lambda: machine.process_event(break_ended))
+    longy = bs.LongBreakScreen(5 * 60, lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended))
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon('6138023.png'))
