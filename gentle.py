@@ -38,7 +38,7 @@ short_break_max_spacing_time = 20  # in seconds
 long_break_spacing_time = 0.5 * 60  # in seconds
 
 length_of_short_break = 5  # in seconds
-length_of_long_break = 5 * 60  # in seconds
+length_of_long_break = 5 #* 60  # in seconds
 
 length_of_early_notification_to_short_break = 10  # in seconds
 length_of_early_notification_to_long_break = 10  # in seconds
@@ -338,10 +338,18 @@ def long_late_notification_pulse():
 showing_long_break_late_notif.on_entry = long_late_notification_pulse
 
 
-def show_long_break_screen():
+def show_long_break_screen_countdown():
+    longy.set_layout_to_countdown()
     longy.showFullScreen()
 
-long_break_in_progress.on_entry = show_long_break_screen
+long_break_in_progress.on_entry = show_long_break_screen_countdown
+
+
+def show_long_break_screen_finished():
+    longy.set_layout_to_finished()
+    longy.showFullScreen()
+
+long_break_finished.on_entry = show_long_break_screen_finished
 
 
 ################  Main
@@ -370,8 +378,8 @@ if __name__ == '__main__':
 
     glowy = gb.GlowBox()
 
-    shorty = bs.ShortBreakScreen(5, lambda: machine.process_event(break_ended))
-    longy = bs.LongBreakScreen(5 * 60, lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended))
+    shorty = bs.ShortBreakScreen(length_of_short_break, lambda: machine.process_event(break_ended))
+    longy = bs.LongBreakScreen(length_of_long_break, lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended))
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon('6138023.png'))

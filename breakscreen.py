@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QLabel,
     QSystemTrayIcon,
+    QStackedLayout,
 )
 
 
@@ -81,6 +82,7 @@ class LongBreakScreen(BaseBreakScreen):
         super().__init__(timeout_length, run_on_completion)
 
         ################  Create the countdown layout
+        self.countdown_layout_widget = QWidget()
         self.countdown_layout = QVBoxLayout()
 
         self.countdown_label = QLabel()
@@ -98,9 +100,10 @@ class LongBreakScreen(BaseBreakScreen):
             skip_button.clicked.connect(run_on_skip)
             self.countdown_layout.addWidget(skip_button)
 
-        self.setLayout(self.countdown_layout)
+        self.countdown_layout_widget.setLayout(self.countdown_layout)
 
         ################  Create the finished layout
+        self.finished_layout_widget = QWidget()
         self.finished_layout = QVBoxLayout()
 
         self.finished_label = QLabel()
@@ -114,10 +117,25 @@ class LongBreakScreen(BaseBreakScreen):
 
         finish_button = QPushButton("Let me get back to work!")
         finish_button.clicked.connect(run_on_finish)
+        finish_button.clicked.connect(self.hide)
         self.finished_layout.addWidget(finish_button)
+
+        self.finished_layout_widget.setLayout(self.finished_layout)
+
+        ################  Stack the layouts so we can switch between them
+        self.stacked_layout = QStackedLayout()
+        self.stacked_layout.addWidget(self.countdown_layout_widget)
+        self.stacked_layout.addWidget(self.finished_layout_widget)
+
+        self.setLayout(self.stacked_layout)
 
     def update_countdown(self):
         super().update_countdown()
         self.countdown_label.setText(self._remaining_time.toString())
 
+    def set_layout_to_countdown(self):
+        self.stacked_layout.setCurrentIndex(0)
+
+    def set_layout_to_finished(self):
+        self.stacked_layout.setCurrentIndex(1)
 
