@@ -36,23 +36,23 @@ import breakscreen as bs
 ################  Config
 
 # TODO Get these from a config file
-short_break_max_spacing_time = 20  # in seconds
-long_break_spacing_time = 0.5 * 60  # in seconds
-
-length_of_short_break = 5  # in seconds
-length_of_long_break = 5 #* 60  # in seconds
-
-length_of_early_notification_to_short_break = 10  # in seconds
-length_of_early_notification_to_long_break = 10  # in seconds
-
-#short_break_max_spacing_time = 20 * 60  # in seconds
-#long_break_spacing_time = 25 * 60  # in seconds
+#short_break_max_spacing_time = 20  # in seconds
+#long_break_spacing_time = 0.5 * 60  # in seconds
 #
-#length_of_short_break = 30  # in seconds
-#length_of_long_break = 5 * 60  # in seconds
+#length_of_short_break = 5  # in seconds
+#length_of_long_break = 5 #* 60  # in seconds
 #
-#length_of_early_notification_to_short_break = 30  # in seconds
-#length_of_early_notification_to_long_break = 2 * 60  # in seconds
+#length_of_early_notification_to_short_break = 10  # in seconds
+#length_of_early_notification_to_long_break = 10  # in seconds
+
+short_break_max_spacing_time = 20 * 60  # in seconds
+long_break_spacing_time = 25 * 60  # in seconds
+
+length_of_short_break = 30  # in seconds
+length_of_long_break = 5 * 60  # in seconds
+
+length_of_early_notification_to_short_break = 30  # in seconds
+length_of_early_notification_to_long_break = 2 * 60  # in seconds
 
 steady_pulse_period = 1_000
 
