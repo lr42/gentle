@@ -233,6 +233,12 @@ def set_timer_for_short_break():
 waiting_for_short_break.on_entry = set_timer_for_short_break
 
 
+def clear_time_out_timer():
+    global_timer.stop()
+
+waiting_for_short_break.on_exit = clear_time_out_timer
+
+
 def short_early_notification_pulse():
     glowy.set_main_color(color_short)
     glowy.run_on_click = lambda: machine.process_event(break_started)
@@ -300,6 +306,8 @@ def set_timer_for_long_break():
 
 waiting_for_long_break.on_entry = set_timer_for_long_break
 
+waiting_for_long_break.on_exit = clear_time_out_timer
+
 
 def long_early_notification_pulse():
     # TODO Should this be a setter?
@@ -340,6 +348,7 @@ showing_long_break_late_notif.on_entry = long_late_notification_pulse
 
 
 def show_long_break_screen_countdown():
+    next_long_break_clock_time = time.time()
     longy.set_layout_to_countdown()
     longy.showFullScreen()
 

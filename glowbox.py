@@ -155,8 +155,12 @@ class GlowBox(QWidget):
             try:
                 self.transition_to_color(next(transitions), handle_next_transition)
             except (StopIteration):
-                if run_on_completion:
-                    run_on_completion()
+                # We don't want the run_on_completion event to run if the
+                #  window has already been clicked and hidden.
+                # TODO Is there a better way to handle this?
+                if not self.isHidden():
+                    if run_on_completion:
+                        run_on_completion()
 
         handle_next_transition()
 

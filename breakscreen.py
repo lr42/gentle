@@ -51,8 +51,10 @@ class BaseBreakScreen(QWidget):
     def showEvent(self, event):
         """Start the timer when the window is shown."""
         self._remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
-        print("******* Starting timer")
         self.countdown_timer.start(1_000)
+
+    def hideEvent(self, event):
+        self.countdown_timer.stop()
 
 
 class ShortBreakScreen(BaseBreakScreen):
