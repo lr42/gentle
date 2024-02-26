@@ -383,7 +383,7 @@ if __name__ == '__main__':
     glowy = gb.GlowBox()
 
     shorty = bs.ShortBreakScreen(length_of_short_break, lambda: machine.process_event(break_ended))
-    longy = bs.LongBreakScreen(length_of_long_break, lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended))
+    longy = bs.LongBreakScreen(length_of_long_break, lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended), lambda: machine.process_event(break_ended))
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon('6138023.png'))

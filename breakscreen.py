@@ -98,6 +98,7 @@ class LongBreakScreen(BaseBreakScreen):
         if run_on_skip is not None:
             skip_button = QPushButton("Skip this break.  :-(")
             skip_button.clicked.connect(run_on_skip)
+            skip_button.clicked.connect(self.hide)
             self.countdown_layout.addWidget(skip_button)
 
         self.countdown_layout_widget.setLayout(self.countdown_layout)
