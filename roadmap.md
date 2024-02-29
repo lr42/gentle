@@ -41,13 +41,13 @@ Maintenance
 ------------------------------------------------------------------------
 
 - [ ] Code formatting and linting.
-- [ ] Change the long break color to violet, and the short break to
   blue.
 - [ ] Add a tooltip/title to the task bar icon.
 - [x] Create a GitHub repository for the project.
 - [x] Include the `stama` library.
 - [x] Get a proper icon.
 - [x] Add documentation on how to install the project.
+- [x] Change the long break color to violet, and the short break to
 
 
 Soon

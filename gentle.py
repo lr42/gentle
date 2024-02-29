@@ -56,8 +56,8 @@ length_of_early_notification_to_long_break = 2 * 60  # in seconds
 steady_pulse_period = 1_000
 
 # TODO Maybe use separate colors for short and long early and late notifications?
-color_short = "chartreuse"
-color_long = "deepskyblue"
+color_short = "deepskyblue"
+color_long = "orchid"
 color_early = "white"
 color_late = "yellow"
 

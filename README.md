@@ -21,13 +21,13 @@ wherever you want on the screen, and resize it by dragging the top-left
 corner.
 
 When it's time to take a short break (indicated by the box pulsing
-green), you can click on the box and a full screen window will appear
-for 20 seconds reminding you to look away from your screen.  (This
-generally follows the 20-20-20 rule:  At least every 20 minutes, look at
-something 20 meters away or more, for at least 20 seconds.
+blue), you can click on the box and a full screen window will appear for
+20 seconds reminding you to look away from your screen.  (This generally
+follows the 20-20-20 rule:  At least every 20 minutes, look at something
+20 meters away or more, for at least 20 seconds.
 
 When it's time to take a regular break (indicated by the box pulsing
-blue), clicking on the box will bring up a five-minute timer, during
+purple), clicking on the box will bring up a five-minute timer, during
 which time you should get away from your computer for a bit.  When you
 are done with your break, click on the "Let me get back to work" button
 at the bottom of the screen to reset the break timers and continue using
