@@ -68,7 +68,7 @@ class ShortBreakScreen(BaseBreakScreen):
         self.big_text_label.setAlignment(Qt.AlignCenter)
         self.big_text_label.setWordWrap(True)
 
-        self.big_text_label.setText("Look at something <s>near</s> <i>far</i> <b>away</b>.")
+        self.big_text_label.setText("Look at something <i>far</i> away.")
 
         font = self.big_text_label.font()
         # TODO She's a witch!  Burn her!  She uses magic numbers!

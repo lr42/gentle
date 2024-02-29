@@ -13,7 +13,6 @@ from PySide6.QtCore import (
     Property,
     QEasingCurve,
     QTimer,
-    QTime,
 )
 from PySide6.QtGui import QAction, QColor, QPalette, QScreen, QIcon
 from PySide6.QtWidgets import (
@@ -48,7 +47,7 @@ import breakscreen as bs
 short_break_max_spacing_time = 20 * 60  # in seconds
 long_break_spacing_time = 25 * 60  # in seconds
 
-length_of_short_break = 30  # in seconds
+length_of_short_break = 20  # in seconds
 length_of_long_break = 5 * 60  # in seconds
 
 length_of_early_notification_to_short_break = 30  # in seconds
