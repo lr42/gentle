@@ -2,7 +2,7 @@ Gentle Break Reminder
 ========================================================================
 ------------------------------------------------------------------------
 
-About the status
+About the status of this project
 ========================================================================
 
 This project is currently in beta, so it may be a little rough around
@@ -17,7 +17,7 @@ breaks, in a very gentle way.
 
 When it's getting close to time to take a break, a colorful, pulsing box
 will appear on your screen.  You can move this by dragging it to
-wherever you want on the screen, and resize it by draggin the top-left
+wherever you want on the screen, and resize it by dragging the top-left
 corner.
 
 When it's time to take a short break (indicated by the box pulsing
@@ -40,34 +40,69 @@ Installation
 **Note**:  The current installation process is temporary and will be
 improved in future versions.
 
+
+Requirements
+------------------------------------------------------------------------
+
+- A supported version of Python
+- `pip`, the Python package manager
+    - Usually this will be installed with Python, but if not you can
+      [follow the instructions for installing
+      it](https://pip.pypa.io/en/stable/installation/).
+
+
+Instructions
+------------------------------------------------------------------------
+
 Run the following commands in your terminal:
 
 1. Go to a directory where you'd like to install Gentle Break Reminder.
 
 2. Clone the project:
 
+    ````````````````````````````````sh
     git clone --recurse-submodules https://github.com/lr42/gentle
+    ````````````````````````````````
 
 3. Set up a virtual environment to install the dependencies of the
   project:
 
+    ````````````````````````````````sh
     cd gentle
     python3 -m venv --prompt . venv
+    ````````````````````````````````
+
+4. Start using the environment
+
+    - On Windows, run the following:
+
+    ````````````````````````````````sh
+    venv\Scripts\Activate.ps1
+    ````````````````````````````````
+
+    - On Mac or Linux, run the following:
+
+    ````````````````````````````````sh
     source ./venv/bin/activate
+    ````````````````````````````````
 
-4. Install the dependecies:
+5. Install the dependecies:
 
+    ````````````````````````````````sh
     pip install -r requirements.txt
+    ````````````````````````````````
 
-5. Run the program:
+6. Run the program:
 
+    ````````````````````````````````sh
     python3 gentle.py
+    ````````````````````````````````
 
-An icon will appear in your taskbar, indicating that Gentle Break
+An flower icon will appear in your taskbar, indicating that Gentle Break
 Reminder is running.  In about every 12 minutes, a colorful box will pop
 up on the screen reminding you to take either a short break (to look
-away from the screen) or a long break, to get away from the computer and
-strech your legs.  (The times and breaks will be customizable in the
+away from the screen) or a long break (to get away from the computer and
+strech your legs).  (The times and breaks will be customizable in the
 very near future.)
 
 
