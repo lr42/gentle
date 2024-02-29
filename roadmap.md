@@ -40,13 +40,15 @@ Bugs
 Maintenance
 ------------------------------------------------------------------------
 
-- [x] Create a GitHub repository for the project.
 - [ ] Add documentation on how to install the project.
+- [ ] Code formatting and linting.
 - [ ] Change the long break color to violet, and the short break to
   blue.
-- [ ] Get a proper icon.
-- [ ] Code formatting and linting.
+- [x] Create a GitHub repository for the project.
 - [x] Include the `stama` library.
+- [x] Get a proper icon.
+
+<a href="https://www.flaticon.com/free-icons/flower" title="flower icons">Flower icons created by Freepik - Flaticon</a>
 
 
 Soon

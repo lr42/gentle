@@ -397,7 +397,7 @@ if __name__ == '__main__':
     longy = bs.LongBreakScreen(length_of_long_break, lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended), lambda: machine.process_event(break_ended))
 
     ################  Add tray icon
-    tray_icon = QSystemTrayIcon(QIcon('6138023.png'))
+    tray_icon = QSystemTrayIcon(QIcon('flower.png'))
 
     tray_menu = QMenu()
     action = QAction('Exit', tray_icon)
