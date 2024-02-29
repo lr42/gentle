@@ -46,7 +46,7 @@ Maintenance
   blue.
 - [ ] Get a proper icon.
 - [ ] Code formatting and linting.
-- [ ] Include the `stama` library.
+- [x] Include the `stama` library.
 
 
 Soon

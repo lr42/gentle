@@ -1,0 +1,3 @@
+[submodule "stama"]
+	path = stama
+	url = https://github.com/lr42/stama
