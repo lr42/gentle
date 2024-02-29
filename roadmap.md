@@ -33,7 +33,7 @@ Features
 Bugs
 ------------------------------------------------------------------------
 
-- [ ] Remove the context menus from the glowbox, or at least the
+- [x] Remove the context menus from the glowbox, or at least the
   nonsensical entries (for now).
 
 

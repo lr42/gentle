@@ -111,15 +111,17 @@ class GlowBox(QWidget):
         self.is_moving = False
 
     # pylint: disable=invalid-name
-    def contextMenuEvent(self, ev):
-        close_action = QAction("Close program", self)
-        close_action.triggered.connect(self.close_and_save_geometry)
 
-        context = QMenu(self)
-        context.addAction(QAction("test 1", self))
-        context.addAction(QAction("test 2", self))
-        context.addAction(close_action)
-        context.exec(ev.globalPos())
+    # TODO Move the glowbox context menu creation to the main program.
+    #  That way we can add as many entries as we want without having to
+    #  account for everyone we might want to create in this module.
+#    def contextMenuEvent(self, ev):
+#        close_action = QAction("Close program", self)
+#        close_action.triggered.connect(self.close_and_save_geometry)
+#
+#        context = QMenu(self)
+#        context.addAction(close_action)
+#        context.exec(ev.globalPos())
 
     ################  Changing the color
 
