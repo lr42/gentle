@@ -13,13 +13,14 @@ many improvements will be coming in the very near future.
 What is this?
 ========================================================================
 
-Gentle Break Reminder is a program which will remind you to take regular
-breaks, in a very gentle way.
+Gentle Break Reminder is a cross-platform program which will remind you
+to take regular breaks, in a very gentle way.  (It's been tested on
+Linux, but should work on Windows and Mac as well.)
 
-When it's getting close to time to take a break, a colorful, pulsing box
-will appear on your screen.  You can move this by dragging it to
-wherever you want on the screen, and resize it by dragging the top-left
-corner.
+When it's getting close to time to take a break, a glowing, colorful,
+semi-transparent, pulsing box will appear on your screen.  You can move
+this by dragging it to wherever you want on the screen, and resize it by
+dragging the top-left corner.
 
 When it's time to take a short break (indicated by the box pulsing
 blue), you can click on the box and a full screen window will appear for
@@ -46,19 +47,20 @@ How is this different from other break reminders?
 
 Other break reminders that I've tried will either try to pester you into
 taking a break, or will automatically go to the break screen.  I found
-this diruptive, especially when I was concentrating on something, or in
-the flow.  Even though I wanted to take care of myself, I often found
-myself disabling the break reminder so that I could get some work done,
-uninterrupted.
+this disruptive, especially when I was concentrating on something, or
+"in the flow".  Even though I wanted to take care of myself, I often
+found myself disabling the break reminder so that I could get some work
+done, uninterrupted.
 
 Gentle Break Reminder is meant to give you a gentle visual reminder to
 take a break without being annoying, but let you decide to take it when
 you're ready.  It won't force you to take a break, or steal focus from
 whatever you're doing.  (If you're in the middle of typing a sentence
-when it pops up, you can keep typing as normal.)  All it does is give
-you a gentle nudge to take care of yourself.
+when it pops up, or playing a video game, you can keep typing or playing
+as normal.)  All it does is give you a gentle nudge to take care of
+yourself.
 
-(And yes, I know that the glowing box can be a little disruptive when it
+(Yes, I know that the glowing box can be a little disruptive when it
 first pops up in the middle of your screen, but you can easily move it
 wherever you like, and it will appear there for future breaks.  I like
 to keep it on the right-hand side of the screen, about 3/4 of the way
@@ -135,7 +137,7 @@ Run the following commands in your terminal:
     source ./venv/bin/activate
     ````````````````````````````````
 
-5. Install the dependecies:
+5. Install the dependencies:
 
     ````````````````````````````````sh
     pip install -r requirements.txt
@@ -147,11 +149,11 @@ Run the following commands in your terminal:
     python3 gentle.py
     ````````````````````````````````
 
-A flower icon will appear in your taskbar, indicating that Gentle Break
+A flower icon will appear in your task bar, indicating that Gentle Break
 Reminder is running.  In about every 12 minutes, a colorful box will pop
 up on the screen reminding you to take either a short break (to look
 away from the screen) or a long break (to get away from the computer and
-strech your legs).  (The times and breaks will be customizable in the
+stretch your legs).  (The times and breaks will be customizable in the
 very near future.)
 
 
