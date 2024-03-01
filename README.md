@@ -6,7 +6,8 @@ About the status of this project
 ========================================================================
 
 This project is currently in beta, so it may be a little rough around
-the edges, but many improvements will be coming in the very near future.
+the edges, but it's usable (I've been using it myself for a while), and
+many improvements will be coming in the very near future.
 
 
 What is this?
@@ -33,6 +34,40 @@ are done with your break, click on the "Let me get back to work" button
 at the bottom of the screen to reset the break timers and continue using
 your computer.
 
+For both types of breaks, the glowing box will appear a little early to
+show that a break is coming up.  During this time its alternate color
+will be white, and the pulses will start slowly, but gradually become
+more rapid.  Once the break is due, the alternate color change to yellow
+and the box will pulse at a steady and rapid pace.
+
+
+How is this different from other break reminders?
+------------------------------------------------------------------------
+
+Other break reminders that I've tried will either try to pester you into
+taking a break, or will automatically go to the break screen.  I found
+this diruptive, especially when I was concentrating on something, or in
+the flow.  Even though I wanted to take care of myself, I often found
+myself disabling the break reminder so that I could get some work done,
+uninterrupted.
+
+Gentle Break Reminder is meant to give you a gentle visual reminder to
+take a break without being annoying, but let you decide to take it when
+you're ready.  It won't force you to take a break, or steal focus from
+whatever you're doing.  (If you're in the middle of typing a sentence
+when it pops up, you can keep typing as normal.)  All it does is give
+you a gentle nudge to take care of yourself.
+
+(And yes, I know that the glowing box can be a little disruptive when it
+first pops up in the middle of your screen, but you can easily move it
+wherever you like, and it will appear there for future breaks.  I like
+to keep it on the right-hand side of the screen, about 3/4 of the way
+down, as a rectangle that's a bit skinny and tall.  But you can place it
+wherever you want.)
+
+I hope that Gentle Break Reminder helps make your life a little bit
+better.
+
 
 Installation
 ========================================================================
@@ -44,6 +79,7 @@ improved in future versions.
 Requirements
 ------------------------------------------------------------------------
 
+- `git`
 - A supported version of Python
 - `pip`, the Python package manager
     - Usually this will be installed with Python, but if not you can
@@ -58,21 +94,34 @@ Run the following commands in your terminal:
 
 1. Go to a directory where you'd like to install Gentle Break Reminder.
 
-2. Clone the project:
+    - Right now, this project is portable in the sense that it doesn't
+      modify anything outside of it's own directory.  If you decide that
+      you want to place it somewhere else, it's as simple as moving the
+      project folder/directory somewhere else.
+
+2. Clone the project and enter the project's directory:
 
     ````````````````````````````````sh
     git clone --recurse-submodules https://github.com/lr42/gentle
+    cd gentle
     ````````````````````````````````
+
+    - If you forget to use the `--recurse-submodules` flag you can
+      install the submodules after-the-fact by using the following:
+
+        ````````````````````````````````sh
+        git submodule init
+        git submodule update
+        ````````````````````````````````
 
 3. Set up a virtual environment to install the dependencies of the
   project:
 
     ````````````````````````````````sh
-    cd gentle
     python3 -m venv --prompt . venv
     ````````````````````````````````
 
-4. Start using the environment
+4. Start using the virtual environment:
 
     - On Windows, run the following:
 
@@ -98,12 +147,36 @@ Run the following commands in your terminal:
     python3 gentle.py
     ````````````````````````````````
 
-An flower icon will appear in your taskbar, indicating that Gentle Break
+A flower icon will appear in your taskbar, indicating that Gentle Break
 Reminder is running.  In about every 12 minutes, a colorful box will pop
 up on the screen reminding you to take either a short break (to look
 away from the screen) or a long break (to get away from the computer and
 strech your legs).  (The times and breaks will be customizable in the
 very near future.)
+
+
+Running the project after install
+------------------------------------------------------------------------
+
+1. Open a terminal in the project's directory.
+
+2. Run the following commands:
+
+    - On Windows:
+
+    ````````````````````````````````sh
+    venv\Scripts\Activate.ps1
+    python3 gentle.py
+    ````````````````````````````````
+
+    - On Mac or Linux:
+
+    ````````````````````````````````sh
+    source ./venv/bin/activate
+    python3 gentle.py
+    ````````````````````````````````
+
+3. Enjoy!
 
 
 Credits
