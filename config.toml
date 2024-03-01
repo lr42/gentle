@@ -1,0 +1,20 @@
+[general]
+    steady_pulse_period = 1_000 # in milliseconds
+
+[regular_break]
+    spacing             = 3000  # in seconds
+    length              = 600   # in seconds
+    early_notification  = 120   # in seconds
+
+[short_break]
+    max_spacing         = 1200  # in seconds
+    length              = 20    # in seconds
+    early_notification  = 30    # in seconds
+
+[colors]
+    regular = "orchid"
+    short   = "deepskyblue"
+
+    early   = "white"
+    late    = "yellow"
+

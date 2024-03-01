@@ -28,6 +28,7 @@ Features
 
 - [ ] Monitor keyboard and mouse activity to reset breaks after a
   certain amount of time.
+- [ ] Allow setting parameters through a configuration file.
 
 
 Bugs
@@ -43,6 +44,7 @@ Maintenance
 - [ ] Code formatting and linting.
   blue.
 - [ ] Add a tooltip/title to the task bar icon.
+- [ ] Move issue tracking over to a proper issue tracker.
 - [x] Create a GitHub repository for the project.
 - [x] Include the `stama` library.
 - [x] Get a proper icon.

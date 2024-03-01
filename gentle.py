@@ -6,6 +6,7 @@ import logging
 from logging.handlers import SocketHandler
 import sys
 import datetime
+import tomlkit
 
 from PySide6.QtCore import (
     Qt,
@@ -30,36 +31,6 @@ from PySide6.QtWidgets import (
 import stama.stama as sm
 import glowbox as gb
 import breakscreen as bs
-
-
-################  Config
-
-# TODO Get these from a config file
-#short_break_max_spacing_time = 20  # in seconds
-#long_break_spacing_time = 0.5 * 60  # in seconds
-#
-#length_of_short_break = 5  # in seconds
-#length_of_long_break = 5 #* 60  # in seconds
-#
-#length_of_early_notification_to_short_break = 10  # in seconds
-#length_of_early_notification_to_long_break = 10  # in seconds
-
-short_break_max_spacing_time = 20 * 60  # in seconds
-long_break_spacing_time = 25 * 60  # in seconds
-
-length_of_short_break = 20  # in seconds
-length_of_long_break = 5 * 60  # in seconds
-
-length_of_early_notification_to_short_break = 30  # in seconds
-length_of_early_notification_to_long_break = 2 * 60  # in seconds
-
-steady_pulse_period = 1_000
-
-# TODO Maybe use separate colors for short and long early and late notifications?
-color_short = "deepskyblue"
-color_long = "orchid"
-color_early = "white"
-color_late = "yellow"
 
 
 ################  States
@@ -376,10 +347,58 @@ if __name__ == '__main__':
     # For logging to cutelog
     socket_handler = SocketHandler('127.0.0.1', 19996)
     logger.addHandler(socket_handler)
-    logger.info("Logging initialized")
+    logger.debug("Logging initialized")
+
+    ################  Default config
+    # TODO Load default config values from a file as well.
+    #short_break_max_spacing_time = 20 * 60  # in seconds
+    #long_break_spacing_time = 25 * 60  # in seconds
+
+    #length_of_short_break = 20  # in seconds
+    #length_of_long_break = 5 * 60  # in seconds
+
+    #length_of_early_notification_to_short_break = 30  # in seconds
+    #length_of_early_notification_to_long_break = 2 * 60  # in seconds
+
+    #steady_pulse_period = 1_000
+
+    # TODO Maybe use separate colors for short and long early and late notifications?
+    #color_short = "deepskyblue"
+    #color_long = "orchid"
+    #color_early = "white"
+    #color_late = "yellow"
+
+    ################  Load configuration
+    configuration_file = "./config.toml"
+    try:
+        with open(configuration_file, 'r') as file:
+            toml_config = tomlkit.load(file)
+            # TODO Use logging instead of print.
+            print(toml_config)
+
+            steady_pulse_period = toml_config["general"]["steady_pulse_period"]
+
+            long_break_spacing_time =                       toml_config["regular_break"]["spacing"]
+            length_of_long_break =                          toml_config["regular_break"]["length"]
+            length_of_early_notification_to_long_break =    toml_config["regular_break"]["early_notification"]
+
+            short_break_max_spacing_time =                  toml_config["short_break"]["max_spacing"]
+            length_of_short_break =                         toml_config["short_break"]["length"]
+            length_of_early_notification_to_short_break =   toml_config["short_break"]["early_notification"]
+
+            # TODO Maybe use separate colors for short and long early and late notifications?
+            #  Or at least leave that as an option?
+            color_long =    toml_config["colors"]["regular"]
+            color_short =   toml_config["colors"]["short"]
+
+            color_early =   toml_config["colors"]["early"]
+            color_late =    toml_config["colors"]["late"]
+
+    except (FileNotFoundError) as e:
+        logger.info("Configuration file not found:  %s", configuration_file)
 
     ################  Show colors
-    logger.info("Here's a list of colors:  %s", QColor.colorNames())
+    #logger.info("Here's a list of colors:  %s", QColor.colorNames())
 
     ################  Set up concurrent activities
     #threading.Thread(target=scheduler_thread, daemon=True).start()
