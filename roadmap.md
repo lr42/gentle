@@ -26,7 +26,7 @@ Features
 
 - [ ] Monitor keyboard and mouse activity to reset breaks after a
   certain amount of time.
-- [ ] Add a tool tip/title to the task bar icon.
+- [x] Add a tool tip/title to the task bar icon.
 - [x] Allow setting parameters through a configuration file.
 
 

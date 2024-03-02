@@ -52,12 +52,11 @@ waiting_after_long_afk = sm.State("Waiting after AFK for long duration")
 test_for_next_break = sm.ConditionalJunction(waiting_for_long_break)
 
 def has_short_break_before_long_break():
-    global next_long_break_clock_time
-    if time.time() > next_long_break_clock_time:
-        logger.debug("Resetting next long break to:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
-        next_long_break_clock_time = time.time() + config["regular_break"]["spacing"]
-    logger.info("Next long break at:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
-    secs_to_long_break = next_long_break_clock_time - time.time()
+    global next_long_break_unix_time
+    if time.time() > next_long_break_unix_time:
+        logger.debug("Resetting next long break to:  %s", datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime("%H:%M:%S"))
+        next_long_break_unix_time = time.time() + config["regular_break"]["spacing"]
+    secs_to_long_break = next_long_break_unix_time - time.time()
     if config["short_break"]["max_spacing"] < secs_to_long_break:
         logger.debug("has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)", config["short_break"]["max_spacing"], secs_to_long_break)
         return True
@@ -164,7 +163,9 @@ waiting_after_long_afk.transitions = {
 ################  Short break state actions
 
 def set_timer_for_short_break():
-    secs_to_long_break = next_long_break_clock_time - time.time()
+    # TODO This function (and probably others) is too long.  It needs to be
+    #  refactored.
+    secs_to_long_break = next_long_break_unix_time - time.time()
     logger.debug("secs_to_long_break:  %s", secs_to_long_break)
 
     num_segments_to_long_break = math.ceil(
@@ -191,16 +192,36 @@ def set_timer_for_short_break():
     )
     logger.debug("secs_to_short_break:  %s", secs_to_short_break)
 
+    next_short_break_unix_time = time.time() + secs_to_short_break
+
     secs_to_notification = (
         secs_to_short_break - config["short_break"]["early_notification"]
     )
     logger.debug("secs_to_notification:  %s", secs_to_notification)
 
+    # I had some situations where all the stuff above would sometimes return a
+    #  negative time.  (This mostly/always happened when testing with very short
+    #  timings.)  It turns out that QT -- not having a time machine built in --
+    #  did not like that.  Setting the secs_to_notification to a minimum of 0
+    #  was the easiest way to fix it.
     secs_to_notification = max(secs_to_notification, 0)
 
-    logger.info("%dm%0.1fs to next short break", int(secs_to_short_break // 60), secs_to_short_break % 60)
-    logger.info("%dm%0.1fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
+    ################  Convey information
+    logger.debug("%dm%0.1fs to next short break", int(secs_to_short_break // 60), secs_to_short_break % 60)
+    logger.debug("%dm%0.1fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
 
+    next_short_break_per_clock = datetime.datetime.fromtimestamp(next_short_break_unix_time).strftime("%H:%M:%S")
+    next_long_break_per_clock = datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime("%H:%M:%S")
+
+    tooltip_next_break = "Next break (short): " + datetime.datetime.fromtimestamp(next_short_break_unix_time).strftime("%H:%M:%S")
+    tooltip_next_long = "Next long break: " + datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime("%H:%M:%S")
+
+    logger.info(tooltip_next_break)
+    logger.info(tooltip_next_long)
+
+    tray_icon.setToolTip(tooltip_title + "\n" + tooltip_next_break + "\n" + tooltip_next_long)
+
+    ################  Start timer
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
 waiting_for_short_break.on_entry = set_timer_for_short_break
@@ -265,15 +286,20 @@ short_break_in_progress.on_exit = hide_short_break_screen
 ################  Long break state actions
 
 def set_timer_for_long_break():
-    secs_to_long_break = next_long_break_clock_time - time.time()
+    secs_to_long_break = next_long_break_unix_time - time.time()
     secs_to_notification = (
         secs_to_long_break - config["regular_break"]["early_notification"]
     )
 
     secs_to_notification = max(secs_to_notification, 0)
 
-    logger.info("%dm%0.1fs to next long break", int(secs_to_long_break // 60), secs_to_long_break % 60)
-    logger.info("%dm%0.1fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
+    logger.debug("%dm%0.1fs to next long break", int(secs_to_long_break // 60), secs_to_long_break % 60)
+    logger.debug("%dm%0.1fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
+
+    next_long_break_per_clock = datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime("%H:%M:%S")
+    tooltip_next_break = "Next break (long): " + next_long_break_per_clock
+    logger.info(tooltip_next_break)
+    tray_icon.setToolTip(tooltip_title + "\n" + tooltip_next_break)
 
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
@@ -321,7 +347,7 @@ showing_long_break_late_notif.on_entry = long_late_notification_pulse
 
 
 def show_long_break_screen_countdown():
-    next_long_break_clock_time = time.time()
+    next_long_break_unix_time = time.time()
     longy.set_layout_to_countdown()
     longy.showFullScreen()
 
@@ -415,8 +441,8 @@ if __name__ == '__main__':
     #threading.Thread(target=scheduler_thread, daemon=True).start()
     global_timer = QTimer()
 
-    global next_long_break_clock_time
-    next_long_break_clock_time = time.time() + config["regular_break"]["spacing"]
+    global next_long_break_unix_time
+    next_long_break_unix_time = time.time() + config["regular_break"]["spacing"]
 
     ################  Set up QT
     app = QApplication(sys.argv)
@@ -438,11 +464,13 @@ if __name__ == '__main__':
     tray_menu.addAction(action)
     tray_icon.setContextMenu(tray_menu)
 
+    tooltip_title = "Gentle Break Reminder"
+    tray_icon.setToolTip(tooltip_title)
+
     tray_icon.show()
 
     ################  Start state machine
     machine = sm.StateMachine(waiting_for_short_break)
-    logger.info("First long break will be at:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
 
     ################  Exit on QT app close
     sys.exit(app.exec())
