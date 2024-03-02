@@ -59,9 +59,9 @@ def has_short_break_before_long_break():
     logger.info("Next long break at:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
     secs_to_long_break = next_long_break_clock_time - time.time()
     if config["short_break"]["max_spacing"] < secs_to_long_break:
-        logger.debug("has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)", short_break_max_spacing_time, secs_to_long_break)
+        logger.debug("has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)", config["short_break"]["max_spacing"], secs_to_long_break)
         return True
-    logger.debug("has_short_break_before_long_break returning False: short_break_max_spacing_time (%s) >= secs_to_long_break (%s)", short_break_max_spacing_time, secs_to_long_break)
+    logger.debug("has_short_break_before_long_break returning False: short_break_max_spacing_time (%s) >= secs_to_long_break (%s)", config["short_break"]["max_spacing"], secs_to_long_break)
     return False
 
 test_for_next_break.add_condition(has_short_break_before_long_break, waiting_for_short_break)
@@ -369,7 +369,9 @@ if __name__ == '__main__':
     ################  Default configuration
     config = {
         'general': {
-            'steady_pulse_period':  1_000,
+            'steady_pulse_period':          1_000,
+            "allow_skipping_short_breaks":  True,
+            "icon":                         'flower.png',
         },
         'regular_break': {
             'spacing':              3000,
@@ -421,11 +423,14 @@ if __name__ == '__main__':
 
     glowy = gb.GlowBox()
 
-    shorty = bs.ShortBreakScreen(config["short_break"]["length"], lambda: machine.process_event(break_ended))
+    if config["general"]["allow_skipping_short_breaks"]:
+        shorty = bs.ShortBreakScreen(config["short_break"]["length"], lambda: machine.process_event(break_ended), lambda: machine.process_event(break_ended))
+    else:
+        shorty = bs.ShortBreakScreen(config["short_break"]["length"], lambda: machine.process_event(break_ended))
     longy = bs.LongBreakScreen(config["regular_break"]["length"], lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended), lambda: machine.process_event(break_ended))
 
     ################  Add tray icon
-    tray_icon = QSystemTrayIcon(QIcon('flower.png'))
+    tray_icon = QSystemTrayIcon(QIcon(config["general"]["icon"]))
 
     tray_menu = QMenu()
     action = QAction('Exit', tray_icon)

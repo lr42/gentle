@@ -6,6 +6,9 @@
     #  and back again, all in one second.
     steady_pulse_period = 1_000  # in milliseconds
 
+    # Whether to show the "Skip break" button on the short break screen.
+    allow_skipping_short_breaks = true
+
 
 [regular_break]
     # All of these values pertain to regular (longer) breaks, where the

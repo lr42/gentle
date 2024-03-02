@@ -58,11 +58,11 @@ class BaseBreakScreen(QWidget):
 
 
 class ShortBreakScreen(BaseBreakScreen):
-    def __init__(self, timeout_length, run_on_completion):
+    def __init__(self, timeout_length, run_on_completion, run_on_skip=None):
         super().__init__(timeout_length, run_on_completion)
 
         ################  Create the layout
-        layout = QVBoxLayout()
+        self.layout = QVBoxLayout()
 
         self.big_text_label = QLabel()
         self.big_text_label.setAlignment(Qt.AlignCenter)
@@ -74,9 +74,16 @@ class ShortBreakScreen(BaseBreakScreen):
         # TODO She's a witch!  Burn her!  She uses magic numbers!
         font.setPointSize(96)  # Set font size
         self.big_text_label.setFont(font)
-        layout.addWidget(self.big_text_label)
+        self.layout.addWidget(self.big_text_label)
 
-        self.setLayout(layout)
+        ################  Add "skip break" button
+        if run_on_skip is not None:
+            skip_button = QPushButton("Skip this break.  :-(")
+            skip_button.clicked.connect(run_on_skip)
+            skip_button.clicked.connect(self.hide)
+            self.layout.addWidget(skip_button)
+
+        self.setLayout(self.layout)
 
 
 class LongBreakScreen(BaseBreakScreen):
