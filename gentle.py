@@ -53,10 +53,10 @@ test_for_next_break = sm.ConditionalJunction(waiting_for_long_break)
 
 def has_short_break_before_long_break():
     global next_long_break_clock_time
-    logger.info("Next long break at:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
     if time.time() > next_long_break_clock_time:
+        logger.debug("Resetting next long break to:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
         next_long_break_clock_time = time.time() + config["regular_break"]["spacing"]
-        logger.info("Next long break reset to:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
+    logger.info("Next long break at:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
     secs_to_long_break = next_long_break_clock_time - time.time()
     if config["short_break"]["max_spacing"] < secs_to_long_break:
         logger.debug("has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)", short_break_max_spacing_time, secs_to_long_break)
@@ -198,8 +198,8 @@ def set_timer_for_short_break():
 
     secs_to_notification = max(secs_to_notification, 0)
 
-    logger.info("%sm%ss to next short break", int(secs_to_short_break // 60), secs_to_short_break % 60)
-    logger.info("%sm%ss to notification", int(secs_to_notification // 60), secs_to_notification % 60)
+    logger.info("%dm%0.1fs to next short break", int(secs_to_short_break // 60), secs_to_short_break % 60)
+    logger.info("%dm%0.1fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
 
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
@@ -272,8 +272,8 @@ def set_timer_for_long_break():
 
     secs_to_notification = max(secs_to_notification, 0)
 
-    logger.info("%sm%ss to next long break", int(secs_to_long_break // 60), secs_to_long_break % 60)
-    logger.info("%sm%ss to notification", int(secs_to_notification // 60), secs_to_notification % 60)
+    logger.info("%dm%fs to next long break", int(secs_to_long_break // 60), secs_to_long_break % 60)
+    logger.info("%dm%fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
 
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
@@ -356,12 +356,14 @@ if __name__ == '__main__':
     ################  Logging
     logger = logging.getLogger()
     logging.basicConfig(
-            level=logging.DEBUG,
+            level=logging.INFO,
             #format='%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s',
             )
+
     # For logging to cutelog
-    socket_handler = SocketHandler('127.0.0.1', 19996)
+    #socket_handler = SocketHandler('127.0.0.1', 19996)
     #logger.addHandler(socket_handler)
+
     logger.debug("Logging initialized")
 
     ################  Default configuration
@@ -393,13 +395,13 @@ if __name__ == '__main__':
     configuration_file = "./config.toml"
     try:
         with open(configuration_file, 'r') as file:
-            toml_config = tomlkit.load(file)
-            # TODO Use logging instead of print.
-            print(toml_config)
+            logger.debug("Default config:  %s", config)
 
-            print(config)
+            toml_config = tomlkit.load(file)
+            logger.debug("Config from file:  %s", toml_config)
+
             config = deep_update(config, toml_config)
-            print(config)
+            logger.debug("Final config:  %s", config)
 
     except (FileNotFoundError) as e:
         logger.info("Configuration file (%s) not found, using defaults.", configuration_file)
@@ -435,6 +437,7 @@ if __name__ == '__main__':
 
     ################  Start state machine
     machine = sm.StateMachine(waiting_for_short_break)
+    logger.info("First long break will be at:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
 
     ################  Exit on QT app close
     sys.exit(app.exec())

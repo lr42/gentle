@@ -28,23 +28,22 @@ Features
 
 - [ ] Monitor keyboard and mouse activity to reset breaks after a
   certain amount of time.
-- [ ] Allow setting parameters through a configuration file.
+- [x] Allow setting parameters through a configuration file.
 
 
 Bugs
 ------------------------------------------------------------------------
 
-- [x] Remove the context menus from the glowbox, or at least the
-  nonsensical entries (for now).
 - [ ] The countdown timer glitches/shows the wrong value when the long
   break screen is shown.
+- [x] Remove the context menus from the glowbox, or at least the
+  nonsensical entries (for now).
 
 
 Maintenance
 ------------------------------------------------------------------------
 
 - [ ] Code formatting and linting.
-  blue.
 - [ ] Add a tooltip/title to the task bar icon.
 - [ ] Move issue tracking over to a proper issue tracker.
 - [x] Create a GitHub repository for the project.
@@ -52,6 +51,10 @@ Maintenance
 - [x] Get a proper icon.
 - [x] Add documentation on how to install the project.
 - [x] Change the long break color to violet, and the short break to
+  blue.
+- [x] Stop logger from spewing debug stuff.  I need to reduce this
+  further in the future, and use proper file logging with rotation in
+  the future.
 
 
 Soon
