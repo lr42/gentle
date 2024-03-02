@@ -4,8 +4,6 @@ Unsorted
 Features
 ------------------------------------------------------------------------
 
-- [ ] Send a ntfy notification, so when you are wandering around on your
-  phone you know when your break is done.
 
 
 Bugs
@@ -20,7 +18,7 @@ Maintenance
   with QT/PySide.
 
 
-Up next  (v0.0.1-beta)
+Up next  (v0.1.0-beta)
 ========================================================================
 
 Features
@@ -28,6 +26,7 @@ Features
 
 - [ ] Monitor keyboard and mouse activity to reset breaks after a
   certain amount of time.
+- [ ] Add a tool tip/title to the task bar icon.
 - [x] Allow setting parameters through a configuration file.
 
 
@@ -44,8 +43,8 @@ Maintenance
 ------------------------------------------------------------------------
 
 - [ ] Code formatting and linting.
-- [ ] Add a tooltip/title to the task bar icon.
 - [ ] Move issue tracking over to a proper issue tracker.
+- [ ] Package into an installer.
 - [x] Create a GitHub repository for the project.
 - [x] Include the `stama` library.
 - [x] Get a proper icon.
@@ -72,18 +71,41 @@ Features
 - [ ] Internationalization.
 - [ ] If you are late to taking a regular break, allow the option of
   extending the break length up to a certain amount.
+- [ ] Set up proper file logging and log rotations.  Preferably the logs
+  file logs would be in JSON format, so they could easily be read with
+  `cutelog` or maybe Grafana or something similar.
+- [ ] Add a command line option to allow the user to specify which level
+  of logging to show in the terminal.
+- [ ] Make the program run on start-up/login.
+- [ ] Show a intro wizard on first run.  Introduce the glow box and
+  allow moving it to wherever the user would like.  (An idea from
+  Matt.)
+- [ ] Show a tool tip over the glow box which indicates which break this
+  is for.  Make this optional.  (From Matt.)
+- [ ] Show a skip break button on the short break screen.  (From
+  Matt.)  Make this optional, possibly with the default to off.
 
 
 Bugs
 ------------------------------------------------------------------------
 
+- [ ] There is no indication to the user of how long the short break
+  lasts.  ->  Add the short break time to the short break screen.
+- [ ] There is no description of what is going on on the long break
+  screen, only a countdown timer.  -->  Provide information to the user
+  on what is happening.  ("Get away from the computer and stretch your
+  legs for a bit.  6½ minutes remaining.")
 
 
 Maintenance
 ------------------------------------------------------------------------
 
-- [ ] Set up proper file logging and log rotations.
-- [ ] Make the program run on start-up/login.
+- [ ] Create a visual demo of what the application does in the README.
+- [ ] Properly update the `pip` `requirements.txt`.
+	- I also need to figure out how to test this program against all
+	  supported versions of Python.  It would be nice to automate
+	  something like this, but that's not something I'm knowledgeable of
+	  right now.
 
 
 Someday
@@ -95,6 +117,8 @@ Features
 - [ ] Track when a user is at the screen so I can compute the percentage
   of time (over the last 'x' hours) that they been in front of the
   computer.
+- [ ] Send a ntfy notification, so when you are wandering around on your
+  phone you know when your break is done.
 
 
 Bugs
