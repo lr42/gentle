@@ -272,8 +272,8 @@ def set_timer_for_long_break():
 
     secs_to_notification = max(secs_to_notification, 0)
 
-    logger.info("%dm%fs to next long break", int(secs_to_long_break // 60), secs_to_long_break % 60)
-    logger.info("%dm%fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
+    logger.info("%dm%0.1fs to next long break", int(secs_to_long_break // 60), secs_to_long_break % 60)
+    logger.info("%dm%0.1fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
 
     global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
 
@@ -355,14 +355,17 @@ if __name__ == '__main__':
 
     ################  Logging
     logger = logging.getLogger()
-    logging.basicConfig(
-            level=logging.INFO,
-            #format='%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s',
-            )
+    logger.setLevel(logging.DEBUG)
+
+    # For logging to the console
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    logger.addHandler(console_handler)
 
     # For logging to cutelog
-    #socket_handler = SocketHandler('127.0.0.1', 19996)
-    #logger.addHandler(socket_handler)
+    socket_handler = SocketHandler('127.0.0.1', 19996)
+    socket_handler.setLevel(logging.DEBUG)
+    logger.addHandler(socket_handler)
 
     logger.debug("Logging initialized")
 
@@ -407,9 +410,6 @@ if __name__ == '__main__':
 
     except (FileNotFoundError) as e:
         logger.info("Configuration file (%s) not found, using defaults.", configuration_file)
-
-    ################  Show colors
-    #logger.info("Here's a list of colors:  %s", QColor.colorNames())
 
     ################  Set up concurrent activities
     #threading.Thread(target=scheduler_thread, daemon=True).start()

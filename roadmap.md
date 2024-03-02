@@ -82,7 +82,7 @@ Features
   Matt.)
 - [ ] Show a tool tip over the glow box which indicates which break this
   is for.  Make this optional.  (From Matt.)
-- [ ] Show a skip break button on the short break screen.  (From
+- [x] Show a skip break button on the short break screen.  (From
   Matt.)  Make this optional, possibly with the default to off.
 
 
@@ -90,11 +90,20 @@ Bugs
 ------------------------------------------------------------------------
 
 - [ ] There is no indication to the user of how long the short break
-  lasts.  ->  Add the short break time to the short break screen.
+  lasts.  -->  Add the short break time to the short break screen.
 - [ ] There is no description of what is going on on the long break
   screen, only a countdown timer.  -->  Provide information to the user
   on what is happening.  ("Get away from the computer and stretch your
   legs for a bit.  6½ minutes remaining.")
+- [ ] When you click the long break early notification glow box, and
+  then click the "skip break" button, it goes right back to showing the
+  glow box.  It should instead go to waiting for a short break.  -->  I
+  think the issue is that the program compares the current time with the
+  clock time set for the next notification.  Since the next long break
+  isn't past dues when you click the notification early and then skip
+  the break immediately, it thinks the next thing it needs to do is
+  wait for the next break, which is imminent and already in the early
+  notification period.
 
 
 Maintenance

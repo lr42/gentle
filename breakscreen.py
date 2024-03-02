@@ -1,3 +1,4 @@
+import logging
 from PySide6.QtCore import (
     Qt,
     QPropertyAnimation,
@@ -19,6 +20,9 @@ from PySide6.QtWidgets import (
     QSystemTrayIcon,
     QStackedLayout,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class BaseBreakScreen(QWidget):
@@ -101,6 +105,7 @@ class LongBreakScreen(BaseBreakScreen):
         font.setPointSize(96)
         self.countdown_label.setFont(font)
         self._remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
+        logger.debug("Setting countdown timer to %s", self._remaining_time.toString())
         self.countdown_label.setText(self._remaining_time.toString())
         self.countdown_layout.addWidget(self.countdown_label)
 
