@@ -15,7 +15,7 @@ What is this?
 
 Gentle Break Reminder is a cross-platform program which will remind you
 to take regular breaks, in a very gentle way.  (It's been tested on
-Linux, but should work on Windows and Mac as well.)
+Linux and Windows, but should work on Mac as well.)
 
 When it's getting close to time to take a break, a glowing, colorful,
 semi-transparent, pulsing box will appear on your screen.  You can move
