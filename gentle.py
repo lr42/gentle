@@ -55,10 +55,10 @@ def has_short_break_before_long_break():
     global next_long_break_clock_time
     logger.info("Next long break at:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
     if time.time() > next_long_break_clock_time:
-        next_long_break_clock_time = time.time() + long_break_spacing_time
+        next_long_break_clock_time = time.time() + config["regular_break"]["spacing"]
         logger.info("Next long break reset to:  %s", datetime.datetime.fromtimestamp(next_long_break_clock_time).strftime("%H:%M:%S"))
     secs_to_long_break = next_long_break_clock_time - time.time()
-    if short_break_max_spacing_time < secs_to_long_break:
+    if config["short_break"]["max_spacing"] < secs_to_long_break:
         logger.debug("has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)", short_break_max_spacing_time, secs_to_long_break)
         return True
     logger.debug("has_short_break_before_long_break returning False: short_break_max_spacing_time (%s) >= secs_to_long_break (%s)", short_break_max_spacing_time, secs_to_long_break)
@@ -168,8 +168,8 @@ def set_timer_for_short_break():
     logger.debug("secs_to_long_break:  %s", secs_to_long_break)
 
     num_segments_to_long_break = math.ceil(
-        (secs_to_long_break + length_of_short_break)
-        / (length_of_short_break + short_break_max_spacing_time)
+        (secs_to_long_break + config["short_break"]["length"])
+        / (config["short_break"]["length"] + config["short_break"]["max_spacing"])
     )
     logger.debug("num_segments_to_long_break:  %s", num_segments_to_long_break)
 
@@ -177,7 +177,7 @@ def set_timer_for_short_break():
     logger.debug("num_short_breaks_to_long_break:  %s", num_short_breaks_to_long_break)
 
     total_short_break_secs_to_long_break = (
-        num_short_breaks_to_long_break * length_of_short_break
+        num_short_breaks_to_long_break * config["short_break"]["length"]
     )
     logger.debug("total_short_break_secs_to_long_break:  %s", total_short_break_secs_to_long_break)
 
@@ -192,7 +192,7 @@ def set_timer_for_short_break():
     logger.debug("secs_to_short_break:  %s", secs_to_short_break)
 
     secs_to_notification = (
-        secs_to_short_break - length_of_early_notification_to_short_break
+        secs_to_short_break - config["short_break"]["early_notification"]
     )
     logger.debug("secs_to_notification:  %s", secs_to_notification)
 
@@ -213,14 +213,14 @@ waiting_for_short_break.on_exit = clear_time_out_timer
 
 
 def short_early_notification_pulse():
-    glowy.set_main_color(color_short)
+    glowy.set_main_color(config["colors"]["short"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
     # TODO Should this include the color to show it as?
     glowy.show()
 
     # TODO Needs to come from configuration
-    ending_fade_interval = steady_pulse_period / 2 / 1_000
+    ending_fade_interval = config["general"]["steady_pulse_period"] / 2 / 1_000
     logger.debug("ending_fade_interval: %s", ending_fade_interval)
     starting_fade_multiplier = 5
     starting_fade_interval = ending_fade_interval * starting_fade_multiplier
@@ -229,10 +229,10 @@ def short_early_notification_pulse():
         starting_fade_multiplier,
         ending_fade_interval,
         # This needs to be part of the GlowBox object.
-        length_of_early_notification_to_short_break,
+        config["short_break"]["early_notification"],
         # TODO These need to be in the main program
-        color_short,
-        color_early,
+        config["colors"]["short"],
+        config["colors"]["early"],
     )
 
     glowy.transition_color_over_iterable(my_iterable, lambda: machine.process_event(time_out))
@@ -241,10 +241,10 @@ showing_short_break_early_notif.on_entry = short_early_notification_pulse
 
 
 def short_late_notification_pulse():
-    glowy.set_main_color(color_short)
+    glowy.set_main_color(config["colors"]["short"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
-    my_iterable = gb.steady_pulse(steady_pulse_period / 2, color_short, color_late)
+    my_iterable = gb.steady_pulse(config["general"]["steady_pulse_period"] / 2, config["colors"]["short"], config["colors"]["late"])
     glowy.transition_color_over_iterable(my_iterable, None)
 
 showing_short_break_late_notif.on_entry = short_late_notification_pulse
@@ -267,7 +267,7 @@ short_break_in_progress.on_exit = hide_short_break_screen
 def set_timer_for_long_break():
     secs_to_long_break = next_long_break_clock_time - time.time()
     secs_to_notification = (
-        secs_to_long_break - length_of_early_notification_to_long_break
+        secs_to_long_break - config["regular_break"]["early_notification"]
     )
 
     secs_to_notification = max(secs_to_notification, 0)
@@ -284,13 +284,13 @@ waiting_for_long_break.on_exit = clear_time_out_timer
 
 def long_early_notification_pulse():
     # TODO Should this be a setter?
-    glowy.set_main_color(color_long)
+    glowy.set_main_color(config["colors"]["regular"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
     glowy.show()
 
     # TODO Needs to come from configuration
-    ending_fade_interval = steady_pulse_period / 2 / 1_000
+    ending_fade_interval = config["general"]["steady_pulse_period"] / 2 / 1_000
     logger.debug("ending_fade_interval: %s", ending_fade_interval)
     starting_fade_multiplier = 5
     starting_fade_interval = ending_fade_interval * starting_fade_multiplier
@@ -299,10 +299,10 @@ def long_early_notification_pulse():
         starting_fade_multiplier,
         ending_fade_interval,
         # This needs to be part of the GlowBox object.
-        length_of_early_notification_to_long_break,
+        config["regular_break"]["early_notification"],
         # TODO These need to be in the main program
-        color_long,
-        color_early,
+        config["colors"]["regular"],
+        config["colors"]["early"],
     )
 
     glowy.transition_color_over_iterable(my_iterable, lambda: machine.process_event(time_out))
@@ -311,10 +311,10 @@ showing_long_break_early_notif.on_entry = long_early_notification_pulse
 
 
 def long_late_notification_pulse():
-    glowy.set_main_color(color_long)
+    glowy.set_main_color(config["colors"]["regular"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
-    my_iterable = gb.steady_pulse(steady_pulse_period / 2, color_long, color_late)
+    my_iterable = gb.steady_pulse(config["general"]["steady_pulse_period"] / 2, config["colors"]["regular"], config["colors"]["late"])
     glowy.transition_color_over_iterable(my_iterable, None)
 
 showing_long_break_late_notif.on_entry = long_late_notification_pulse
@@ -404,24 +404,6 @@ if __name__ == '__main__':
     except (FileNotFoundError) as e:
         logger.info("Configuration file (%s) not found, using defaults.", configuration_file)
 
-    steady_pulse_period = config["general"]["steady_pulse_period"]
-
-    long_break_spacing_time =                       config["regular_break"]["spacing"]
-    length_of_long_break =                          config["regular_break"]["length"]
-    length_of_early_notification_to_long_break =    config["regular_break"]["early_notification"]
-
-    short_break_max_spacing_time =                  config["short_break"]["max_spacing"]
-    length_of_short_break =                         config["short_break"]["length"]
-    length_of_early_notification_to_short_break =   config["short_break"]["early_notification"]
-
-    # TODO Maybe use separate colors for short and long early and late notifications?
-    #  Or at least leave that as an option?
-    color_long =    config["colors"]["regular"]
-    color_short =   config["colors"]["short"]
-
-    color_early =   config["colors"]["early"]
-    color_late =    config["colors"]["late"]
-
     ################  Show colors
     #logger.info("Here's a list of colors:  %s", QColor.colorNames())
 
@@ -430,15 +412,15 @@ if __name__ == '__main__':
     global_timer = QTimer()
 
     global next_long_break_clock_time
-    next_long_break_clock_time = time.time() + long_break_spacing_time
+    next_long_break_clock_time = time.time() + config["regular_break"]["spacing"]
 
     ################  Set up QT
     app = QApplication(sys.argv)
 
     glowy = gb.GlowBox()
 
-    shorty = bs.ShortBreakScreen(length_of_short_break, lambda: machine.process_event(break_ended))
-    longy = bs.LongBreakScreen(length_of_long_break, lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended), lambda: machine.process_event(break_ended))
+    shorty = bs.ShortBreakScreen(config["short_break"]["length"], lambda: machine.process_event(break_ended))
+    longy = bs.LongBreakScreen(config["regular_break"]["length"], lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended), lambda: machine.process_event(break_ended))
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon('flower.png'))
