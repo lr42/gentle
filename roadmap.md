@@ -33,7 +33,7 @@ Features
 Bugs
 ------------------------------------------------------------------------
 
-- [ ] The countdown timer glitches/shows the wrong value when the long
+- [x] The countdown timer glitches/shows the wrong value when the long
   break screen is shown.
 - [x] Remove the context menus from the glowbox, or at least the
   nonsensical entries (for now).
@@ -82,6 +82,7 @@ Features
   Matt.)
 - [ ] Show a tool tip over the glow box which indicates which break this
   is for.  Make this optional.  (From Matt.)
+- [ ] Add a progress bar to the break screens.
 - [x] Show a skip break button on the short break screen.  (From
   Matt.)  Make this optional, possibly with the default to off.
 

@@ -38,8 +38,8 @@ your computer.
 For both types of breaks, the glowing box will appear a little early to
 show that a break is coming up.  During this time its alternate color
 will be white, and the pulses will start slowly, but gradually become
-more rapid.  Once the break is due, the alternate color change to yellow
-and the box will pulse at a steady and rapid pace.
+more rapid.  Once the break is due, the alternate color will change to
+yellow and the box will pulse at a steady and rapid pace.
 
 
 How is this different from other break reminders?
@@ -55,10 +55,9 @@ that I could get some work done, uninterrupted.
 Gentle Break Reminder is meant to give you a gentle visual reminder to
 take a break without being annoying, but let you decide to take it when
 you're ready.  It won't force you to take a break, or steal focus from
-whatever you're doing.  (If you're in the middle of typing a sentence
-when it pops up, or playing a video game, you can keep typing or playing
-as normal.)  All it does is give you a gentle nudge to take care of
-yourself.
+whatever you're doing.  (If you're in the middle of typing when it pops
+up, or playing a video game, you can keep typing or playing as normal.)
+All it does is give you a gentle nudge to take care of yourself.
 
 (Yes, I know that the glowing box can be a little disruptive when it
 first pops up in the middle of your screen, but you can easily move it

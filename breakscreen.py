@@ -46,19 +46,21 @@ class BaseBreakScreen(QWidget):
         palette.setColor(QPalette.WindowText, QColor("lightGray"))
         self.setPalette(palette)
 
-    def update_countdown(self):
-        self._remaining_time = self._remaining_time.addSecs(-1)
-        if self._remaining_time == QTime(0, 0, 0):
-            self.countdown_timer.stop()
-            self._run_on_completion()
-
     def showEvent(self, event):
+        super().showEvent(event)
         """Start the timer when the window is shown."""
         self._remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
         self.countdown_timer.start(1_000)
 
     def hideEvent(self, event):
+        super().hideEvent(event)
         self.countdown_timer.stop()
+
+    def update_countdown(self):
+        self._remaining_time = self._remaining_time.addSecs(-1)
+        if self._remaining_time == QTime(0, 0, 0):
+            self.countdown_timer.stop()
+            self._run_on_completion()
 
 
 class ShortBreakScreen(BaseBreakScreen):
@@ -143,6 +145,10 @@ class LongBreakScreen(BaseBreakScreen):
         self.stacked_layout.addWidget(self.finished_layout_widget)
 
         self.setLayout(self.stacked_layout)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.countdown_label.setText(self._remaining_time.toString())
 
     def update_countdown(self):
         super().update_countdown()
