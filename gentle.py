@@ -335,7 +335,22 @@ def show_long_break_screen_finished():
 long_break_finished.on_entry = show_long_break_screen_finished
 
 
+################  Functions used in __main__
+
+def deep_update(a, b):
+    if isinstance(b, dict):
+        for key in b:
+            if key in a and isinstance(a[key], dict):
+                a[key] = deep_update(a[key], b[key])
+            else:
+                a[key] = b[key]
+    else:
+        a = b
+    return a
+
+
 ################  Main
+
 if __name__ == '__main__':
 
     ################  Logging
@@ -346,29 +361,35 @@ if __name__ == '__main__':
             )
     # For logging to cutelog
     socket_handler = SocketHandler('127.0.0.1', 19996)
-    logger.addHandler(socket_handler)
+    #logger.addHandler(socket_handler)
     logger.debug("Logging initialized")
 
-    ################  Default config
-    # TODO Load default config values from a file as well.
-    #short_break_max_spacing_time = 20 * 60  # in seconds
-    #long_break_spacing_time = 25 * 60  # in seconds
+    ################  Default configuration
+    config = {
+        'general': {
+            'steady_pulse_period':  1_000,
+        },
+        'regular_break': {
+            'spacing':              3000,
+            'length':               600,
+            'early_notification':   120,
+        },
+        'short_break': {
+            'max_spacing':          1200,
+            'length':               20,
+            'early_notification':   30,
+        },
+        # TODO Maybe use separate colors for short and long early and late notifications?
+        #  Or at least leave that as an option?
+        'colors': {
+            'regular':  'orchid',
+            'short':    'deepskyblue',
+            'early':    'white',
+            'late':     'yellow',
+        },
+    }
 
-    #length_of_short_break = 20  # in seconds
-    #length_of_long_break = 5 * 60  # in seconds
-
-    #length_of_early_notification_to_short_break = 30  # in seconds
-    #length_of_early_notification_to_long_break = 2 * 60  # in seconds
-
-    #steady_pulse_period = 1_000
-
-    # TODO Maybe use separate colors for short and long early and late notifications?
-    #color_short = "deepskyblue"
-    #color_long = "orchid"
-    #color_early = "white"
-    #color_late = "yellow"
-
-    ################  Load configuration
+    ################  Load configuration from file
     configuration_file = "./config.toml"
     try:
         with open(configuration_file, 'r') as file:
@@ -376,26 +397,30 @@ if __name__ == '__main__':
             # TODO Use logging instead of print.
             print(toml_config)
 
-            steady_pulse_period = toml_config["general"]["steady_pulse_period"]
-
-            long_break_spacing_time =                       toml_config["regular_break"]["spacing"]
-            length_of_long_break =                          toml_config["regular_break"]["length"]
-            length_of_early_notification_to_long_break =    toml_config["regular_break"]["early_notification"]
-
-            short_break_max_spacing_time =                  toml_config["short_break"]["max_spacing"]
-            length_of_short_break =                         toml_config["short_break"]["length"]
-            length_of_early_notification_to_short_break =   toml_config["short_break"]["early_notification"]
-
-            # TODO Maybe use separate colors for short and long early and late notifications?
-            #  Or at least leave that as an option?
-            color_long =    toml_config["colors"]["regular"]
-            color_short =   toml_config["colors"]["short"]
-
-            color_early =   toml_config["colors"]["early"]
-            color_late =    toml_config["colors"]["late"]
+            print(config)
+            config = deep_update(config, toml_config)
+            print(config)
 
     except (FileNotFoundError) as e:
-        logger.info("Configuration file not found:  %s", configuration_file)
+        logger.info("Configuration file (%s) not found, using defaults.", configuration_file)
+
+    steady_pulse_period = config["general"]["steady_pulse_period"]
+
+    long_break_spacing_time =                       config["regular_break"]["spacing"]
+    length_of_long_break =                          config["regular_break"]["length"]
+    length_of_early_notification_to_long_break =    config["regular_break"]["early_notification"]
+
+    short_break_max_spacing_time =                  config["short_break"]["max_spacing"]
+    length_of_short_break =                         config["short_break"]["length"]
+    length_of_early_notification_to_short_break =   config["short_break"]["early_notification"]
+
+    # TODO Maybe use separate colors for short and long early and late notifications?
+    #  Or at least leave that as an option?
+    color_long =    config["colors"]["regular"]
+    color_short =   config["colors"]["short"]
+
+    color_early =   config["colors"]["early"]
+    color_late =    config["colors"]["late"]
 
     ################  Show colors
     #logger.info("Here's a list of colors:  %s", QColor.colorNames())

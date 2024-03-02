@@ -36,6 +36,8 @@ Bugs
 
 - [x] Remove the context menus from the glowbox, or at least the
   nonsensical entries (for now).
+- [ ] The countdown timer glitches/shows the wrong value when the long
+  break screen is shown.
 
 
 Maintenance
