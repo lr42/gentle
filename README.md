@@ -48,9 +48,9 @@ How is this different from other break reminders?
 Other break reminders that I've tried will either try to pester you into
 taking a break, or will automatically go to the break screen.  I found
 this disruptive, especially when I was concentrating on something, or
-"in the flow".  Even though I wanted to take care of myself, I often
-found myself disabling the break reminder so that I could get some work
-done, uninterrupted.
+"in the flow".  Even though I want to take care of my health and use
+best practices, I often found myself disabling the break reminder so
+that I could get some work done, uninterrupted.
 
 Gentle Break Reminder is meant to give you a gentle visual reminder to
 take a break without being annoying, but let you decide to take it when
@@ -150,11 +150,11 @@ Run the following commands in your terminal:
     ````````````````````````````````
 
 A flower icon will appear in your task bar, indicating that Gentle Break
-Reminder is running.  In about every 12 minutes, a colorful box will pop
-up on the screen reminding you to take either a short break (to look
-away from the screen) or a long break (to get away from the computer and
-stretch your legs).  (The times and breaks will be customizable in the
-very near future.)
+Reminder is running.  Every once in a while, a colorful box will pop up
+on the screen reminding you to take either a short break (to look away
+from the screen) or a long break (to get away from the computer and
+stretch your legs).  (The times and breaks can be customized in the
+`config.toml` configuration file.)
 
 
 Running the project after install
@@ -179,6 +179,14 @@ Running the project after install
     ````````````````````````````````
 
 3. Enjoy!
+
+
+Configuration
+========================================================================
+
+The program can be customized by editing the values in the `config.toml`
+configuration file.  There is further documentation there on what each
+option does.
 
 
 Credits

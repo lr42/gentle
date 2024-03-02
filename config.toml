@@ -1,17 +1,61 @@
 [general]
-    steady_pulse_period = 1_000 # in milliseconds
+
+    # Determines the pulsing speed of the glow box when a break is due.
+    #  A speed of 1000 milliseconds (or one second) means that the glow
+    #  box will transition from its main color to its alternate color
+    #  and back again, all in one second.
+    steady_pulse_period = 1_000  # in milliseconds
+
 
 [regular_break]
+    # All of these values pertain to regular (longer) breaks, where the
+    #  user is meant to stretch their legs and get away from the
+    #  computer for a bit.
+
+    # How far apart breaks will be spaced from each other.
     spacing             = 3000  # in seconds
+
+    # The length of the break.
     length              = 600   # in seconds
+
+    # This determines how early a notification is shown before a break
+    #  is due.  This does not effect the timing of the breaks.  For
+    #  example: if a break is scheduled every 50 minutes, and a
+    #  notification is set to appear two minutes early, the notification
+    #  will appear 48 minutes after the last break, but the break will
+    #  still be due 50 minutes after the last break.
     early_notification  = 120   # in seconds
 
+
 [short_break]
+    # All of these values pertain to shorter breaks, where the user
+    #  should allow their eyes a short rest by looking away from the
+    #  screen.  Most of these match the similar options for the regular
+    #  breaks, except where noted.
+
+    # The maximum spacing of short breaks.  Short breaks will be spaced
+    #  evenly between long breaks, and not necessarily exactly to this
+    #  value, but will never be longer than this spacing.
     max_spacing         = 1200  # in seconds
+
     length              = 20    # in seconds
+
     early_notification  = 30    # in seconds
 
+
 [colors]
+    # Colors can be formatted either as hex values or named colors.  To
+    #  format a color as a hex value, use the following
+    #  format:  "#RRGGBB".  For example, "#88FF88" for a pale green.
+    #  A list of color names that can be used, sorted by hue, is
+    #  available at:  https://johndecember.com/html/spec/colorsvghsl.html
+
+    # The glow box pulses between a main color (indicating whether a
+    #  regular or short break is due -- the `regular` and `short`
+    #  options below) and an alternate color (indicating whether the
+    #  break is not yet due, or is past due -- the `early` and `late`
+    #  options below).
+
     regular = "orchid"
     short   = "deepskyblue"
 
