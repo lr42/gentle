@@ -1,0 +1,4 @@
+[flake8]
+per-file-ignores =
+     ./gentle.py: E501, E221
+     ./glowbox.py: E501

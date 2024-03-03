@@ -42,9 +42,9 @@ Bugs
 Maintenance
 ------------------------------------------------------------------------
 
-- [ ] Linting.
 - [ ] Move issue tracking over to a proper issue tracker.
 - [ ] Package into an installer.
+- [ ] More linting.
 - [x] Create a GitHub repository for the project.
 - [x] Include the `stama` library.
 - [x] Get a proper icon.
@@ -55,6 +55,7 @@ Maintenance
   further in the future, and use proper file logging with rotation in
   the future.
 - [x] Code formatting.
+- [x] Linting.
 
 
 Soon
@@ -113,10 +114,10 @@ Maintenance
 
 - [ ] Create a visual demo of what the application does in the README.
 - [ ] Properly update the `pip` `requirements.txt`.
-	- I also need to figure out how to test this program against all
-	  supported versions of Python.  It would be nice to automate
-	  something like this, but that's not something I'm knowledgeable of
-	  right now.
+    - I also need to figure out how to test this program against all
+      supported versions of Python.  It would be nice to automate
+      something like this, but that's not something I'm knowledgeable of
+      right now.
 
 
 Someday

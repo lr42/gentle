@@ -13,14 +13,14 @@ from PySide6.QtCore import (
 )
 
 # pylint: disable=import-error
-from PySide6.QtGui import QAction, QColor, QPalette
+from PySide6.QtGui import QColor, QPalette  # , QAction
 
 # pylint: disable=import-error
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
     QSizeGrip,
-    QMenu,
+    # QMenu,
 )
 
 
@@ -43,7 +43,7 @@ class GlowBox(QWidget):
 
         self.setWindowTitle("Gentle break reminder")
 
-        ################################################################
+        # # # # # # # #################################################
 
         self.setWindowFlags(
             Qt.Window
@@ -57,7 +57,7 @@ class GlowBox(QWidget):
 
         self.setAttribute(Qt.WA_ShowWithoutActivating)
 
-        # TODO Magic
+        # TODO Magic number
         self.setWindowOpacity(0.7)
 
         self.setAutoFillBackground(True)
@@ -84,9 +84,11 @@ class GlowBox(QWidget):
         self.is_moving = None
         self.previous_position = None
 
+        self._color_main = QColor("grey")
+
         self.color_animation = QPropertyAnimation(self, b"color")
 
-    ################  QT QWidget overrides
+    # # # # # # # #   QT QWidget overrides
 
     # pylint: disable=invalid-name
     def mousePressEvent(self, event):
@@ -102,7 +104,6 @@ class GlowBox(QWidget):
     # pylint: disable=invalid-name
     def mouseReleaseEvent(self, event):
         if event.globalPosition().toPoint() == self.previous_position:
-            # TODO We don't really need this.  We need proper logging.
             if self.run_on_click is not None:
                 logger.info("Glowbox clicked!  Running: %s", self.run_on_click)
                 self.run_on_click()
@@ -113,12 +114,11 @@ class GlowBox(QWidget):
             self.close_and_save_geometry()
         self.is_moving = False
 
-    # pylint: disable=invalid-name
-
     # TODO Move the glowbox context menu creation to the main program.
     #  That way we can add as many entries as we want without having to
     #  account for everyone we might want to create in this module.
 
+    # pylint: disable=invalid-name
     # def contextMenuEvent(self, ev):
     #     close_action = QAction("Close program", self)
     #     close_action.triggered.connect(self.close_and_save_geometry)
@@ -127,7 +127,7 @@ class GlowBox(QWidget):
     #     context.addAction(close_action)
     #     context.exec(ev.globalPos())
 
-    ################  Changing the color
+    # # # # # # # #   Changing the color
 
     def set_main_color(self, color=None):
         if color is not None:
@@ -155,6 +155,7 @@ class GlowBox(QWidget):
                     self.color_animation.finished.disconnect()
                 except RuntimeError as e:
                     logger.info(
+                        # pylint: disable=line-too-long
                         "%s -- There was probably nothing previously connected to the animation finishing, and probably nothing to worry about.",
                         e,
                     )
@@ -176,7 +177,7 @@ class GlowBox(QWidget):
 
         handle_next_transition()
 
-    ################  Window geometry
+    # # # # # # # #   Window geometry
 
     def save_window_geometry(self, filename="geometry.json"):
         rect = self.geometry()
@@ -243,6 +244,7 @@ def nearest_even(n):
     return int(round(n / 2) * 2)
 
 
+# pylint: disable=too-many-arguments, useless-return
 def intervals_decreasing_over_total_time(
     rough_starting_interval,
     ending_interval,
@@ -286,9 +288,9 @@ def intervals_decreasing_over_total_time(
         #  the interval is the time at the midpoint of the interval...
         # I dunno how exactly to say what I was saying there.  Imma come
         #  back to it.  TODO.
-        next = new_starting_interval + ((i + 0.5) * slope)
-        next *= 1_000
-        next = int(next)
+        next_duration = new_starting_interval + ((i + 0.5) * slope)
+        next_duration *= 1_000
+        next_duration = int(next_duration)
 
         # logger.info("i: %s", i)
         if i % 2 == 0:
@@ -296,9 +298,11 @@ def intervals_decreasing_over_total_time(
         else:
             color = main_color
 
-        yield {"new_color": color, "duration": next}
-        # logger.info(i, "\t", next, "\t", sum(intervals)/1_000)
+        yield {"new_color": color, "duration": next_duration}
+        # logger.info(i, "\t", next_duration, "\t", sum(intervals)/1_000)
 
+    # I'm leaving the `return` statement here to make clear that the iterator
+    #  should end at this point.
     return
 
 

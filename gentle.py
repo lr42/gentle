@@ -1,30 +1,23 @@
 import math
-import sched
 import time
-import threading
 import logging
 from logging.handlers import SocketHandler
 import sys
 import datetime
 import tomlkit
 
+# pylint: disable=import-error
 from PySide6.QtCore import (
-    Qt,
-    QPropertyAnimation,
-    Property,
-    QEasingCurve,
     QTimer,
 )
-from PySide6.QtGui import QAction, QColor, QPalette, QScreen, QIcon
+
+# pylint: disable=import-error
+from PySide6.QtGui import QAction, QIcon
+
+# pylint: disable=import-error
 from PySide6.QtWidgets import (
     QApplication,
-    QWidget,
-    QMainWindow,
-    QSizeGrip,
-    QPushButton,
     QMenu,
-    QVBoxLayout,
-    QLabel,
     QSystemTrayIcon,
 )
 
@@ -33,28 +26,31 @@ import glowbox as gb
 import breakscreen as bs
 
 
-################  States
+# # # # # # # #   States
 
 
 # fmt: off
-waiting_for_short_break =           sm.State("Waiting for a short break")
-showing_short_break_early_notif =   sm.State("Showing the short break early notification")
-showing_short_break_late_notif =    sm.State("Showing the short break late notification")
-short_break_in_progress =           sm.State("Short break in progress")
-waiting_after_short_afk =           sm.State("Waiting after AFK for short duration")
+waiting_for_short_break         = sm.State("Waiting for a short break")
+showing_short_break_early_notif = sm.State("Showing the short break early notification")
+showing_short_break_late_notif  = sm.State("Showing the short break late notification")
+short_break_in_progress         = sm.State("Short break in progress")
+waiting_after_short_afk         = sm.State("Waiting after AFK for short duration")
 
-waiting_for_long_break =            sm.State("Waiting for a long break")
-showing_long_break_early_notif =    sm.State("Showing the long break early notification")
-showing_long_break_late_notif =     sm.State("Showing the long break late notification")
-long_break_in_progress =            sm.State("long break in progress")
-long_break_finished =               sm.State("long break finished")
-waiting_after_long_afk =            sm.State("Waiting after AFK for long duration")
+waiting_for_long_break          = sm.State("Waiting for a long break")
+showing_long_break_early_notif  = sm.State("Showing the long break early notification")
+showing_long_break_late_notif   = sm.State("Showing the long break late notification")
+long_break_in_progress          = sm.State("long break in progress")
+long_break_finished             = sm.State("long break finished")
+waiting_after_long_afk          = sm.State("Waiting after AFK for long duration")
 
-test_for_next_break =               sm.ConditionalJunction(waiting_for_long_break, "Testing for next break")
+test_for_next_break             = sm.ConditionalJunction(
+                                        waiting_for_long_break,
+                                        "Testing for next break",
+                                  )
 # fmt: on
 
 
-################  Set up conditional junction
+# # # # # # # #   Set up conditional junction
 
 
 def has_short_break_before_long_break():
@@ -72,13 +68,13 @@ def has_short_break_before_long_break():
     secs_to_long_break = next_long_break_unix_time - time.time()
     if config["short_break"]["max_spacing"] < secs_to_long_break:
         logger.debug(
-            "has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)",
+            "has_short_break_before_long_break is True: %s < %s",
             config["short_break"]["max_spacing"],
             secs_to_long_break,
         )
         return True
     logger.debug(
-        "has_short_break_before_long_break returning False: short_break_max_spacing_time (%s) >= secs_to_long_break (%s)",
+        "has_short_break_before_long_break is False: %s >= %s",
         config["short_break"]["max_spacing"],
         secs_to_long_break,
     )
@@ -90,20 +86,20 @@ test_for_next_break.add_condition(
 )
 
 
-################  Events for the state machine
+# # # # # # # #   Events for the state machine
 
 
 # fmt: off
-time_out =                  sm.Event("Time out")
-break_started =             sm.Event("Break started")
-break_ended =               sm.Event("Break ended")
-afk_short_period_ended =    sm.Event("Short AFK period ended")
-afk_long_period_ended =     sm.Event("Long AFK period ended")
-returned_to_computer =      sm.Event("User returned to computer")
+time_out                = sm.Event("Time out")
+break_started           = sm.Event("Break started")
+break_ended             = sm.Event("Break ended")
+afk_short_period_ended  = sm.Event("Short AFK period ended")
+afk_long_period_ended   = sm.Event("Long AFK period ended")
+returned_to_computer    = sm.Event("User returned to computer")
 # fmt: on
 
 
-################  Short break transitions
+# # # # # # # #   Short break transitions
 
 
 # fmt: off
@@ -131,8 +127,8 @@ showing_short_break_late_notif.transitions = {
 short_break_in_progress.transitions = {
     break_ended:                test_for_next_break,
     afk_short_period_ended:     None,
-    afk_long_period_ended:      None,  #TODO
-    returned_to_computer:       None,  #TODO
+    afk_long_period_ended:      None,  # TODO
+    returned_to_computer:       None,  # TODO
 }
 
 waiting_after_short_afk.transitions = {
@@ -141,7 +137,7 @@ waiting_after_short_afk.transitions = {
 }
 
 
-################  Long break transitions
+# # # # # # # #   Long break transitions
 
 
 waiting_for_long_break.transitions = {
@@ -173,14 +169,14 @@ long_break_in_progress.transitions = {
     break_ended:                test_for_next_break,  # Skipping the break
     afk_short_period_ended:     None,
     afk_long_period_ended:      None,
-    returned_to_computer:       None,  #TODO
+    returned_to_computer:       None,  # TODO
 }
 
 long_break_finished.transitions = {
     break_ended:                test_for_next_break,
     afk_short_period_ended:     None,
     afk_long_period_ended:      None,
-    returned_to_computer:       None,  #TODO
+    returned_to_computer:       None,  # TODO
 }
 
 waiting_after_long_afk.transitions = {
@@ -189,7 +185,7 @@ waiting_after_long_afk.transitions = {
 # fmt:on
 
 
-################  Short break state actions
+# # # # # # # #   Short break state actions
 
 
 def set_timer_for_short_break():
@@ -244,7 +240,7 @@ def set_timer_for_short_break():
     #  was the easiest way to fix it.
     secs_to_notification = max(secs_to_notification, 0)
 
-    ################  Convey information
+    # # # # # # # #   Convey information
     logger.debug(
         "%dm%0.1fs to next short break",
         int(secs_to_short_break // 60),
@@ -263,24 +259,17 @@ def set_timer_for_short_break():
         next_long_break_unix_time
     ).strftime("%H:%M:%S")
 
-    tooltip_next_break = (
-        "Next break (short): "
-        + datetime.datetime.fromtimestamp(next_short_break_unix_time).strftime(
-            "%H:%M:%S"
-        )
-    )
-    tooltip_next_long = "Next long break: " + datetime.datetime.fromtimestamp(
-        next_long_break_unix_time
-    ).strftime("%H:%M:%S")
+    tooltip_next_break = "Next break (short): " + next_short_break_per_clock
+    tooltip_next_long = "Next long break: " + next_long_break_per_clock
 
     logger.info(tooltip_next_break)
     logger.info(tooltip_next_long)
 
     tray_icon.setToolTip(
-        tooltip_title + "\n" + tooltip_next_break + "\n" + tooltip_next_long
+        TOOLTIP_TITLE + "\n" + tooltip_next_break + "\n" + tooltip_next_long
     )
 
-    ################  Start timer
+    # # # # # # # #   Start timer
     global_timer.singleShot(
         secs_to_notification * 1000, lambda: machine.process_event(time_out)
     )
@@ -301,7 +290,6 @@ def short_early_notification_pulse():
     ending_fade_interval = config["general"]["steady_pulse_period"] / 2 / 1_000
     logger.debug("ending_fade_interval: %s", ending_fade_interval)
     starting_fade_multiplier = 5
-    starting_fade_interval = ending_fade_interval * starting_fade_multiplier
 
     my_iterable = gb.intervals_decreasing_over_total_time(
         starting_fade_multiplier,
@@ -338,7 +326,7 @@ def hide_short_break_screen():
     shorty.hide()
 
 
-################  Long break state actions
+# # # # # # # #   Long break state actions
 
 
 def set_timer_for_long_break():
@@ -365,7 +353,7 @@ def set_timer_for_long_break():
     ).strftime("%H:%M:%S")
     tooltip_next_break = "Next break (long): " + next_long_break_per_clock
     logger.info(tooltip_next_break)
-    tray_icon.setToolTip(tooltip_title + "\n" + tooltip_next_break)
+    tray_icon.setToolTip(TOOLTIP_TITLE + "\n" + tooltip_next_break)
 
     global_timer.singleShot(
         secs_to_notification * 1000, lambda: machine.process_event(time_out)
@@ -383,7 +371,6 @@ def long_early_notification_pulse():
     ending_fade_interval = config["general"]["steady_pulse_period"] / 2 / 1_000
     logger.debug("ending_fade_interval: %s", ending_fade_interval)
     starting_fade_multiplier = 5
-    starting_fade_interval = ending_fade_interval * starting_fade_multiplier
 
     my_iterable = gb.intervals_decreasing_over_total_time(
         starting_fade_multiplier,
@@ -413,6 +400,7 @@ def long_late_notification_pulse():
 
 
 def show_long_break_screen_countdown():
+    global next_long_break_unix_time
     next_long_break_unix_time = time.time()
     longy.set_layout_to_countdown()
     longy.showFullScreen()
@@ -423,35 +411,35 @@ def show_long_break_screen_finished():
     longy.showFullScreen()
 
 
-################  Assigning functions to actions
+# # # # # # # #   Assigning functions to actions
 
 
 # fmt: off
-waiting_for_short_break.on_entry =          set_timer_for_short_break
-waiting_for_short_break.on_exit =           clear_time_out_timer
+waiting_for_short_break.on_entry            = set_timer_for_short_break
+waiting_for_short_break.on_exit             = clear_time_out_timer
 
-showing_short_break_early_notif.on_entry =  short_early_notification_pulse
+showing_short_break_early_notif.on_entry    = short_early_notification_pulse
 
-showing_short_break_late_notif.on_entry =   short_late_notification_pulse
+showing_short_break_late_notif.on_entry     = short_late_notification_pulse
 
-short_break_in_progress.on_entry =          show_short_break_screen
-short_break_in_progress.on_exit =           hide_short_break_screen
+short_break_in_progress.on_entry            = show_short_break_screen
+short_break_in_progress.on_exit             = hide_short_break_screen
 
 
-waiting_for_long_break.on_entry =           set_timer_for_long_break
-waiting_for_long_break.on_exit =            clear_time_out_timer
+waiting_for_long_break.on_entry             = set_timer_for_long_break
+waiting_for_long_break.on_exit              = clear_time_out_timer
 
-showing_long_break_early_notif.on_entry =   long_early_notification_pulse
+showing_long_break_early_notif.on_entry     = long_early_notification_pulse
 
-showing_long_break_late_notif.on_entry =    long_late_notification_pulse
+showing_long_break_late_notif.on_entry      = long_late_notification_pulse
 
-long_break_in_progress.on_entry =           show_long_break_screen_countdown
+long_break_in_progress.on_entry             = show_long_break_screen_countdown
 
-long_break_finished.on_entry =              show_long_break_screen_finished
+long_break_finished.on_entry                = show_long_break_screen_finished
 # fmt: on
 
 
-################  Functions used in __main__
+# # # # # # # #   Functions used in __main__
 
 
 def deep_update(a, b):
@@ -466,11 +454,11 @@ def deep_update(a, b):
     return a
 
 
-################  Main
+# # # # # # # #   Main
 
 
 if __name__ == "__main__":
-    ################  Logging
+    # # # # # # # #   Logging
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
@@ -486,7 +474,7 @@ if __name__ == "__main__":
 
     logger.debug("Logging initialized")
 
-    ################  Default configuration
+    # # # # # # # #   Default configuration
     config = {
         "general": {
             "steady_pulse_period": 1_000,
@@ -513,10 +501,10 @@ if __name__ == "__main__":
         },
     }
 
-    ################  Load configuration from file
-    configuration_file = "./config.toml"
+    # # # # # # # #   Load configuration from file
+    CONFIGURATION_FILE = "./config.toml"
     try:
-        with open(configuration_file, "r") as file:
+        with open(CONFIGURATION_FILE, "r", encoding="utf-8") as file:
             logger.debug("Default config:  %s", config)
 
             toml_config = tomlkit.load(file)
@@ -525,22 +513,20 @@ if __name__ == "__main__":
             config = deep_update(config, toml_config)
             logger.debug("Final config:  %s", config)
 
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         logger.info(
             "Configuration file (%s) not found, using defaults.",
-            configuration_file,
+            CONFIGURATION_FILE,
         )
 
-    ################  Set up concurrent activities
-    # threading.Thread(target=scheduler_thread, daemon=True).start()
+    # # # # # # # #   Set up concurrent activities
     global_timer = QTimer()
 
-    global next_long_break_unix_time
     next_long_break_unix_time = (
         time.time() + config["regular_break"]["spacing"]
     )
 
-    ################  Set up QT
+    # # # # # # # #   Set up QT
     app = QApplication(sys.argv)
 
     glowy = gb.GlowBox()
@@ -564,7 +550,7 @@ if __name__ == "__main__":
         lambda: machine.process_event(break_ended),
     )
 
-    ################  Add tray icon
+    # # # # # # # #   Add tray icon
     tray_icon = QSystemTrayIcon(QIcon(config["general"]["icon"]))
 
     tray_menu = QMenu()
@@ -573,13 +559,13 @@ if __name__ == "__main__":
     tray_menu.addAction(action)
     tray_icon.setContextMenu(tray_menu)
 
-    tooltip_title = "Gentle Break Reminder"
-    tray_icon.setToolTip(tooltip_title)
+    TOOLTIP_TITLE = "Gentle Break Reminder"
+    tray_icon.setToolTip(TOOLTIP_TITLE)
 
     tray_icon.show()
 
-    ################  Start state machine
+    # # # # # # # #   Start state machine
     machine = sm.StateMachine(waiting_for_short_break)
 
-    ################  Exit on QT app close
+    # # # # # # # #   Exit on QT app close
     sys.exit(app.exec())

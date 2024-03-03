@@ -1,31 +1,24 @@
 import logging
+
+# pylint: disable=import-error
 from PySide6.QtCore import (
     Qt,
-    QPropertyAnimation,
-    Property,
-    QEasingCurve,
     QTimer,
     QTime,
 )
+
+# pylint: disable=import-error
 from PySide6.QtGui import (
-    QAction,
     QColor,
     QPalette,
-    QScreen,
-    QIcon,
-    QFontMetrics,
-    QTextOption,
 )
+
+# pylint: disable=import-error
 from PySide6.QtWidgets import (
-    QApplication,
     QWidget,
-    QMainWindow,
-    QSizeGrip,
     QPushButton,
-    QMenu,
     QVBoxLayout,
     QLabel,
-    QSystemTrayIcon,
     QStackedLayout,
 )
 
@@ -39,7 +32,9 @@ class BaseBreakScreen(QWidget):
 
         self._run_on_completion = run_on_completion
 
-        ################  Initialize the countdown timer
+        # # # # # # # #   Initialize the countdown timer
+        self._remaining_time = QTime(0, 0)
+
         self.countdown_timer = QTimer()
         self.countdown_timer.timeout.connect(self.update_countdown)
         self._timeout_length = timeout_length
@@ -47,21 +42,24 @@ class BaseBreakScreen(QWidget):
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowFlag(Qt.FramelessWindowHint, True)
 
-        ################  Set dark background and light text
+        # # # # # # # #   Set dark background and light text
         # TODO Make this customizable
         palette = self.palette()
         palette.setColor(QPalette.Window, QColor("black"))
         palette.setColor(QPalette.WindowText, QColor("lightGray"))
         self.setPalette(palette)
 
+    # pylint: disable=invalid-name
     def showEvent(self, event):
         super().showEvent(event)
-        """Start the timer when the window is shown."""
+
+        # Start the timer when the window is shown.
         self._remaining_time = QTime(
             0, self._timeout_length // 60, self._timeout_length % 60
         )
         self.countdown_timer.start(1_000)
 
+    # pylint: disable=invalid-name
     def hideEvent(self, event):
         super().hideEvent(event)
         self.countdown_timer.stop()
@@ -77,7 +75,7 @@ class ShortBreakScreen(BaseBreakScreen):
     def __init__(self, timeout_length, run_on_completion, run_on_skip=None):
         super().__init__(timeout_length, run_on_completion)
 
-        ################  Create the layout
+        # # # # # # # #   Create the layout
         self.layout = QVBoxLayout()
 
         self.big_text_label = QLabel()
@@ -92,7 +90,7 @@ class ShortBreakScreen(BaseBreakScreen):
         self.big_text_label.setFont(font)
         self.layout.addWidget(self.big_text_label)
 
-        ################  Add "skip break" button
+        # # # # # # # #   Add "skip break" button
         if run_on_skip is not None:
             skip_button = QPushButton("Skip this break.  :-(")
             skip_button.clicked.connect(run_on_skip)
@@ -112,7 +110,7 @@ class LongBreakScreen(BaseBreakScreen):
     ):
         super().__init__(timeout_length, run_on_completion)
 
-        ################  Create the countdown layout
+        # # # # # # # #   Create the countdown layout
         self.countdown_layout_widget = QWidget()
         self.countdown_layout = QVBoxLayout()
 
@@ -139,7 +137,7 @@ class LongBreakScreen(BaseBreakScreen):
 
         self.countdown_layout_widget.setLayout(self.countdown_layout)
 
-        ################  Create the finished layout
+        # # # # # # # #   Create the finished layout
         self.finished_layout_widget = QWidget()
         self.finished_layout = QVBoxLayout()
 
@@ -159,13 +157,14 @@ class LongBreakScreen(BaseBreakScreen):
 
         self.finished_layout_widget.setLayout(self.finished_layout)
 
-        ################  Stack the layouts so we can switch between them
+        # # # # # # # #   Stack the layouts so we can switch between them
         self.stacked_layout = QStackedLayout()
         self.stacked_layout.addWidget(self.countdown_layout_widget)
         self.stacked_layout.addWidget(self.finished_layout_widget)
 
         self.setLayout(self.stacked_layout)
 
+    # pylint: disable=invalid-name
     def showEvent(self, event):
         super().showEvent(event)
         self.countdown_label.setText(self._remaining_time.toString())
