@@ -30,6 +30,8 @@ class BaseBreakScreen(QWidget):
     def __init__(self, timeout_length, run_on_completion):
         super().__init__()
 
+        self.FONT_SIZE = 72
+
         self._run_on_completion = run_on_completion
 
         # # # # # # # #   Initialize the countdown timer
@@ -90,8 +92,7 @@ class ShortBreakScreen(BaseBreakScreen):
         )
 
         font = self.big_text_label.font()
-        FONT_SIZE = 72
-        font.setPointSize(FONT_SIZE)
+        font.setPointSize(self.FONT_SIZE)
         self.big_text_label.setFont(font)
         self.layout.addWidget(self.big_text_label)
 
@@ -121,9 +122,10 @@ class LongBreakScreen(BaseBreakScreen):
 
         self.countdown_label = QLabel()
         self.countdown_label.setAlignment(Qt.AlignCenter)
+        self.countdown_label.setWordWrap(True)
+
         font = self.countdown_label.font()
-        # TODO She's a witch!  Burn her!  She uses magic numbers!
-        font.setPointSize(96)
+        font.setPointSize(self.FONT_SIZE)
         self.countdown_label.setFont(font)
         self._remaining_time = QTime(
             0, self._timeout_length // 60, self._timeout_length % 60
@@ -131,7 +133,7 @@ class LongBreakScreen(BaseBreakScreen):
         logger.debug(
             "Setting countdown timer to %s", self._remaining_time.toString()
         )
-        self.countdown_label.setText(self._remaining_time.toString())
+        self.countdown_label.setText(self.get_countdown_label_text())
         self.countdown_layout.addWidget(self.countdown_label)
 
         if run_on_skip is not None:
@@ -148,9 +150,10 @@ class LongBreakScreen(BaseBreakScreen):
 
         self.finished_label = QLabel()
         self.finished_label.setAlignment(Qt.AlignCenter)
+        self.countdown_label.setWordWrap(True)
+
         font = self.finished_label.font()
-        # TODO She's a witch!  Burn her!  She uses magic numbers!
-        font.setPointSize(96)
+        font.setPointSize(self.FONT_SIZE)
         self.finished_label.setFont(font)
         self.finished_label.setText("Finished!")
         self.finished_layout.addWidget(self.finished_label)
@@ -172,11 +175,18 @@ class LongBreakScreen(BaseBreakScreen):
     # pylint: disable=invalid-name
     def showEvent(self, event):
         super().showEvent(event)
-        self.countdown_label.setText(self._remaining_time.toString())
+        self.countdown_label.setText(self.get_countdown_label_text())
+
+    def get_countdown_label_text(self):
+        LABEL_TEXT = (
+            "Get away from the computer for a bit.<hr>Time remaining: "
+        )
+        count_down_text = self._remaining_time.toString("m:ss")
+        return LABEL_TEXT + count_down_text
 
     def update_countdown(self):
         super().update_countdown()
-        self.countdown_label.setText(self._remaining_time.toString())
+        self.countdown_label.setText(self.get_countdown_label_text())
 
     def set_layout_to_countdown(self):
         self.stacked_layout.setCurrentIndex(0)
