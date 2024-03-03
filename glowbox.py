@@ -1,9 +1,9 @@
 """Creates a pulsing box on the screen that can execute actions when it's clicked"""
 
-import datetime  # TODO Temporary
 import json
 import shutil
 import logging
+
 # pylint: disable=import-error
 from PySide6.QtCore import (
     Qt,
@@ -11,8 +11,10 @@ from PySide6.QtCore import (
     Property,
     QEasingCurve,
 )
+
 # pylint: disable=import-error
 from PySide6.QtGui import QAction, QColor, QPalette
+
 # pylint: disable=import-error
 from PySide6.QtWidgets import (
     QApplication,
@@ -27,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 class GlowBox(QWidget):
     """Creates a pulsing box on the screen that can execute actions when it's clicked"""
+
     color = Property(
         QColor,
         lambda self: self.palette().color(QPalette.Window),
@@ -38,7 +41,7 @@ class GlowBox(QWidget):
 
         self.run_on_click = run_on_click
 
-        self.setWindowTitle("Gentle break reminder")  # This might be obsolete some day.
+        self.setWindowTitle("Gentle break reminder")
 
         ################################################################
 
@@ -115,13 +118,14 @@ class GlowBox(QWidget):
     # TODO Move the glowbox context menu creation to the main program.
     #  That way we can add as many entries as we want without having to
     #  account for everyone we might want to create in this module.
-#    def contextMenuEvent(self, ev):
-#        close_action = QAction("Close program", self)
-#        close_action.triggered.connect(self.close_and_save_geometry)
-#
-#        context = QMenu(self)
-#        context.addAction(close_action)
-#        context.exec(ev.globalPos())
+
+    # def contextMenuEvent(self, ev):
+    #     close_action = QAction("Close program", self)
+    #     close_action.triggered.connect(self.close_and_save_geometry)
+    #
+    #     context = QMenu(self)
+    #     context.addAction(close_action)
+    #     context.exec(ev.globalPos())
 
     ################  Changing the color
 
@@ -133,30 +137,36 @@ class GlowBox(QWidget):
         self.setPalette(palette)
 
     def transition_to_color(self, transition, on_transition_done=None):
-        # TODO If a person really wants to transition the color when the window is hidden, I could add an option for that here.
+        # TODO If a person really wants to transition the color when the window
+        #  is hidden, I could add an option for that here.
         if self.isVisible():
             logger.debug("Transitioning color to %s", transition)
-            self.color_animation.setEndValue(QColor(transition['new_color']))
-            self.color_animation.setDuration(transition['duration'])
-            # TODO Magic
-            default_transitition = QEasingCurve.InOutSine
-            if 'easing curve' in transition:
-                self.color_animation.setEasingCurve(transition['easing curve'])
+            self.color_animation.setEndValue(QColor(transition["new_color"]))
+            self.color_animation.setDuration(transition["duration"])
+            # TODO Do I want to change the default easing curve?
+            default_easing_curve = QEasingCurve.InOutSine
+            if "easing curve" in transition:
+                self.color_animation.setEasingCurve(transition["easing curve"])
             else:
-                self.color_animation.setEasingCurve(default_transitition)
+                self.color_animation.setEasingCurve(default_easing_curve)
             self.color_animation.start()
             if on_transition_done:
                 try:
                     self.color_animation.finished.disconnect()
-                except (RuntimeError) as e:
-                    logger.info("%s -- There was probably nothing previously connected to the animation finishing.", e)
+                except RuntimeError as e:
+                    logger.info(
+                        "%s -- There was probably nothing previously connected to the animation finishing, and probably nothing to worry about.",
+                        e,
+                    )
                 self.color_animation.finished.connect(on_transition_done)
 
     def transition_color_over_iterable(self, transitions, run_on_completion):
         def handle_next_transition():
             try:
-                self.transition_to_color(next(transitions), handle_next_transition)
-            except (StopIteration):
+                self.transition_to_color(
+                    next(transitions), handle_next_transition
+                )
+            except StopIteration:
                 # We don't want the run_on_completion event to run if the
                 #  window has already been clicked and hidden.
                 # TODO Is there a better way to handle this?
@@ -165,7 +175,6 @@ class GlowBox(QWidget):
                         run_on_completion()
 
         handle_next_transition()
-
 
     ################  Window geometry
 
@@ -214,10 +223,9 @@ class GlowBox(QWidget):
         except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             logger.info("Could not parse file: %s  (%s)", filename, e)
             try:
-                shutil.copy2(filename, filename+".backup")
-            except (FileNotFoundError) as e2:
+                shutil.copy2(filename, filename + ".backup")
+            except FileNotFoundError as e2:
                 logger.info("Could not make a backup  (%s)", e2)
-            print("Moving on")
             zsize = QApplication.screens()[0].size()
             # TODO Magic numbers
             logger.info(zsize)
@@ -236,26 +244,42 @@ def nearest_even(n):
 
 
 def intervals_decreasing_over_total_time(
-    rough_starting_interval, ending_interval, total_time, main_color, secondary_color, to_nearest_even_number=True
+    rough_starting_interval,
+    ending_interval,
+    total_time,
+    main_color,
+    secondary_color,
+    to_nearest_even_number=True,
 ):
-    logger.debug("Starting intervals_decreasing_over_total_time(%s, %s, %s)", rough_starting_interval, ending_interval, total_time)
+    logger.debug(
+        "Starting intervals_decreasing_over_total_time(%s, %s, %s)",
+        rough_starting_interval,
+        ending_interval,
+        total_time,
+    )
 
-    unrounded_number_of_intervals = 2 * total_time / (rough_starting_interval + ending_interval)
-    logger.debug("Approximate number of intervals: %s", unrounded_number_of_intervals)
+    unrounded_number_of_intervals = (
+        2 * total_time / (rough_starting_interval + ending_interval)
+    )
+    logger.debug(
+        "Approximate number of intervals: %s", unrounded_number_of_intervals
+    )
 
     if to_nearest_even_number:
-        final_number_of_intervals = int(nearest_even(unrounded_number_of_intervals))
+        final_number_of_intervals = int(
+            nearest_even(unrounded_number_of_intervals)
+        )
     logger.debug("Final number of intervals: %s", final_number_of_intervals)
 
-    new_starting_interval = (2 * total_time / final_number_of_intervals) - ending_interval
+    new_starting_interval = (
+        2 * total_time / final_number_of_intervals
+    ) - ending_interval
     logger.debug("New starting interval: %s", new_starting_interval)
 
-    total_time / ((new_starting_interval / 2) + ending_interval)
-
-    (((new_starting_interval - ending_interval) / 2) + ending_interval) * final_number_of_intervals
-
     for i in range(final_number_of_intervals):
-        slope = (ending_interval - new_starting_interval) / final_number_of_intervals
+        slope = (
+            ending_interval - new_starting_interval
+        ) / final_number_of_intervals
         # We add 0.5, because we want to get the timing of the interval
         #  from the slope of the equation at the middle of the interval.
         #  (Since the slope is linear, you can the whole time taken by
@@ -266,21 +290,19 @@ def intervals_decreasing_over_total_time(
         next *= 1_000
         next = int(next)
 
-        #logger.info("i: %s", i)
+        # logger.info("i: %s", i)
         if i % 2 == 0:
             color = secondary_color
         else:
             color = main_color
 
-        yield {'new_color': color, 'duration': next}
+        yield {"new_color": color, "duration": next}
         # logger.info(i, "\t", next, "\t", sum(intervals)/1_000)
 
     return
 
 
-def steady_pulse(
-    interval, main_color, secondary_color
-):
+def steady_pulse(interval, main_color, secondary_color):
     on_main_color = True
     while True:
         if on_main_color:
@@ -289,5 +311,4 @@ def steady_pulse(
             color = main_color
         on_main_color = not on_main_color
 
-        yield {'new_color': color, 'duration': interval}
-
+        yield {"new_color": color, "duration": interval}

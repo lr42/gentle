@@ -59,12 +59,11 @@ whatever you're doing.  (If you're in the middle of typing when it pops
 up, or playing a video game, you can keep typing or playing as normal.)
 All it does is give you a gentle nudge to take care of yourself.
 
-(Yes, I know that the glowing box can be a little disruptive when it
-first pops up in the middle of your screen, but you can easily move it
-wherever you like, and it will appear there for future breaks.  I like
-to keep it on the right-hand side of the screen, about 3/4 of the way
-down, as a rectangle that's a bit skinny and tall.  But you can place it
-wherever you want.)
+(The glowing box can be a little disruptive when it first pops up in the
+middle of your screen, but you can easily move it wherever you like, and
+it will appear there for future breaks.  I like to keep it on the
+right-hand side of the screen, about 3/4 of the way down, as a rectangle
+that's a bit skinny and tall.  But you can place it wherever you want.)
 
 I hope that Gentle Break Reminder helps make your life a little bit
 better.

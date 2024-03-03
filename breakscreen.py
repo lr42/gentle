@@ -7,7 +7,15 @@ from PySide6.QtCore import (
     QTimer,
     QTime,
 )
-from PySide6.QtGui import QAction, QColor, QPalette, QScreen, QIcon, QFontMetrics, QTextOption
+from PySide6.QtGui import (
+    QAction,
+    QColor,
+    QPalette,
+    QScreen,
+    QIcon,
+    QFontMetrics,
+    QTextOption,
+)
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -49,7 +57,9 @@ class BaseBreakScreen(QWidget):
     def showEvent(self, event):
         super().showEvent(event)
         """Start the timer when the window is shown."""
-        self._remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
+        self._remaining_time = QTime(
+            0, self._timeout_length // 60, self._timeout_length % 60
+        )
         self.countdown_timer.start(1_000)
 
     def hideEvent(self, event):
@@ -93,7 +103,13 @@ class ShortBreakScreen(BaseBreakScreen):
 
 
 class LongBreakScreen(BaseBreakScreen):
-    def __init__(self, timeout_length, run_on_completion, run_on_finish, run_on_skip=None):
+    def __init__(
+        self,
+        timeout_length,
+        run_on_completion,
+        run_on_finish,
+        run_on_skip=None,
+    ):
         super().__init__(timeout_length, run_on_completion)
 
         ################  Create the countdown layout
@@ -106,8 +122,12 @@ class LongBreakScreen(BaseBreakScreen):
         # TODO She's a witch!  Burn her!  She uses magic numbers!
         font.setPointSize(96)
         self.countdown_label.setFont(font)
-        self._remaining_time = QTime(0, self._timeout_length // 60, self._timeout_length % 60)
-        logger.debug("Setting countdown timer to %s", self._remaining_time.toString())
+        self._remaining_time = QTime(
+            0, self._timeout_length // 60, self._timeout_length % 60
+        )
+        logger.debug(
+            "Setting countdown timer to %s", self._remaining_time.toString()
+        )
         self.countdown_label.setText(self._remaining_time.toString())
         self.countdown_layout.addWidget(self.countdown_label)
 
@@ -159,4 +179,3 @@ class LongBreakScreen(BaseBreakScreen):
 
     def set_layout_to_finished(self):
         self.stacked_layout.setCurrentIndex(1)
-

@@ -35,48 +35,76 @@ import breakscreen as bs
 
 ################  States
 
-waiting_for_short_break = sm.State("Waiting for a short break")
-showing_short_break_early_notif = sm.State("Showing the short break early notification")
-showing_short_break_late_notif = sm.State("Showing the short break late notification")
-short_break_in_progress = sm.State("Short break in progress")
-waiting_after_short_afk = sm.State("Waiting after AFK for short duration")
 
-waiting_for_long_break = sm.State("Waiting for a long break")
-showing_long_break_early_notif = sm.State("Showing the long break early notification")
-showing_long_break_late_notif = sm.State("Showing the long break late notification")
-long_break_in_progress = sm.State("long break in progress")
-long_break_finished = sm.State("long break finished")
-waiting_after_long_afk = sm.State("Waiting after AFK for long duration")
+# fmt: off
+waiting_for_short_break =           sm.State("Waiting for a short break")
+showing_short_break_early_notif =   sm.State("Showing the short break early notification")
+showing_short_break_late_notif =    sm.State("Showing the short break late notification")
+short_break_in_progress =           sm.State("Short break in progress")
+waiting_after_short_afk =           sm.State("Waiting after AFK for short duration")
 
-# TODO
-test_for_next_break = sm.ConditionalJunction(waiting_for_long_break)
+waiting_for_long_break =            sm.State("Waiting for a long break")
+showing_long_break_early_notif =    sm.State("Showing the long break early notification")
+showing_long_break_late_notif =     sm.State("Showing the long break late notification")
+long_break_in_progress =            sm.State("long break in progress")
+long_break_finished =               sm.State("long break finished")
+waiting_after_long_afk =            sm.State("Waiting after AFK for long duration")
+
+test_for_next_break =               sm.ConditionalJunction(waiting_for_long_break, "Testing for next break")
+# fmt: on
+
+
+################  Set up conditional junction
+
 
 def has_short_break_before_long_break():
     global next_long_break_unix_time
     if time.time() > next_long_break_unix_time:
-        logger.debug("Resetting next long break to:  %s", datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime("%H:%M:%S"))
-        next_long_break_unix_time = time.time() + config["regular_break"]["spacing"]
+        logger.debug(
+            "Resetting next long break to:  %s",
+            datetime.datetime.fromtimestamp(
+                next_long_break_unix_time
+            ).strftime("%H:%M:%S"),
+        )
+        next_long_break_unix_time = (
+            time.time() + config["regular_break"]["spacing"]
+        )
     secs_to_long_break = next_long_break_unix_time - time.time()
     if config["short_break"]["max_spacing"] < secs_to_long_break:
-        logger.debug("has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)", config["short_break"]["max_spacing"], secs_to_long_break)
+        logger.debug(
+            "has_short_break_before_long_break returning True: short_break_max_spacing_time (%s) < secs_to_long_break (%s)",
+            config["short_break"]["max_spacing"],
+            secs_to_long_break,
+        )
         return True
-    logger.debug("has_short_break_before_long_break returning False: short_break_max_spacing_time (%s) >= secs_to_long_break (%s)", config["short_break"]["max_spacing"], secs_to_long_break)
+    logger.debug(
+        "has_short_break_before_long_break returning False: short_break_max_spacing_time (%s) >= secs_to_long_break (%s)",
+        config["short_break"]["max_spacing"],
+        secs_to_long_break,
+    )
     return False
 
-test_for_next_break.add_condition(has_short_break_before_long_break, waiting_for_short_break)
+
+test_for_next_break.add_condition(
+    has_short_break_before_long_break, waiting_for_short_break
+)
 
 
 ################  Events for the state machine
 
-time_out = sm.Event("Time out")
-break_started = sm.Event("Break started")
-break_ended = sm.Event("Break ended")
-afk_short_period_ended = sm.Event("Short AFK period ended")
-afk_long_period_ended = sm.Event("Long AFK period ended")
-returned_to_computer = sm.Event("User returned to computer")
+
+# fmt: off
+time_out =                  sm.Event("Time out")
+break_started =             sm.Event("Break started")
+break_ended =               sm.Event("Break ended")
+afk_short_period_ended =    sm.Event("Short AFK period ended")
+afk_long_period_ended =     sm.Event("Long AFK period ended")
+returned_to_computer =      sm.Event("User returned to computer")
+# fmt: on
 
 
 ################  Short break transitions
+
 
 # fmt: off
 waiting_for_short_break.transitions = {
@@ -114,6 +142,7 @@ waiting_after_short_afk.transitions = {
 
 
 ################  Long break transitions
+
 
 waiting_for_long_break.transitions = {
     time_out:                   showing_long_break_early_notif,
@@ -162,6 +191,7 @@ waiting_after_long_afk.transitions = {
 
 ################  Short break state actions
 
+
 def set_timer_for_short_break():
     # TODO This function (and probably others) is too long.  It needs to be
     #  refactored.
@@ -170,17 +200,25 @@ def set_timer_for_short_break():
 
     num_segments_to_long_break = math.ceil(
         (secs_to_long_break + config["short_break"]["length"])
-        / (config["short_break"]["length"] + config["short_break"]["max_spacing"])
+        / (
+            config["short_break"]["length"]
+            + config["short_break"]["max_spacing"]
+        )
     )
     logger.debug("num_segments_to_long_break:  %s", num_segments_to_long_break)
 
     num_short_breaks_to_long_break = num_segments_to_long_break - 1
-    logger.debug("num_short_breaks_to_long_break:  %s", num_short_breaks_to_long_break)
+    logger.debug(
+        "num_short_breaks_to_long_break:  %s", num_short_breaks_to_long_break
+    )
 
     total_short_break_secs_to_long_break = (
         num_short_breaks_to_long_break * config["short_break"]["length"]
     )
-    logger.debug("total_short_break_secs_to_long_break:  %s", total_short_break_secs_to_long_break)
+    logger.debug(
+        "total_short_break_secs_to_long_break:  %s",
+        total_short_break_secs_to_long_break,
+    )
 
     working_secs_to_long_break = (
         secs_to_long_break - total_short_break_secs_to_long_break
@@ -207,30 +245,49 @@ def set_timer_for_short_break():
     secs_to_notification = max(secs_to_notification, 0)
 
     ################  Convey information
-    logger.debug("%dm%0.1fs to next short break", int(secs_to_short_break // 60), secs_to_short_break % 60)
-    logger.debug("%dm%0.1fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
+    logger.debug(
+        "%dm%0.1fs to next short break",
+        int(secs_to_short_break // 60),
+        secs_to_short_break % 60,
+    )
+    logger.debug(
+        "%dm%0.1fs to notification",
+        int(secs_to_notification // 60),
+        secs_to_notification % 60,
+    )
 
-    next_short_break_per_clock = datetime.datetime.fromtimestamp(next_short_break_unix_time).strftime("%H:%M:%S")
-    next_long_break_per_clock = datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime("%H:%M:%S")
+    next_short_break_per_clock = datetime.datetime.fromtimestamp(
+        next_short_break_unix_time
+    ).strftime("%H:%M:%S")
+    next_long_break_per_clock = datetime.datetime.fromtimestamp(
+        next_long_break_unix_time
+    ).strftime("%H:%M:%S")
 
-    tooltip_next_break = "Next break (short): " + datetime.datetime.fromtimestamp(next_short_break_unix_time).strftime("%H:%M:%S")
-    tooltip_next_long = "Next long break: " + datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime("%H:%M:%S")
+    tooltip_next_break = (
+        "Next break (short): "
+        + datetime.datetime.fromtimestamp(next_short_break_unix_time).strftime(
+            "%H:%M:%S"
+        )
+    )
+    tooltip_next_long = "Next long break: " + datetime.datetime.fromtimestamp(
+        next_long_break_unix_time
+    ).strftime("%H:%M:%S")
 
     logger.info(tooltip_next_break)
     logger.info(tooltip_next_long)
 
-    tray_icon.setToolTip(tooltip_title + "\n" + tooltip_next_break + "\n" + tooltip_next_long)
+    tray_icon.setToolTip(
+        tooltip_title + "\n" + tooltip_next_break + "\n" + tooltip_next_long
+    )
 
     ################  Start timer
-    global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
-
-waiting_for_short_break.on_entry = set_timer_for_short_break
+    global_timer.singleShot(
+        secs_to_notification * 1000, lambda: machine.process_event(time_out)
+    )
 
 
 def clear_time_out_timer():
     global_timer.stop()
-
-waiting_for_short_break.on_exit = clear_time_out_timer
 
 
 def short_early_notification_pulse():
@@ -256,34 +313,33 @@ def short_early_notification_pulse():
         config["colors"]["early"],
     )
 
-    glowy.transition_color_over_iterable(my_iterable, lambda: machine.process_event(time_out))
-
-showing_short_break_early_notif.on_entry = short_early_notification_pulse
+    glowy.transition_color_over_iterable(
+        my_iterable, lambda: machine.process_event(time_out)
+    )
 
 
 def short_late_notification_pulse():
     glowy.set_main_color(config["colors"]["short"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
-    my_iterable = gb.steady_pulse(config["general"]["steady_pulse_period"] / 2, config["colors"]["short"], config["colors"]["late"])
+    my_iterable = gb.steady_pulse(
+        config["general"]["steady_pulse_period"] / 2,
+        config["colors"]["short"],
+        config["colors"]["late"],
+    )
     glowy.transition_color_over_iterable(my_iterable, None)
-
-showing_short_break_late_notif.on_entry = short_late_notification_pulse
 
 
 def show_short_break_screen():
     shorty.showFullScreen()
 
-short_break_in_progress.on_entry = show_short_break_screen
-
 
 def hide_short_break_screen():
     shorty.hide()
 
-short_break_in_progress.on_exit = hide_short_break_screen
-
 
 ################  Long break state actions
+
 
 def set_timer_for_long_break():
     secs_to_long_break = next_long_break_unix_time - time.time()
@@ -293,19 +349,27 @@ def set_timer_for_long_break():
 
     secs_to_notification = max(secs_to_notification, 0)
 
-    logger.debug("%dm%0.1fs to next long break", int(secs_to_long_break // 60), secs_to_long_break % 60)
-    logger.debug("%dm%0.1fs to notification", int(secs_to_notification // 60), secs_to_notification % 60)
+    logger.debug(
+        "%dm%0.1fs to next long break",
+        int(secs_to_long_break // 60),
+        secs_to_long_break % 60,
+    )
+    logger.debug(
+        "%dm%0.1fs to notification",
+        int(secs_to_notification // 60),
+        secs_to_notification % 60,
+    )
 
-    next_long_break_per_clock = datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime("%H:%M:%S")
+    next_long_break_per_clock = datetime.datetime.fromtimestamp(
+        next_long_break_unix_time
+    ).strftime("%H:%M:%S")
     tooltip_next_break = "Next break (long): " + next_long_break_per_clock
     logger.info(tooltip_next_break)
     tray_icon.setToolTip(tooltip_title + "\n" + tooltip_next_break)
 
-    global_timer.singleShot(secs_to_notification * 1000, lambda: machine.process_event(time_out))
-
-waiting_for_long_break.on_entry = set_timer_for_long_break
-
-waiting_for_long_break.on_exit = clear_time_out_timer
+    global_timer.singleShot(
+        secs_to_notification * 1000, lambda: machine.process_event(time_out)
+    )
 
 
 def long_early_notification_pulse():
@@ -331,19 +395,21 @@ def long_early_notification_pulse():
         config["colors"]["early"],
     )
 
-    glowy.transition_color_over_iterable(my_iterable, lambda: machine.process_event(time_out))
-
-showing_long_break_early_notif.on_entry = long_early_notification_pulse
+    glowy.transition_color_over_iterable(
+        my_iterable, lambda: machine.process_event(time_out)
+    )
 
 
 def long_late_notification_pulse():
     glowy.set_main_color(config["colors"]["regular"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
-    my_iterable = gb.steady_pulse(config["general"]["steady_pulse_period"] / 2, config["colors"]["regular"], config["colors"]["late"])
+    my_iterable = gb.steady_pulse(
+        config["general"]["steady_pulse_period"] / 2,
+        config["colors"]["regular"],
+        config["colors"]["late"],
+    )
     glowy.transition_color_over_iterable(my_iterable, None)
-
-showing_long_break_late_notif.on_entry = long_late_notification_pulse
 
 
 def show_long_break_screen_countdown():
@@ -351,17 +417,42 @@ def show_long_break_screen_countdown():
     longy.set_layout_to_countdown()
     longy.showFullScreen()
 
-long_break_in_progress.on_entry = show_long_break_screen_countdown
-
 
 def show_long_break_screen_finished():
     longy.set_layout_to_finished()
     longy.showFullScreen()
 
-long_break_finished.on_entry = show_long_break_screen_finished
+
+################  Assigning functions to actions
+
+
+# fmt: off
+waiting_for_short_break.on_entry =          set_timer_for_short_break
+waiting_for_short_break.on_exit =           clear_time_out_timer
+
+showing_short_break_early_notif.on_entry =  short_early_notification_pulse
+
+showing_short_break_late_notif.on_entry =   short_late_notification_pulse
+
+short_break_in_progress.on_entry =          show_short_break_screen
+short_break_in_progress.on_exit =           hide_short_break_screen
+
+
+waiting_for_long_break.on_entry =           set_timer_for_long_break
+waiting_for_long_break.on_exit =            clear_time_out_timer
+
+showing_long_break_early_notif.on_entry =   long_early_notification_pulse
+
+showing_long_break_late_notif.on_entry =    long_late_notification_pulse
+
+long_break_in_progress.on_entry =           show_long_break_screen_countdown
+
+long_break_finished.on_entry =              show_long_break_screen_finished
+# fmt: on
 
 
 ################  Functions used in __main__
+
 
 def deep_update(a, b):
     if isinstance(b, dict):
@@ -377,8 +468,8 @@ def deep_update(a, b):
 
 ################  Main
 
-if __name__ == '__main__':
 
+if __name__ == "__main__":
     ################  Logging
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
@@ -389,7 +480,7 @@ if __name__ == '__main__':
     logger.addHandler(console_handler)
 
     # For logging to cutelog
-    socket_handler = SocketHandler('127.0.0.1', 19996)
+    socket_handler = SocketHandler("127.0.0.1", 19996)
     socket_handler.setLevel(logging.DEBUG)
     logger.addHandler(socket_handler)
 
@@ -397,35 +488,35 @@ if __name__ == '__main__':
 
     ################  Default configuration
     config = {
-        'general': {
-            'steady_pulse_period':          1_000,
-            "allow_skipping_short_breaks":  True,
-            "icon":                         'flower.png',
+        "general": {
+            "steady_pulse_period": 1_000,
+            "allow_skipping_short_breaks": True,
+            "icon": "flower.png",
         },
-        'regular_break': {
-            'spacing':              3000,
-            'length':               600,
-            'early_notification':   120,
+        "regular_break": {
+            "spacing": 3000,
+            "length": 600,
+            "early_notification": 120,
         },
-        'short_break': {
-            'max_spacing':          1200,
-            'length':               20,
-            'early_notification':   30,
+        "short_break": {
+            "max_spacing": 1200,
+            "length": 20,
+            "early_notification": 30,
         },
         # TODO Maybe use separate colors for short and long early and late notifications?
         #  Or at least leave that as an option?
-        'colors': {
-            'regular':  'orchid',
-            'short':    'deepskyblue',
-            'early':    'white',
-            'late':     'yellow',
+        "colors": {
+            "regular": "orchid",
+            "short": "deepskyblue",
+            "early": "white",
+            "late": "yellow",
         },
     }
 
     ################  Load configuration from file
     configuration_file = "./config.toml"
     try:
-        with open(configuration_file, 'r') as file:
+        with open(configuration_file, "r") as file:
             logger.debug("Default config:  %s", config)
 
             toml_config = tomlkit.load(file)
@@ -434,15 +525,20 @@ if __name__ == '__main__':
             config = deep_update(config, toml_config)
             logger.debug("Final config:  %s", config)
 
-    except (FileNotFoundError) as e:
-        logger.info("Configuration file (%s) not found, using defaults.", configuration_file)
+    except FileNotFoundError as e:
+        logger.info(
+            "Configuration file (%s) not found, using defaults.",
+            configuration_file,
+        )
 
     ################  Set up concurrent activities
-    #threading.Thread(target=scheduler_thread, daemon=True).start()
+    # threading.Thread(target=scheduler_thread, daemon=True).start()
     global_timer = QTimer()
 
     global next_long_break_unix_time
-    next_long_break_unix_time = time.time() + config["regular_break"]["spacing"]
+    next_long_break_unix_time = (
+        time.time() + config["regular_break"]["spacing"]
+    )
 
     ################  Set up QT
     app = QApplication(sys.argv)
@@ -450,16 +546,29 @@ if __name__ == '__main__':
     glowy = gb.GlowBox()
 
     if config["general"]["allow_skipping_short_breaks"]:
-        shorty = bs.ShortBreakScreen(config["short_break"]["length"], lambda: machine.process_event(break_ended), lambda: machine.process_event(break_ended))
+        shorty = bs.ShortBreakScreen(
+            config["short_break"]["length"],
+            lambda: machine.process_event(break_ended),
+            lambda: machine.process_event(break_ended),
+        )
     else:
-        shorty = bs.ShortBreakScreen(config["short_break"]["length"], lambda: machine.process_event(break_ended))
-    longy = bs.LongBreakScreen(config["regular_break"]["length"], lambda: machine.process_event(time_out), lambda: machine.process_event(break_ended), lambda: machine.process_event(break_ended))
+        shorty = bs.ShortBreakScreen(
+            config["short_break"]["length"],
+            lambda: machine.process_event(break_ended),
+        )
+
+    longy = bs.LongBreakScreen(
+        config["regular_break"]["length"],
+        lambda: machine.process_event(time_out),
+        lambda: machine.process_event(break_ended),
+        lambda: machine.process_event(break_ended),
+    )
 
     ################  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon(config["general"]["icon"]))
 
     tray_menu = QMenu()
-    action = QAction('Exit', tray_icon)
+    action = QAction("Exit", tray_icon)
     action.triggered.connect(app.quit)
     tray_menu.addAction(action)
     tray_icon.setContextMenu(tray_menu)
@@ -474,4 +583,3 @@ if __name__ == '__main__':
 
     ################  Exit on QT app close
     sys.exit(app.exec())
-

@@ -14,8 +14,8 @@ Bugs
 Maintenance
 ------------------------------------------------------------------------
 
-- [ ] Figure out if a window has focus, or if this is even an option
-  with QT/PySide.
+- [ ] Figure out if a window has focus, or if this is even an possible
+  to do with QT/PySide.
 
 
 Up next  (v0.1.0-beta)
@@ -35,14 +35,14 @@ Bugs
 
 - [x] The countdown timer glitches/shows the wrong value when the long
   break screen is shown.
-- [x] Remove the context menus from the glowbox, or at least the
+- [x] Remove the context menus from the glow box, or at least the
   nonsensical entries (for now).
 
 
 Maintenance
 ------------------------------------------------------------------------
 
-- [ ] Code formatting and linting.
+- [ ] Linting.
 - [ ] Move issue tracking over to a proper issue tracker.
 - [ ] Package into an installer.
 - [x] Create a GitHub repository for the project.
@@ -54,6 +54,7 @@ Maintenance
 - [x] Stop logger from spewing debug stuff.  I need to reduce this
   further in the future, and use proper file logging with rotation in
   the future.
+- [x] Code formatting.
 
 
 Soon
