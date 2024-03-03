@@ -82,11 +82,16 @@ class ShortBreakScreen(BaseBreakScreen):
         self.big_text_label.setAlignment(Qt.AlignCenter)
         self.big_text_label.setWordWrap(True)
 
-        self.big_text_label.setText("Look at something <i>far</i> away.")
+        # TODO Make the short break screen text customizable.
+        self.big_text_label.setText(
+            "Look at something <i>far</i> away for {} seconds.".format(
+                timeout_length
+            )
+        )
 
         font = self.big_text_label.font()
-        # TODO She's a witch!  Burn her!  She uses magic numbers!
-        font.setPointSize(96)  # Set font size
+        FONT_SIZE = 72
+        font.setPointSize(FONT_SIZE)
         self.big_text_label.setFont(font)
         self.layout.addWidget(self.big_text_label)
 

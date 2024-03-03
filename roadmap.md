@@ -4,11 +4,25 @@ Unsorted
 Features
 ------------------------------------------------------------------------
 
+- [ ] Make the text font size of items on the break screen adjust
+  automatically to fill the space that they exist in.  I've got a Python
+  script in my extras folder where I was experimenting with this, but
+  set it aside in the interest of time, so I shouldn't have to start
+  completely from scratch.
 
 
 Bugs
 ------------------------------------------------------------------------
 
+- [ ] I've noticed in testing that the long break will occasionally be
+  pushed back.  -->  I believe that this is because if the short break
+  is taken late and then ends after the long break is due, it sees that
+  the long break is past due and resets its next time.  I need to
+  address this, possibly by only updating the next scheduled long break
+  on long break finished and in-progress exit.  I think I also need to
+  create a timeout event on the late notification for the short break
+  that will transition to a long break late notification (or maybe a
+  long break early notification) if the long break is becoming due.
 
 
 Maintenance
@@ -80,8 +94,8 @@ Features
   of logging to show in the terminal.
 - [ ] Make the program run on start-up/login.
 - [ ] Show a intro wizard on first run.  Introduce the glow box and
-  allow moving it to wherever the user would like.  (An idea from
-  Matt.)
+  allow moving it to wherever the user would like.  (Introducing the
+  glow box is an idea from Matt.)
 - [ ] Show a tool tip over the glow box which indicates which break this
   is for.  Make this optional.  (From Matt.)
 - [ ] Add a progress bar to the break screens.
