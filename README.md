@@ -13,9 +13,8 @@ many improvements will be coming in the very near future.
 What is this?
 ========================================================================
 
-Gentle Break Reminder is a cross-platform program which will remind you
-to take regular breaks, in a very gentle way.  (It's been tested on
-Linux and Windows, but should work on Mac as well.)
+Gentle Break Reminder is a cross-platform program for Windows and Linux
+which will remind you to take regular breaks, in a very gentle way.
 
 When it's getting close to time to take a break, a glowing, colorful,
 semi-transparent, pulsing box will appear on your screen.  You can move
@@ -147,10 +146,12 @@ Run the following commands in your terminal:
     python3 gentle.py
     ````````````````````````````````
 
-A flower icon will appear in your task bar, indicating that Gentle Break
-Reminder is running.  Every once in a while, a colorful box will pop up
-on the screen reminding you to take either a short break (to look away
-from the screen) or a long break (to get away from the computer and
+A flower icon will appear in your system tray, indicating that Gentle
+Break Reminder is running.  (If you don't see the icon in your system
+tray, check to make sure it is not hidden in an overflow area,
+especially on Windows.)  Every once in a while, a colorful box will pop
+up on the screen reminding you to take either a short break (to look
+away from the screen) or a long break (to get away from the computer and
 stretch your legs).  (The times and breaks can be customized in the
 `config.toml` configuration file.)
 
@@ -187,11 +188,43 @@ configuration file.  There is further documentation there on what each
 option does.
 
 
+Cross-platform compatibility
+========================================================================
+
+This has been tested on the following platforms:
+
+- Windows
+- Linux
+    - X11
+        - Cinnamon
+        - XFCE
+        - LXDE
+        - OpenBox
+
+Note that window transparency does not work on non-compositing window
+managers, simply because it's not a feature the window managers support.
+The program should still be usable otherwise.
+
+
+Tested as not working
+------------------------------------------------------------------------
+
+This program will run on MacOS, but exhibits some weird behavior.  If
+you run MacOS and would like to help me troubleshoot and fix this,
+please reach out.
+
+
+Not tested
+------------------------------------------------------------------------
+
+- Wayland on Linux
+
+
 Credits
 ========================================================================
 
 The [flower icon](https://www.flaticon.com/free-icon/flower_346218) in
-the task bar is used under the Flaticon license.  Please see [Flower
+the system tray is used under the Flaticon license.  Please see [Flower
 icons created by Freepik -
 Flaticon](https://www.flaticon.com/free-icons/flower) for more
 information.
