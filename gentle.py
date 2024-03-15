@@ -479,7 +479,7 @@ if __name__ == "__main__":
         "general": {
             "steady_pulse_period": 1_000,
             "allow_skipping_short_breaks": True,
-            "icon": "flower.png",
+            "icon": "./flower.png",
         },
         "regular_break": {
             "spacing": 3000,
