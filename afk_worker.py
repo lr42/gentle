@@ -17,6 +17,11 @@ class AFKWorker(QObject):
 
     stopTimerSignal = Signal()
 
+    afk_signal = Signal()
+    at_computer_signal = Signal()
+    in_limbo_signal = Signal()
+    leaving_limbo_signal = Signal()
+
     def __init__(
         self,
         on_back_at_computer=None,
@@ -76,16 +81,13 @@ class AFKWorker(QObject):
                     elapsed_limbo_time = time.time() - self._entered_limbo_time
                     if elapsed_limbo_time > self._limbo_timeout:
                         self._status = self._AT_COMPUTER
-                        if self._on_back_at_computer is not None:
-                            self._on_back_at_computer()
+                        self.at_computer_signal.emit()
             else:
                 if self._status == self._AFK:
                     self._status = self._AT_COMPUTER
-                    if self._on_back_at_computer is not None:
-                        self._on_back_at_computer()
+                    self.at_computer_signal.emit()
         else:
-            if self._on_back_at_computer is not None:
-                self._on_back_at_computer()
+            self.at_computer_signal.emit()
 
     @Slot()
     def _monitor_status(self):
@@ -105,8 +107,7 @@ class AFKWorker(QObject):
             and elapsed_input_time > self._input_timeout
         ):
             self._status = self._AFK
-            if self._on_afk is not None:
-                self._on_afk()
+            self.afk_signal.emit()
 
     @Slot()
     def start_worker(self):
@@ -129,18 +130,26 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     afk_thread = QThread()
-    afk_worker = AFKWorker(
-        on_back_at_computer=lambda: print("Welcome back " + str(time.time())),
-        on_afk=lambda: print("You are AFK " + str(time.time())),
+    afk_worker = AFKWorker()
+
+    afk_worker.at_computer_signal.connect(
+        lambda: print("Welcome back " + str(time.time()))
     )
+    afk_worker.afk_signal.connect(
+        lambda: print("You are AFK " + str(time.time()))
+    )
+
     afk_worker.moveToThread(afk_thread)
     afk_thread.started.connect(afk_worker.start_worker)
     afk_thread.start()
 
     input_thread = QThread()
-    input_worker = AFKWorker(
-        on_back_at_computer=lambda: print(".", end="", flush=True), timeout=-1
+    input_worker = AFKWorker(timeout=0)
+
+    input_worker.at_computer_signal.connect(
+        lambda: print(".", end="", flush=True)
     )
+
     input_worker.moveToThread(input_thread)
     input_thread.started.connect(input_worker.start_worker)
     input_thread.start()
