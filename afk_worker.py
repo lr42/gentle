@@ -6,7 +6,6 @@ import time
 # pylint: disable=import-error
 import pynput
 from PySide6.QtCore import QObject, QThread, QTimer, Slot, Signal
-from PySide6.QtWidgets import QMainWindow
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
@@ -91,7 +90,7 @@ class AFKWorker(QObject):
 
 if __name__ == "__main__":
     import sys
-    from PySide6.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)
 

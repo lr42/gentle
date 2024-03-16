@@ -1,4 +1,7 @@
 import logging
+
+from PySide6.QtCore import QObject, QThread, QTimer, Slot, Signal
+
 import afk_worker as aw
 import stama.stama as sm
 
@@ -46,14 +49,45 @@ class AFKStateMachine:
         # ##############  Start the state machine
         self._afk_machine = sm.StateMachine(self._at_computer, "AFK SM")
 
+        # ##############  Start monitoring for input activity
+        self._worker = aw.AFKWorker(
+            timeout=-1,
+            on_back_at_computer=lambda: self._afk_machine.process_event(
+                self.input_activity
+            ),
+        )
+
+        # TODO Is there a way to create and destroy the QThread automatically on object creation and destruction? ...
+        #  Should I use a `with` statement to do something like this?
+        #  (See https://stackoverflow.com/a/865272 for some info on
+        #  this.)
+        self._thread = QThread()
+        self._worker.moveToThread(self._thread)
+        self._thread.started.connect(self._worker.start_worker)
+        self._thread.start()
+
+    # TODO process_event() is probably not necessary.
     def process_event(self, event):
         self._afk_machine.process_event(event)
+
+    def cleanup(self):
+        self._worker.stopTimerSignal.emit()
+        self._thread.quit()
+        self._thread.wait()
 
 
 # ##############  Main function, if not imported as a module
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+
+    import sys
+    from PySide6.QtWidgets import QApplication, QMainWindow
+
+    app = QApplication(sys.argv)
+
+    mainWindow = QMainWindow()
+    mainWindow.show()
 
     afk = AFKStateMachine()
 
@@ -64,3 +98,7 @@ if __name__ == "__main__":
     afk.process_event(afk.input_activity)
     afk.process_event(afk.input_activity)
     afk.process_event(afk.input_activity)
+
+    app.aboutToQuit.connect(afk.cleanup)
+
+    sys.exit(app.exec())
