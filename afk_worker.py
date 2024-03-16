@@ -17,8 +17,8 @@ class AFKWorker(QObject):
 
     stopTimerSignal = Signal()
 
-    afk_signal = Signal()
-    at_computer_signal = Signal()
+    afk_signal = Signal(float)
+    at_computer_signal = Signal(float)
     in_limbo_signal = Signal()
     leaving_limbo_signal = Signal()
 
@@ -81,19 +81,18 @@ class AFKWorker(QObject):
                     if elapsed_limbo_time > self._limbo_timeout:
                         self._status = self._AT_COMPUTER
                         self.leaving_limbo_signal.emit()
-                        self.at_computer_signal.emit()
+                        self.at_computer_signal.emit(self._entered_limbo_time)
             else:
                 if self._status == self._AFK:
                     self._status = self._AT_COMPUTER
-                    self.at_computer_signal.emit()
+                    self.at_computer_signal.emit(time.time())
         else:
-            self.at_computer_signal.emit()
+            self.at_computer_signal.emit(time.time())
 
     @Slot()
     def _monitor_status(self):
         """Runs at a regular interval to check for AFK conditions"""
         elapsed_input_time = time.time() - self._last_input_time
-        # elapsed_limbo_time = time.time() - self._last_limbo_time
 
         if (
             self._status == self._IN_LIMBO
@@ -106,7 +105,7 @@ class AFKWorker(QObject):
             and elapsed_input_time > self._input_timeout
         ):
             self._status = self._AFK
-            self.afk_signal.emit()
+            self.afk_signal.emit(self._last_input_time)
 
     @Slot()
     def start_worker(self):
@@ -124,6 +123,7 @@ class AFKWorker(QObject):
 
 if __name__ == "__main__":
     import sys
+    import datetime
     from PySide6.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)
@@ -132,13 +132,27 @@ if __name__ == "__main__":
     afk_worker = AFKWorker()
 
     afk_worker.at_computer_signal.connect(
-        lambda: print("Welcome back " + str(time.time()))
+        lambda t: print(
+            "Back since: "
+            + time.strftime("%H:%M:%S", time.localtime(t))
+            + " -- Now: "
+            + time.strftime("%H:%M:%S")
+        )
     )
     afk_worker.afk_signal.connect(
-        lambda: print("You are AFK " + str(time.time()))
+        lambda t: print(
+            "AFK since: "
+            + time.strftime("%H:%M:%S", time.localtime(t))
+            + " -- Now: "
+            + time.strftime("%H:%M:%S")
+        )
     )
-    afk_worker.leaving_limbo_signal.connect(lambda: print("Leaving limbo"))
-    afk_worker.in_limbo_signal.connect(lambda: print("Entering limbo"))
+    afk_worker.leaving_limbo_signal.connect(
+        lambda: print("Leaving limbo: " + time.strftime("%H:%M:%S"))
+    )
+    afk_worker.in_limbo_signal.connect(
+        lambda: print("Entering limbo: " + time.strftime("%H:%M:%S"))
+    )
 
     afk_worker.moveToThread(afk_thread)
     afk_thread.started.connect(afk_worker.start_worker)
