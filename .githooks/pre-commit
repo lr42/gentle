@@ -14,7 +14,7 @@ if black --version | grep -q Python ; then
 	if ! black -l 79 --check -q ./*.py ; then
 		black -l 79 --check -v ./*.py 2>&1 | grep -e "^would reformat "
 		echo Please format your files with:
-		echo black -l 79 ./\*.py
+		echo 'black -l 79 ./*.py'
 		echo \(You may need to install \'black\' first, if you haven\'t already.\)
 		echo
 		exit_code=$((exit_code+2))

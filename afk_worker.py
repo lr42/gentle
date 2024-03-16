@@ -39,9 +39,11 @@ class AFKWorker(QObject):
         self._on_back_at_computer = on_back_at_computer
         self._on_afk = on_afk
         self._monitor_interval = monitor_interval  # in milliseconds
-        self._timeout = timeout
+        self._input_timeout = timeout
+        self._limbo_timeout = 10
 
         self._last_input_time = time.time()
+        self._entered_limbo_time = 0
 
         self.kb_listener = pynput.keyboard.Listener(on_press=self._on_input)
         self.mouse_listener = pynput.mouse.Listener(
@@ -50,7 +52,8 @@ class AFKWorker(QObject):
             on_scroll=self._on_input,
         )
 
-        self._is_checking_for_afk = self._timeout > 0
+        self._is_checking_for_afk = self._input_timeout > 0
+        self._is_using_limbo_state = self._is_checking_for_afk
 
         if self._is_checking_for_afk:
             self._timer = QTimer(self)
@@ -61,19 +64,46 @@ class AFKWorker(QObject):
     def _on_input(self, *args):
         """Runs whenever mouse or keyboard activity is detected."""
         self._last_input_time = time.time()
-        if not self._is_checking_for_afk:
-            if self._on_back_at_computer is not None:
-                self._on_back_at_computer()
-        elif self._status == self._AFK:
-            self._status = self._AT_COMPUTER
+
+        if self._is_checking_for_afk:
+            if self._is_using_limbo_state:
+                if self._status == self._AFK:
+                    self._status = self._IN_LIMBO
+                    self._entered_limbo_time = time.time()
+                    # TODO Emit entering_limbo signal
+                    print("Entering limbo")
+                elif self._status == self._IN_LIMBO:
+                    elapsed_limbo_time = time.time() - self._entered_limbo_time
+                    if elapsed_limbo_time > self._limbo_timeout:
+                        self._status = self._AT_COMPUTER
+                        if self._on_back_at_computer is not None:
+                            self._on_back_at_computer()
+            else:
+                if self._status == self._AFK:
+                    self._status = self._AT_COMPUTER
+                    if self._on_back_at_computer is not None:
+                        self._on_back_at_computer()
+        else:
             if self._on_back_at_computer is not None:
                 self._on_back_at_computer()
 
     @Slot()
     def _monitor_status(self):
         """Runs at a regular interval to check for AFK conditions"""
-        elapsed_time = time.time() - self._last_input_time
-        if self._status == self._AT_COMPUTER and elapsed_time > self._timeout:
+        elapsed_input_time = time.time() - self._last_input_time
+        # elapsed_limbo_time = time.time() - self._last_limbo_time
+
+        if (
+            self._status == self._IN_LIMBO
+            and elapsed_input_time > self._limbo_timeout
+        ):
+            self._status = self._AFK
+            # TODO Emit leaving_limbo signal
+            print("Leaving limbo")
+        elif (
+            self._status == self._AT_COMPUTER
+            and elapsed_input_time > self._input_timeout
+        ):
             self._status = self._AFK
             if self._on_afk is not None:
                 self._on_afk()
