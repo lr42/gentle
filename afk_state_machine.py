@@ -10,23 +10,30 @@ logger = logging.getLogger(__name__)
 
 
 class AFKStateMachine:
-    """TK"""
+    """TODO TK"""
 
     def __init__(self):
+        # ##############  Constants
+        # TODO These constants should probably be made into settable variables.
+        self._AFK_TIMEOUT = 5_000
+
+        # ##############  Set up timer for timeouts
+        self._timer = QTimer()
+
         # ##############  Set up states
         # fmt:off
-        self._at_computer         = sm.State("at computer")
-        self._away_from_keyboard  = sm.State("away from keyboard")
-        self._in_limbo            = sm.State("in limbo")
+        self._at_computer           = sm.State("at computer")
+        self._away_from_keyboard    = sm.State("away from keyboard")
+        self._in_limbo              = sm.State("in limbo")
 
-        self._coming_back         = sm.ConditionalJunction(
-                                    self._at_computer,
-                                    "coming back to computer",
-                              )
+        self._coming_back           = sm.ConditionalJunction(
+            self._at_computer,
+            "coming back to computer",
+        )
 
         # ##############  Set up events
-        self.input_activity      = sm.Event("input activity detected")
-        self.timeout             = sm.Event("timeout")
+        self.input_activity         = sm.Event("input activity detected")
+        self.timeout                = sm.Event("timeout")
         # fmt:on
 
         # ##############  Set up transitions
@@ -46,13 +53,26 @@ class AFKStateMachine:
             self.timeout: self._away_from_keyboard,
         }
 
+        # ##############  Set up state actions
+        self._at_computer.on_entry = lambda: self._timer.singleShot(
+            self._AFK_TIMEOUT,
+            lambda: self._machine.process_event(self.timeout),
+        )
+        self._at_computer.on_exit = lambda: self._timer.stop()
+
+        # self._away_from_keyboard
+
+        # self._in_limbo
+
+        # self._coming_back
+
         # ##############  Start the state machine
-        self._afk_machine = sm.StateMachine(self._at_computer, "AFK SM")
+        self._machine = sm.StateMachine(self._at_computer, "AFK SM")
 
         # ##############  Start monitoring for input activity
         self._worker = aw.AFKWorker(
             timeout=-1,
-            on_back_at_computer=lambda: self._afk_machine.process_event(
+            on_back_at_computer=lambda: self._machine.process_event(
                 self.input_activity
             ),
         )
@@ -68,12 +88,16 @@ class AFKStateMachine:
 
     # TODO process_event() is probably not necessary.
     def process_event(self, event):
-        self._afk_machine.process_event(event)
+        self._machine.process_event(event)
 
     def cleanup(self):
         self._worker.stopTimerSignal.emit()
         self._thread.quit()
         self._thread.wait()
+
+    # ##############  State entry and exit functions
+    def clear_timer(self):
+        self._timer.stop()
 
 
 # ##############  Main function, if not imported as a module
