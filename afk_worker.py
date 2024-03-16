@@ -1,4 +1,4 @@
-"""Detects AFK status based on mouse and keyboard activity"""
+"""Detects AFK status based on mouse and keyboard activity."""
 
 
 import time
@@ -30,7 +30,11 @@ class AFKWorker(QObject):
 
         super().__init__()
 
-        self._is_afk = True
+        self._AT_COMPUTER = "at computer"
+        self._AFK = "away from keyboard"
+        self._IN_LIMBO = "in limbo"
+
+        self._status = self._AT_COMPUTER
 
         self._on_back_at_computer = on_back_at_computer
         self._on_afk = on_afk
@@ -46,7 +50,7 @@ class AFKWorker(QObject):
             on_scroll=self._on_input,
         )
 
-        self._is_checking_for_afk = self._timeout >= 0
+        self._is_checking_for_afk = self._timeout > 0
 
         if self._is_checking_for_afk:
             self._timer = QTimer(self)
@@ -60,8 +64,8 @@ class AFKWorker(QObject):
         if not self._is_checking_for_afk:
             if self._on_back_at_computer is not None:
                 self._on_back_at_computer()
-        elif self._is_afk:
-            self._is_afk = False
+        elif self._status == self._AFK:
+            self._status = self._AT_COMPUTER
             if self._on_back_at_computer is not None:
                 self._on_back_at_computer()
 
@@ -69,8 +73,8 @@ class AFKWorker(QObject):
     def _monitor_status(self):
         """Runs at a regular interval to check for AFK conditions"""
         elapsed_time = time.time() - self._last_input_time
-        if not self._is_afk and elapsed_time > self._timeout:
-            self._is_afk = True
+        if self._status == self._AT_COMPUTER and elapsed_time > self._timeout:
+            self._status = self._AFK
             if self._on_afk is not None:
                 self._on_afk()
 
