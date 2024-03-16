@@ -75,12 +75,12 @@ class AFKWorker(QObject):
                 if self._status == self._AFK:
                     self._status = self._IN_LIMBO
                     self._entered_limbo_time = time.time()
-                    # TODO Emit entering_limbo signal
-                    print("Entering limbo")
+                    self.in_limbo_signal.emit()
                 elif self._status == self._IN_LIMBO:
                     elapsed_limbo_time = time.time() - self._entered_limbo_time
                     if elapsed_limbo_time > self._limbo_timeout:
                         self._status = self._AT_COMPUTER
+                        self.leaving_limbo_signal.emit()
                         self.at_computer_signal.emit()
             else:
                 if self._status == self._AFK:
@@ -100,8 +100,7 @@ class AFKWorker(QObject):
             and elapsed_input_time > self._limbo_timeout
         ):
             self._status = self._AFK
-            # TODO Emit leaving_limbo signal
-            print("Leaving limbo")
+            self.leaving_limbo_signal.emit()
         elif (
             self._status == self._AT_COMPUTER
             and elapsed_input_time > self._input_timeout
@@ -138,6 +137,8 @@ if __name__ == "__main__":
     afk_worker.afk_signal.connect(
         lambda: print("You are AFK " + str(time.time()))
     )
+    afk_worker.leaving_limbo_signal.connect(lambda: print("Leaving limbo"))
+    afk_worker.in_limbo_signal.connect(lambda: print("Entering limbo"))
 
     afk_worker.moveToThread(afk_thread)
     afk_thread.started.connect(afk_worker.start_worker)
