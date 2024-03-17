@@ -6,9 +6,7 @@ import sys
 import tomlkit
 
 # pylint: disable=import-error
-from PySide6.QtCore import (
-    QTimer,
-)
+from PySide6.QtCore import QTimer, QUrl
 
 # pylint: disable=import-error
 from PySide6.QtGui import QAction, QIcon
@@ -19,6 +17,9 @@ from PySide6.QtWidgets import (
     QMenu,
     QSystemTrayIcon,
 )
+
+# pylint: disable=import-error
+from PySide6.QtMultimedia import QSoundEffect
 
 import stama.stama as sm
 import glowbox as gb
@@ -399,6 +400,7 @@ def show_long_break_screen_countdown():
 def show_long_break_screen_finished():
     longy.set_layout_to_finished()
     longy.showFullScreen()
+    long_break_chime.play()
 
 
 def reset_next_long_break_time():
@@ -533,7 +535,7 @@ if __name__ == "__main__":
         time.strftime("%H:%M:%S", time.localtime(next_long_break_unix_time)),
     )
 
-    # ##############  Set up QT
+    # ##############  Set up Qt
     app = QApplication(sys.argv)
 
     glowy = gb.GlowBox()
@@ -556,6 +558,15 @@ if __name__ == "__main__":
         lambda: machine.process_event(break_ended),
         lambda: machine.process_event(break_ended),
     )
+
+    # ##############  Add chime
+    # TODO Make the chime settable in the configuration
+    # TODO Stop the chime when the user clicks "Let me get back to work"
+    long_break_chime_file = "singing_bowl.wav"
+    long_break_chime_volume = 0.5
+    long_break_chime = QSoundEffect()
+    long_break_chime.setSource(QUrl.fromLocalFile(long_break_chime_file))
+    long_break_chime.setVolume(long_break_chime_volume)
 
     # ##############  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon(config["general"]["icon"]))
