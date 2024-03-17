@@ -55,16 +55,6 @@ test_for_next_break             = sm.ConditionalJunction(
 
 def has_short_break_before_long_break():
     global next_long_break_unix_time
-    if time.time() > next_long_break_unix_time:
-        logger.debug(
-            "Resetting next long break to:  %s",
-            datetime.datetime.fromtimestamp(
-                next_long_break_unix_time
-            ).strftime("%H:%M:%S"),
-        )
-        next_long_break_unix_time = (
-            time.time() + config["regular_break"]["spacing"]
-        )
     secs_to_long_break = next_long_break_unix_time - time.time()
     if config["short_break"]["max_spacing"] < secs_to_long_break:
         logger.debug(
@@ -330,6 +320,7 @@ def hide_short_break_screen():
 
 
 def set_timer_for_long_break():
+    global next_long_break_unix_time
     secs_to_long_break = next_long_break_unix_time - time.time()
     secs_to_notification = (
         secs_to_long_break - config["regular_break"]["early_notification"]
@@ -411,6 +402,19 @@ def show_long_break_screen_finished():
     longy.showFullScreen()
 
 
+def reset_next_long_break_time():
+    global next_long_break_unix_time
+    next_long_break_unix_time = (
+        time.time() + config["regular_break"]["spacing"]
+    )
+    logger.debug(
+        "Resetting next long break to:  %s",
+        datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime(
+            "%H:%M:%S"
+        ),
+    )
+
+
 # ##############  Assigning functions to actions
 
 
@@ -434,8 +438,10 @@ showing_long_break_early_notif.on_entry     = long_early_notification_pulse
 showing_long_break_late_notif.on_entry      = long_late_notification_pulse
 
 long_break_in_progress.on_entry             = show_long_break_screen_countdown
+long_break_in_progress.on_exit              = reset_next_long_break_time
 
 long_break_finished.on_entry                = show_long_break_screen_finished
+long_break_finished.on_exit                 = reset_next_long_break_time
 # fmt: on
 
 
@@ -524,6 +530,12 @@ if __name__ == "__main__":
 
     next_long_break_unix_time = (
         time.time() + config["regular_break"]["spacing"]
+    )
+    logger.debug(
+        "Setting next long break to:  %s",
+        datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime(
+            "%H:%M:%S"
+        ),
     )
 
     # ##############  Set up QT
