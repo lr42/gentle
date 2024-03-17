@@ -26,7 +26,7 @@ import glowbox as gb
 import breakscreen as bs
 
 
-# # # # # # # #   States
+# ##############  States
 
 
 # fmt: off
@@ -44,13 +44,13 @@ long_break_finished             = sm.State("long break finished")
 waiting_after_long_afk          = sm.State("Waiting after AFK for long duration")
 
 test_for_next_break             = sm.ConditionalJunction(
-                                        waiting_for_long_break,
-                                        "Testing for next break",
+                                      waiting_for_long_break,
+                                      "Testing for next break",
                                   )
 # fmt: on
 
 
-# # # # # # # #   Set up conditional junction
+# ##############  Set up conditional junction
 
 
 def has_short_break_before_long_break():
@@ -86,7 +86,7 @@ test_for_next_break.add_condition(
 )
 
 
-# # # # # # # #   Events for the state machine
+# ##############  Events for the state machine
 
 
 # fmt: off
@@ -99,7 +99,7 @@ returned_to_computer    = sm.Event("User returned to computer")
 # fmt: on
 
 
-# # # # # # # #   Short break transitions
+# ##############  Short break transitions
 
 
 # fmt: off
@@ -137,7 +137,7 @@ waiting_after_short_afk.transitions = {
 }
 
 
-# # # # # # # #   Long break transitions
+# ##############  Long break transitions
 
 
 waiting_for_long_break.transitions = {
@@ -185,7 +185,7 @@ waiting_after_long_afk.transitions = {
 # fmt:on
 
 
-# # # # # # # #   Short break state actions
+# ##############  Short break state actions
 
 
 def set_timer_for_short_break():
@@ -240,7 +240,7 @@ def set_timer_for_short_break():
     #  was the easiest way to fix it.
     secs_to_notification = max(secs_to_notification, 0)
 
-    # # # # # # # #   Convey information
+    # ##############  Convey information
     logger.debug(
         "%dm%0.1fs to next short break",
         int(secs_to_short_break // 60),
@@ -269,7 +269,7 @@ def set_timer_for_short_break():
         TOOLTIP_TITLE + "\n" + tooltip_next_break + "\n" + tooltip_next_long
     )
 
-    # # # # # # # #   Start timer
+    # ##############  Start timer
     global_timer.singleShot(
         secs_to_notification * 1000, lambda: machine.process_event(time_out)
     )
@@ -326,7 +326,7 @@ def hide_short_break_screen():
     shorty.hide()
 
 
-# # # # # # # #   Long break state actions
+# ##############  Long break state actions
 
 
 def set_timer_for_long_break():
@@ -411,7 +411,7 @@ def show_long_break_screen_finished():
     longy.showFullScreen()
 
 
-# # # # # # # #   Assigning functions to actions
+# ##############  Assigning functions to actions
 
 
 # fmt: off
@@ -439,7 +439,7 @@ long_break_finished.on_entry                = show_long_break_screen_finished
 # fmt: on
 
 
-# # # # # # # #   Functions used in __main__
+# ##############  Functions used in __main__
 
 
 def deep_update(a, b):
@@ -454,11 +454,11 @@ def deep_update(a, b):
     return a
 
 
-# # # # # # # #   Main
+# ##############  Main
 
 
 if __name__ == "__main__":
-    # # # # # # # #   Logging
+    # ##############  Logging
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
@@ -474,7 +474,7 @@ if __name__ == "__main__":
 
     logger.debug("Logging initialized")
 
-    # # # # # # # #   Default configuration
+    # ##############  Default configuration
     config = {
         "general": {
             "steady_pulse_period": 1_000,
@@ -501,7 +501,7 @@ if __name__ == "__main__":
         },
     }
 
-    # # # # # # # #   Load configuration from file
+    # ##############  Load configuration from file
     CONFIGURATION_FILE = "./config.toml"
     try:
         with open(CONFIGURATION_FILE, "r", encoding="utf-8") as file:
@@ -519,14 +519,14 @@ if __name__ == "__main__":
             CONFIGURATION_FILE,
         )
 
-    # # # # # # # #   Set up concurrent activities
+    # ##############  Set up concurrent activities
     global_timer = QTimer()
 
     next_long_break_unix_time = (
         time.time() + config["regular_break"]["spacing"]
     )
 
-    # # # # # # # #   Set up QT
+    # ##############  Set up QT
     app = QApplication(sys.argv)
 
     glowy = gb.GlowBox()
@@ -550,7 +550,7 @@ if __name__ == "__main__":
         lambda: machine.process_event(break_ended),
     )
 
-    # # # # # # # #   Add tray icon
+    # ##############  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon(config["general"]["icon"]))
 
     tray_menu = QMenu()
@@ -564,8 +564,8 @@ if __name__ == "__main__":
 
     tray_icon.show()
 
-    # # # # # # # #   Start state machine
+    # ##############  Start state machine
     machine = sm.StateMachine(waiting_for_short_break)
 
-    # # # # # # # #   Exit on QT app close
+    # ##############  Exit on QT app close
     sys.exit(app.exec())
