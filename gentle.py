@@ -3,7 +3,6 @@ import time
 import logging
 from logging.handlers import SocketHandler
 import sys
-import datetime
 import tomlkit
 
 # pylint: disable=import-error
@@ -242,12 +241,12 @@ def set_timer_for_short_break():
         secs_to_notification % 60,
     )
 
-    next_short_break_per_clock = datetime.datetime.fromtimestamp(
-        next_short_break_unix_time
-    ).strftime("%H:%M:%S")
-    next_long_break_per_clock = datetime.datetime.fromtimestamp(
-        next_long_break_unix_time
-    ).strftime("%H:%M:%S")
+    next_short_break_per_clock = time.strftime(
+        "%H:%M:%S", time.localtime(next_short_break_unix_time)
+    )
+    next_long_break_per_clock = time.strftime(
+        "%H:%M:%S", time.localtime(next_long_break_unix_time)
+    )
 
     tooltip_next_break = "Next break (short): " + next_short_break_per_clock
     tooltip_next_long = "Next long break: " + next_long_break_per_clock
@@ -339,9 +338,9 @@ def set_timer_for_long_break():
         secs_to_notification % 60,
     )
 
-    next_long_break_per_clock = datetime.datetime.fromtimestamp(
-        next_long_break_unix_time
-    ).strftime("%H:%M:%S")
+    next_long_break_per_clock = time.strftime(
+        "%H:%M:%S", time.localtime(next_long_break_unix_time)
+    )
     tooltip_next_break = "Next break (long): " + next_long_break_per_clock
     logger.info(tooltip_next_break)
     tray_icon.setToolTip(TOOLTIP_TITLE + "\n" + tooltip_next_break)
@@ -409,9 +408,7 @@ def reset_next_long_break_time():
     )
     logger.debug(
         "Resetting next long break to:  %s",
-        datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime(
-            "%H:%M:%S"
-        ),
+        time.strftime("%H:%M:%S", time.localtime(next_long_break_unix_time)),
     )
 
 
@@ -533,9 +530,7 @@ if __name__ == "__main__":
     )
     logger.debug(
         "Setting next long break to:  %s",
-        datetime.datetime.fromtimestamp(next_long_break_unix_time).strftime(
-            "%H:%M:%S"
-        ),
+        time.strftime("%H:%M:%S", time.localtime(next_long_break_unix_time)),
     )
 
     # ##############  Set up QT
