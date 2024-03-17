@@ -11,8 +11,7 @@ from PySide6.QtCore import QObject, QThread, QTimer, Slot, Signal
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
 class AFKWorker(QObject):
     """
-    Run a function when mouse or keyboard activity is detected, and
-    optionally a different function after a timeout with no activty.
+    TODO TK
     """
 
     stopTimerSignal = Signal()
@@ -24,9 +23,10 @@ class AFKWorker(QObject):
 
     def __init__(
         self,
-        on_back_at_computer=None,
-        on_afk=None,
-        timeout=5,
+        input_timeout=30,
+        limbo_timeout=5,  # TODO 2 separate timeouts: to AFK and to at compy.
+        #  Limbo should be quick to go to "at computer" but slow to go back to
+        #  "afk" status.
         monitor_interval=100,
     ):
         """
@@ -35,17 +35,15 @@ class AFKWorker(QObject):
 
         super().__init__()
 
-        self._AT_COMPUTER = "at computer"
-        self._AFK = "away from keyboard"
-        self._IN_LIMBO = "in limbo"
+        self._AT_COMPUTER = "at computer"  # pylint: disable=invalid-name
+        self._AFK = "away from keyboard"  # pylint: disable=invalid-name
+        self._IN_LIMBO = "in limbo"  # pylint: disable=invalid-name
 
         self._status = self._AT_COMPUTER
 
-        self._on_back_at_computer = on_back_at_computer
-        self._on_afk = on_afk
         self._monitor_interval = monitor_interval  # in milliseconds
-        self._input_timeout = timeout
-        self._limbo_timeout = 10
+        self._input_timeout = input_timeout
+        self._limbo_timeout = limbo_timeout
 
         self._last_input_time = time.time()
         self._entered_limbo_time = 0
@@ -123,7 +121,6 @@ class AFKWorker(QObject):
 
 if __name__ == "__main__":
     import sys
-    import datetime
     from PySide6.QtWidgets import QApplication, QMainWindow
 
     app = QApplication(sys.argv)
@@ -159,7 +156,7 @@ if __name__ == "__main__":
     afk_thread.start()
 
     input_thread = QThread()
-    input_worker = AFKWorker(timeout=0)
+    input_worker = AFKWorker(input_timeout=0)
 
     input_worker.at_computer_signal.connect(
         lambda: print(".", end="", flush=True)
