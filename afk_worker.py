@@ -78,7 +78,6 @@ class AFKWorker(QObject):
     # pylint: disable=unused-argument
     def _on_input(self, *args):
         """Runs whenever mouse or keyboard activity is detected."""
-        self._scheduled_current_index = 0
         self._last_input_time = time.time()
 
         if self._is_checking_for_afk:
@@ -99,6 +98,9 @@ class AFKWorker(QObject):
                     self.at_computer_signal.emit(time.time())
         else:
             self.at_computer_signal.emit(time.time())
+
+        if self._status == self._AT_COMPUTER:
+            self._scheduled_current_index = 0
 
     @Slot()
     def _monitor_status(self):
