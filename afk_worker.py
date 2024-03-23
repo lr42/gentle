@@ -31,6 +31,7 @@ class AFKWorker(QObject):
         input_timeout=30,
         limbo_timeout_to_back=5,
         limbo_timeout_to_afk=None,
+        limbo_timeout_to_afk_multiplier=3,
         scheduled_timeouts=[],
         monitor_interval=100,
     ):
@@ -48,7 +49,9 @@ class AFKWorker(QObject):
         if limbo_timeout_to_afk is not None:
             self._limbo_timeout_to_afk = limbo_timeout_to_afk
         else:
-            self._limbo_timeout_to_afk = limbo_timeout_to_back
+            self._limbo_timeout_to_afk = (
+                limbo_timeout_to_back * limbo_timeout_to_afk_multiplier
+            )
 
         self._scheduled_timeouts = scheduled_timeouts
         self._scheduled_timeouts.sort()
@@ -156,8 +159,6 @@ if __name__ == "__main__":
     afk_thread = QThread()
     afk_worker = AFKWorker(
         input_timeout=10,
-        limbo_timeout_to_back=5,
-        limbo_timeout_to_afk=15,
         scheduled_timeouts=list(scheduled_events.keys()),
     )
 
