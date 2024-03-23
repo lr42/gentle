@@ -6,7 +6,7 @@ import sys
 import tomlkit
 
 # pylint: disable=import-error
-from PySide6.QtCore import QTimer, QUrl
+from PySide6.QtCore import QTimer, QUrl, QThread
 
 # pylint: disable=import-error
 from PySide6.QtGui import QAction, QIcon
@@ -24,6 +24,7 @@ from PySide6.QtMultimedia import QSoundEffect
 import stama.stama as sm
 import glowbox as gb
 import breakscreen as bs
+import afk_worker as aw
 
 
 # ##############  States
@@ -122,6 +123,7 @@ short_break_in_progress.transitions = {
 }
 
 waiting_after_short_afk.transitions = {
+    time_out:                   None,
     afk_long_period_ended:      waiting_after_long_afk,
     returned_to_computer:       test_for_next_break,
 }
@@ -170,6 +172,7 @@ long_break_finished.transitions = {
 }
 
 waiting_after_long_afk.transitions = {
+    time_out:                   None,
     returned_to_computer:       test_for_next_break,
 }
 # fmt:on
@@ -442,7 +445,7 @@ long_break_in_progress.on_exit              = reset_next_long_break_time
 long_break_finished.on_entry                = show_long_break_screen_finished
 long_break_finished.on_exit                 = reset_next_long_break_time
 
-# waiting_after_long_afk.on_exit              = lambda: pass
+waiting_after_long_afk.on_exit              = reset_next_long_break_time
 # fmt: on
 
 
@@ -588,13 +591,20 @@ if __name__ == "__main__":
     machine = sm.StateMachine(waiting_for_short_break)
 
     # ##############  Set up AFK listener
+    # TODO The afk periods need to be longer than the "limbo" to "back at computer" timeout....
+    #  Otherwise we end up in a situation where we can be in a "Waiting
+    #  after AFK for long duration" state when we receive a "Short AFK
+    #  period ended" event, which the first is not set up to handle.
+    # TODO Make AFK times settable in the config.
     scheduled_events = {
         2 * 60: lambda: machine.process_event(afk_short_period_ended),
         10 * 60: lambda: machine.process_event(afk_long_period_ended),
     }
 
     afk_thread = QThread()
-    afk_worker = AFKWorker(
+    afk_worker = aw.AFKWorker(
+        # input_timeout = 1,
+        # limbo_timeout_to_back = 1,
         scheduled_timeouts=list(scheduled_events.keys()),
     )
 
@@ -617,10 +627,6 @@ if __name__ == "__main__":
         afk_worker.stopTimerSignal.emit()
         afk_thread.quit()
         afk_thread.wait()
-
-        input_worker.stopTimerSignal.emit()
-        input_thread.quit()
-        input_thread.wait()
 
     app.aboutToQuit.connect(cleanup)
 
