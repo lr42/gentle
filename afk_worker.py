@@ -78,6 +78,7 @@ class AFKWorker(QObject):
     # pylint: disable=unused-argument
     def _on_input(self, *args):
         """Runs whenever mouse or keyboard activity is detected."""
+        self._scheduled_current_index = 0
         self._last_input_time = time.time()
 
         if self._is_checking_for_afk:
@@ -90,13 +91,11 @@ class AFKWorker(QObject):
                     elapsed_limbo_time = time.time() - self._entered_limbo_time
                     if elapsed_limbo_time > self._limbo_timeout_to_back:
                         self._status = self._AT_COMPUTER
-                        self._scheduled_current_index = 0
                         self.leaving_limbo_signal.emit()
                         self.at_computer_signal.emit(self._entered_limbo_time)
             else:
                 if self._status == self._AFK:
                     self._status = self._AT_COMPUTER
-                    self._scheduled_current_index = 0
                     self.at_computer_signal.emit(time.time())
         else:
             self.at_computer_signal.emit(time.time())
