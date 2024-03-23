@@ -20,6 +20,7 @@ class AFKWorker(QObject):
     at_computer_signal = Signal(float)
     in_limbo_signal = Signal()
     leaving_limbo_signal = Signal()
+    scheduled_signal = Signal(float)
 
     _AT_COMPUTER = "at computer"  # pylint: disable=invalid-name
     _AFK = "away from keyboard"  # pylint: disable=invalid-name
@@ -31,6 +32,7 @@ class AFKWorker(QObject):
         limbo_timeout=5,  # TODO 2 separate timeouts: to AFK and to at compy.
         #  Limbo should be quick to go to "at computer" but slow to go back to
         #  "afk" status.
+        scheduled_timeouts=[],
         monitor_interval=100,
     ):
         """
@@ -44,6 +46,10 @@ class AFKWorker(QObject):
         self._monitor_interval = monitor_interval  # in milliseconds
         self._input_timeout = input_timeout
         self._limbo_timeout = limbo_timeout
+
+        self._scheduled_timeouts = scheduled_timeouts
+        self._scheduled_timeouts.sort()
+        self._scheduled_current_index = 0
 
         self._last_input_time = time.time()
         self._entered_limbo_time = 0
@@ -78,11 +84,13 @@ class AFKWorker(QObject):
                     elapsed_limbo_time = time.time() - self._entered_limbo_time
                     if elapsed_limbo_time > self._limbo_timeout:
                         self._status = self._AT_COMPUTER
+                        self._scheduled_current_index = 0
                         self.leaving_limbo_signal.emit()
                         self.at_computer_signal.emit(self._entered_limbo_time)
             else:
                 if self._status == self._AFK:
                     self._status = self._AT_COMPUTER
+                    self._scheduled_current_index = 0
                     self.at_computer_signal.emit(time.time())
         else:
             self.at_computer_signal.emit(time.time())
@@ -105,6 +113,18 @@ class AFKWorker(QObject):
             self._status = self._AFK
             self.afk_signal.emit(self._last_input_time)
 
+        while True:
+            if self._scheduled_current_index >= len(self._scheduled_timeouts):
+                break
+            current_scheduled_time = self._scheduled_timeouts[
+                self._scheduled_current_index
+            ]
+            if elapsed_input_time > current_scheduled_time:
+                self.scheduled_signal.emit(current_scheduled_time)
+                self._scheduled_current_index += 1
+            else:
+                break
+
     @Slot()
     def start_worker(self):
         """The slot to call when the thread running this worker is started."""
@@ -125,8 +145,17 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
+    scheduled_events = {
+        5: lambda: print("A bit"),
+        15: lambda: print("A while"),
+    }
+
     afk_thread = QThread()
-    afk_worker = AFKWorker(input_timeout=10)
+    afk_worker = AFKWorker(
+        input_timeout=10, scheduled_timeouts=list(scheduled_events.keys())
+    )
+
+    afk_worker.scheduled_signal.connect(lambda t: scheduled_events[t]())
 
     afk_worker.at_computer_signal.connect(
         lambda t: print(
