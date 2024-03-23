@@ -2,6 +2,7 @@
 
 
 import time
+from typing import List
 
 # pylint: disable=import-error
 import pynput
@@ -11,7 +12,7 @@ from PySide6.QtCore import QObject, QThread, QTimer, Slot, Signal
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
 class AFKWorker(QObject):
     """
-    TODO TK
+    Emit signals on key/mouse activity, and "away from keyboard" timeouts.
     """
 
     stopTimerSignal = Signal()
@@ -28,15 +29,41 @@ class AFKWorker(QObject):
 
     def __init__(
         self,
-        input_timeout=30,
-        limbo_timeout_to_back=5,
-        limbo_timeout_to_afk=None,
-        limbo_timeout_to_afk_multiplier=3,
-        scheduled_timeouts=[],
-        monitor_interval=100,
+        input_timeout: float = 30,
+        limbo_timeout_to_back: float = 5,
+        limbo_timeout_to_afk: float = None,
+        limbo_timeout_to_afk_multiplier: float = 3,
+        scheduled_timeouts: List[float] = [],
+        monitor_interval: float = 100,
     ):
         """
-        TODO TK Read PEP 257
+        Constructs the AFKWorker object.
+
+        Args:
+            input_timeout: The amount of time (in seconds) before going to an
+                "AFK" status.
+
+            limbo_timeout_to_back: Time (in seconds) after which any input in a
+                "limbo" status will transition to a "at computer" status.
+
+            limbo_timeout_to_afk: Time (in seconds) after which no activity in a
+                "limbo" status will transition back to an "AFK" status.  This
+                will override any `limbo_timeout_to_afk_multiplier` value.
+
+            limbo_timeout_to_afk_multiplier: The amount to multiply the
+                `limbo_timeout_to_back` value to get the `limbo_timeout_to_afk`
+                value.  Only applicable if no 'limbo_timeout_to_afk` parameter
+                is passed.
+
+            scheduled_timeouts: A list of floats, which will emit a signal with
+                the value of the float when that amount of time (in seconds)
+                into an "AFK" state.  This value returned by this signal can be
+                analyzed to run a specific action.  The signals raised by this
+                process can be emitted before the AFKWorker object officially
+                enters the "AFK" state.
+
+            monitor_interval: How frequently (in milliseconds) to monitor and
+                update the status.
         """
 
         super().__init__()
