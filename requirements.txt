@@ -5,3 +5,4 @@ python-xlib>=0.33
 shiboken6>=6.2.4
 six>=1.16.0
 tomlkit>=0.12.4
+types-pynput>=1.7.5.20240311

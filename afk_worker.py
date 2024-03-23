@@ -2,7 +2,7 @@
 
 
 import time
-from typing import List
+from typing import List, Optional
 
 # pylint: disable=import-error
 import pynput
@@ -27,13 +27,14 @@ class AFKWorker(QObject):
     _AFK = "away from keyboard"  # pylint: disable=invalid-name
     _IN_LIMBO = "in limbo"  # pylint: disable=invalid-name
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         input_timeout: float = 30,
         limbo_timeout_to_back: float = 5,
-        limbo_timeout_to_afk: float = None,
+        limbo_timeout_to_afk: Optional[float] = None,
         limbo_timeout_to_afk_multiplier: float = 3,
-        scheduled_timeouts: List[float] = [],
+        scheduled_timeouts: Optional[List[float]] = None,
         monitor_interval: float = 100,
     ):
         """
@@ -46,8 +47,8 @@ class AFKWorker(QObject):
             limbo_timeout_to_back: Time (in seconds) after which any input in a
                 "limbo" status will transition to a "at computer" status.
 
-            limbo_timeout_to_afk: Time (in seconds) after which no activity in a
-                "limbo" status will transition back to an "AFK" status.  This
+            limbo_timeout_to_afk: Time (in seconds) after which no activity in
+                a "limbo" status will transition back to an "AFK" status.  This
                 will override any `limbo_timeout_to_afk_multiplier` value.
 
             limbo_timeout_to_afk_multiplier: The amount to multiply the
@@ -80,8 +81,11 @@ class AFKWorker(QObject):
                 limbo_timeout_to_back * limbo_timeout_to_afk_multiplier
             )
 
-        self._scheduled_timeouts = scheduled_timeouts
-        self._scheduled_timeouts.sort()
+        if scheduled_timeouts is not None:
+            self._scheduled_timeouts = scheduled_timeouts
+            self._scheduled_timeouts.sort()
+        else:
+            self._scheduled_timeouts = []
         self._scheduled_current_index = 0
 
         self._last_input_time = time.time()
@@ -95,7 +99,7 @@ class AFKWorker(QObject):
         )
 
         self._is_only_monitoring_input = (
-            self._input_timeout <= 0 and len(scheduled_timeouts) == 0
+            self._input_timeout <= 0 and scheduled_timeouts is not None
         )
         self._is_using_limbo_state = self._limbo_timeout_to_back > 0
 
