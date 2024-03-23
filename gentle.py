@@ -3,11 +3,10 @@ import time
 import logging
 from logging.handlers import SocketHandler
 import sys
-import datetime
 import tomlkit
 
 # pylint: disable=import-error
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QUrl
 
 # pylint: disable=import-error
 from PySide6.QtGui import QAction, QIcon
@@ -18,6 +17,9 @@ from PySide6.QtWidgets import (
     QMenu,
     QSystemTrayIcon,
 )
+
+# pylint: disable=import-error
+from PySide6.QtMultimedia import QSoundEffect
 
 import stama.stama as sm
 import glowbox as gb
@@ -42,8 +44,8 @@ long_break_finished             = sm.State("long break finished")
 waiting_after_long_afk          = sm.State("Waiting after AFK for long duration")
 
 test_for_next_break             = sm.ConditionalJunction(
-                                        waiting_for_long_break,
-                                        "Testing for next break",
+                                      waiting_for_long_break,
+                                      "Testing for next break",
                                   )
 # fmt: on
 
@@ -53,16 +55,6 @@ test_for_next_break             = sm.ConditionalJunction(
 
 def has_short_break_before_long_break():
     global next_long_break_unix_time
-    if time.time() > next_long_break_unix_time:
-        logger.debug(
-            "Resetting next long break to:  %s",
-            datetime.datetime.fromtimestamp(
-                next_long_break_unix_time
-            ).strftime("%H:%M:%S"),
-        )
-        next_long_break_unix_time = (
-            time.time() + config["regular_break"]["spacing"]
-        )
     secs_to_long_break = next_long_break_unix_time - time.time()
     if config["short_break"]["max_spacing"] < secs_to_long_break:
         logger.debug(
@@ -250,12 +242,12 @@ def set_timer_for_short_break():
         secs_to_notification % 60,
     )
 
-    next_short_break_per_clock = datetime.datetime.fromtimestamp(
-        next_short_break_unix_time
-    ).strftime("%H:%M:%S")
-    next_long_break_per_clock = datetime.datetime.fromtimestamp(
-        next_long_break_unix_time
-    ).strftime("%H:%M:%S")
+    next_short_break_per_clock = time.strftime(
+        "%H:%M:%S", time.localtime(next_short_break_unix_time)
+    )
+    next_long_break_per_clock = time.strftime(
+        "%H:%M:%S", time.localtime(next_long_break_unix_time)
+    )
 
     tooltip_next_break = "Next break (short): " + next_short_break_per_clock
     tooltip_next_long = "Next long break: " + next_long_break_per_clock
@@ -328,6 +320,7 @@ def hide_short_break_screen():
 
 
 def set_timer_for_long_break():
+    global next_long_break_unix_time
     secs_to_long_break = next_long_break_unix_time - time.time()
     secs_to_notification = (
         secs_to_long_break - config["regular_break"]["early_notification"]
@@ -346,9 +339,9 @@ def set_timer_for_long_break():
         secs_to_notification % 60,
     )
 
-    next_long_break_per_clock = datetime.datetime.fromtimestamp(
-        next_long_break_unix_time
-    ).strftime("%H:%M:%S")
+    next_long_break_per_clock = time.strftime(
+        "%H:%M:%S", time.localtime(next_long_break_unix_time)
+    )
     tooltip_next_break = "Next break (long): " + next_long_break_per_clock
     logger.info(tooltip_next_break)
     tray_icon.setToolTip(TOOLTIP_TITLE + "\n" + tooltip_next_break)
@@ -407,6 +400,18 @@ def show_long_break_screen_countdown():
 def show_long_break_screen_finished():
     longy.set_layout_to_finished()
     longy.showFullScreen()
+    long_break_chime.play()
+
+
+def reset_next_long_break_time():
+    global next_long_break_unix_time
+    next_long_break_unix_time = (
+        time.time() + config["regular_break"]["spacing"]
+    )
+    logger.debug(
+        "Resetting next long break to:  %s",
+        time.strftime("%H:%M:%S", time.localtime(next_long_break_unix_time)),
+    )
 
 
 # ##############  Assigning functions to actions
@@ -432,8 +437,10 @@ showing_long_break_early_notif.on_entry     = long_early_notification_pulse
 showing_long_break_late_notif.on_entry      = long_late_notification_pulse
 
 long_break_in_progress.on_entry             = show_long_break_screen_countdown
+long_break_in_progress.on_exit              = reset_next_long_break_time
 
 long_break_finished.on_entry                = show_long_break_screen_finished
+long_break_finished.on_exit                 = reset_next_long_break_time
 
 # waiting_after_long_afk.on_exit              = lambda: pass
 # fmt: on
@@ -525,8 +532,12 @@ if __name__ == "__main__":
     next_long_break_unix_time = (
         time.time() + config["regular_break"]["spacing"]
     )
+    logger.debug(
+        "Setting next long break to:  %s",
+        time.strftime("%H:%M:%S", time.localtime(next_long_break_unix_time)),
+    )
 
-    # ##############  Set up QT
+    # ##############  Set up Qt
     app = QApplication(sys.argv)
 
     glowy = gb.GlowBox()
@@ -549,6 +560,15 @@ if __name__ == "__main__":
         lambda: machine.process_event(break_ended),
         lambda: machine.process_event(break_ended),
     )
+
+    # ##############  Add chime
+    # TODO Make the chime settable in the configuration
+    # TODO Stop the chime when the user clicks "Let me get back to work"
+    long_break_chime_file = "singing_bowl.wav"
+    long_break_chime_volume = 0.5
+    long_break_chime = QSoundEffect()
+    long_break_chime.setSource(QUrl.fromLocalFile(long_break_chime_file))
+    long_break_chime.setVolume(long_break_chime_volume)
 
     # ##############  Add tray icon
     tray_icon = QSystemTrayIcon(QIcon(config["general"]["icon"]))
