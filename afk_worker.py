@@ -29,9 +29,8 @@ class AFKWorker(QObject):
     def __init__(
         self,
         input_timeout=30,
-        limbo_timeout=5,  # TODO 2 separate timeouts: to AFK and to at compy.
-        #  Limbo should be quick to go to "at computer" but slow to go back to
-        #  "afk" status.
+        limbo_timeout_to_back=5,
+        limbo_timeout_to_afk=None,
         scheduled_timeouts=[],
         monitor_interval=100,
     ):
@@ -45,7 +44,11 @@ class AFKWorker(QObject):
 
         self._monitor_interval = monitor_interval  # in milliseconds
         self._input_timeout = input_timeout
-        self._limbo_timeout = limbo_timeout
+        self._limbo_timeout_to_back = limbo_timeout_to_back
+        if limbo_timeout_to_afk is not None:
+            self._limbo_timeout_to_afk = limbo_timeout_to_afk
+        else:
+            self._limbo_timeout_to_afk = limbo_timeout_to_back
 
         self._scheduled_timeouts = scheduled_timeouts
         self._scheduled_timeouts.sort()
@@ -62,7 +65,7 @@ class AFKWorker(QObject):
         )
 
         self._is_checking_for_afk = self._input_timeout > 0
-        self._is_using_limbo_state = self._limbo_timeout > 0
+        self._is_using_limbo_state = self._limbo_timeout_to_back > 0
 
         if self._is_checking_for_afk:
             self._timer = QTimer(self)
@@ -82,7 +85,7 @@ class AFKWorker(QObject):
                     self.in_limbo_signal.emit()
                 elif self._status == self._IN_LIMBO:
                     elapsed_limbo_time = time.time() - self._entered_limbo_time
-                    if elapsed_limbo_time > self._limbo_timeout:
+                    if elapsed_limbo_time > self._limbo_timeout_to_back:
                         self._status = self._AT_COMPUTER
                         self._scheduled_current_index = 0
                         self.leaving_limbo_signal.emit()
@@ -102,7 +105,7 @@ class AFKWorker(QObject):
 
         if (
             self._status == self._IN_LIMBO
-            and elapsed_input_time > self._limbo_timeout
+            and elapsed_input_time > self._limbo_timeout_to_afk
         ):
             self._status = self._AFK
             self.leaving_limbo_signal.emit()
@@ -152,7 +155,10 @@ if __name__ == "__main__":
 
     afk_thread = QThread()
     afk_worker = AFKWorker(
-        input_timeout=10, scheduled_timeouts=list(scheduled_events.keys())
+        input_timeout=10,
+        limbo_timeout_to_back=5,
+        limbo_timeout_to_afk=15,
+        scheduled_timeouts=list(scheduled_events.keys()),
     )
 
     afk_worker.scheduled_signal.connect(lambda t: scheduled_events[t]())
