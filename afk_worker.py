@@ -99,7 +99,7 @@ class AFKWorker(QObject):
         )
 
         self._is_only_monitoring_input = (
-            self._input_timeout <= 0 and scheduled_timeouts is not None
+            self._input_timeout <= 0 and scheduled_timeouts is None
         )
         self._is_using_limbo_state = self._limbo_timeout_to_back > 0
 
@@ -186,8 +186,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     scheduled_events = {
-        5: lambda: print("A bit: " + time.strftime("%H:%M:%S")),
-        15: lambda: print("A while: " + time.strftime("%H:%M:%S")),
+        5: lambda: print("Nothing in a bit: " + time.strftime("%H:%M:%S")),
+        15: lambda: print("Nothing for a while: " + time.strftime("%H:%M:%S")),
     }
 
     afk_thread = QThread()
