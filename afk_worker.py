@@ -94,10 +94,12 @@ class AFKWorker(QObject):
             on_scroll=self._on_input,
         )
 
-        self._is_checking_for_afk = self._input_timeout > 0
+        self._is_only_monitoring_input = (
+            self._input_timeout <= 0 and len(scheduled_timeouts) == 0
+        )
         self._is_using_limbo_state = self._limbo_timeout_to_back > 0
 
-        if self._is_checking_for_afk:
+        if not self._is_only_monitoring_input:
             self._timer = QTimer(self)
             self._timer.timeout.connect(self._monitor_status)
             self.stopTimerSignal.connect(self._stop_worker)
@@ -107,7 +109,7 @@ class AFKWorker(QObject):
         """Runs whenever mouse or keyboard activity is detected."""
         self._last_input_time = time.time()
 
-        if self._is_checking_for_afk:
+        if not self._is_only_monitoring_input:
             if self._is_using_limbo_state:
                 if self._status == self._AFK:
                     self._status = self._IN_LIMBO
@@ -162,7 +164,7 @@ class AFKWorker(QObject):
     @Slot()
     def start_worker(self):
         """The slot to call when the thread running this worker is started."""
-        if self._is_checking_for_afk:
+        if not self._is_only_monitoring_input:
             self._timer.start(self._monitor_interval)
         self.kb_listener.start()
         self.mouse_listener.start()
