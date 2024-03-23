@@ -151,8 +151,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     scheduled_events = {
-        5: lambda: print("A bit"),
-        15: lambda: print("A while"),
+        5: lambda: print("A bit: " + time.strftime("%H:%M:%S")),
+        15: lambda: print("A while: " + time.strftime("%H:%M:%S")),
     }
 
     afk_thread = QThread()
