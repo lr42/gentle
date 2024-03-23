@@ -185,6 +185,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
+    # ##############  Set up thread that tracks AFK status
     scheduled_events = {
         5: lambda: print("Nothing in a bit: " + time.strftime("%H:%M:%S")),
         15: lambda: print("Nothing for a while: " + time.strftime("%H:%M:%S")),
@@ -225,6 +226,7 @@ if __name__ == "__main__":
     afk_thread.started.connect(afk_worker.start_worker)
     afk_thread.start()
 
+    # ##############  Set up thread that ticks on any input
     input_thread = QThread()
     input_worker = AFKWorker(input_timeout=0)
 

@@ -434,6 +434,8 @@ showing_long_break_late_notif.on_entry      = long_late_notification_pulse
 long_break_in_progress.on_entry             = show_long_break_screen_countdown
 
 long_break_finished.on_entry                = show_long_break_screen_finished
+
+# waiting_after_long_afk.on_exit              = lambda: pass
 # fmt: on
 
 
@@ -564,6 +566,43 @@ if __name__ == "__main__":
 
     # ##############  Start state machine
     machine = sm.StateMachine(waiting_for_short_break)
+
+    # ##############  Set up AFK listener
+    scheduled_events = {
+        2 * 60: lambda: machine.process_event(afk_short_period_ended),
+        10 * 60: lambda: machine.process_event(afk_long_period_ended),
+    }
+
+    afk_thread = QThread()
+    afk_worker = AFKWorker(
+        scheduled_timeouts=list(scheduled_events.keys()),
+    )
+
+    afk_worker.scheduled_signal.connect(lambda t: scheduled_events[t]())
+
+    afk_worker.at_computer_signal.connect(
+        lambda t: machine.process_event(returned_to_computer)
+    )
+
+    afk_worker.moveToThread(afk_thread)
+    afk_thread.started.connect(afk_worker.start_worker)
+    afk_thread.start()
+
+    # ##############  Clean up AFK thread on exit
+    def cleanup():
+        """
+        Stop timers and threads, before exiting the application.  (Otherwise we
+        get errors complaining that we didn't.)
+        """
+        afk_worker.stopTimerSignal.emit()
+        afk_thread.quit()
+        afk_thread.wait()
+
+        input_worker.stopTimerSignal.emit()
+        input_thread.quit()
+        input_thread.wait()
+
+    app.aboutToQuit.connect(cleanup)
 
     # ##############  Exit on QT app close
     sys.exit(app.exec())
