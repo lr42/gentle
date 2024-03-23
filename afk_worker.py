@@ -21,6 +21,10 @@ class AFKWorker(QObject):
     in_limbo_signal = Signal()
     leaving_limbo_signal = Signal()
 
+    _AT_COMPUTER = "at computer"  # pylint: disable=invalid-name
+    _AFK = "away from keyboard"  # pylint: disable=invalid-name
+    _IN_LIMBO = "in limbo"  # pylint: disable=invalid-name
+
     def __init__(
         self,
         input_timeout=30,
@@ -34,10 +38,6 @@ class AFKWorker(QObject):
         """
 
         super().__init__()
-
-        self._AT_COMPUTER = "at computer"  # pylint: disable=invalid-name
-        self._AFK = "away from keyboard"  # pylint: disable=invalid-name
-        self._IN_LIMBO = "in limbo"  # pylint: disable=invalid-name
 
         self._status = self._AT_COMPUTER
 
@@ -56,7 +56,7 @@ class AFKWorker(QObject):
         )
 
         self._is_checking_for_afk = self._input_timeout > 0
-        self._is_using_limbo_state = self._is_checking_for_afk
+        self._is_using_limbo_state = self._limbo_timeout > 0
 
         if self._is_checking_for_afk:
             self._timer = QTimer(self)
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     afk_thread = QThread()
-    afk_worker = AFKWorker()
+    afk_worker = AFKWorker(input_timeout=10)
 
     afk_worker.at_computer_signal.connect(
         lambda t: print(
