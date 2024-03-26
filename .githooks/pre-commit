@@ -4,7 +4,12 @@ exit_code=0
 
 if ! diff <(cat requirements.txt | sed 's/[>=]=[0-9].*//' | sort) <(pip freeze | sed 's/[>=]=[0-9].*//' | sort) ; then
 	echo \'pip freeze\' and \'requirements.txt\' differ in their modules specified.
-	echo Please fix this by running:
+	echo
+	echo "You can reset your virtual environment to match the \'requirements.txt\'"
+	echo "file (if you've, for example, switched branches) by running:"
+	echo "pip install -r requirements.txt && pip freeze | sed 's/==/>=/' | grep -v -f requirements.txt | xargs pip uninstall -y"
+	echo
+	echo ... OR you can update the requirements file by running:
 	echo "pip freeze | sed 's/==/>=/' >| requirements.txt"
 	echo
 	exit_code=$((exit_code+1))
