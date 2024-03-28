@@ -59,8 +59,7 @@ def has_short_break_before_long_break():
 
 # ##############  Short break state actions
 def set_timer_for_short_break():
-    # TODO This function (and probably others) is too long.  It needs to be
-    #  refactored.
+    # TODO This function (and probably others) is too long.  It needs to be refactored.
     secs_to_long_break = next_long_break_unix_time - time.time()
     logger.debug("secs_to_long_break:  %s", secs_to_long_break)
 
@@ -539,7 +538,7 @@ if __name__ == "__main__":
             "length": 20,
             "early_notification": 30,
         },
-        # TODO Maybe use separate colors for short and long early and late notifications?
+        # TODO Maybe use separate colors for short and long early and late notifications?...
         #  Or at least leave that as an option?
         "colors": {
             "regular": "orchid",
@@ -603,8 +602,8 @@ if __name__ == "__main__":
     )
 
     # ##############  Add chime
-    # TODO Make the chime settable in the configuration
-    # TODO Stop the chime when the user clicks "Let me get back to work"
+    # TODO Make the chime settable in the configuration.
+    # TODO Stop the chime when the user clicks "Let me get back to work".
     long_break_chime_file = "singing_bowl.wav"
     long_break_chime_volume = 0.5
     long_break_chime = QSoundEffect()
@@ -630,9 +629,9 @@ if __name__ == "__main__":
 
     # ##############  Set up AFK listener
     # TODO The afk periods need to be longer than the "limbo" to "back at computer" timeout....
-    #  Otherwise we end up in a situation where we can be in a "Waiting
-    #  after AFK for long duration" state when we receive a "Short AFK
-    #  period ended" event, which the first is not set up to handle.
+    #  Otherwise we end up in a situation where we can be in a "Waiting after
+    #  AFK for long duration" state when we receive a "Short AFK period ended"
+    #  event, which the first is not set up to handle.
     # TODO Make AFK times settable in the config.
     scheduled_events = {
         2 * 60: lambda: machine.process_event(afk_short_period_ended),
