@@ -148,7 +148,7 @@ def clear_timeout_timer():
     global_timer.stop()
 
 
-def show_short_early_notification_pulse():
+def show_short_break_early_notification():
     glowy.set_main_color(config["colors"]["short"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
@@ -230,7 +230,7 @@ def set_timer_for_long_break():
     )
 
 
-def long_early_notification_pulse():
+def show_long_break_early_notification():
     # TODO Should this be a setter?
     glowy.set_main_color(config["colors"]["regular"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
@@ -257,9 +257,11 @@ def long_early_notification_pulse():
     )
 
 
-def long_late_notification_pulse():
+def show_long_break_late_notification():
     glowy.set_main_color(config["colors"]["regular"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
+
+    glowy.show()
 
     my_iterable = gb.steady_pulse(
         config["general"]["steady_pulse_period"] / 2,
@@ -293,7 +295,7 @@ def reset_next_long_break_time():
     )
 
 
-# ##############  State sub classes
+# ##############  Set up short break state sub-classes
 class WaitingForShortBreak(sm.State):
     def __init__(self):
         super().__init__()
@@ -312,7 +314,7 @@ class ShowingShortBreakEarlyNotif(sm.State):
         self.name = "Showing the short break early notification"
 
     def on_entry(self):
-        show_short_early_notification_pulse()
+        show_short_break_early_notification()
 
     def on_exit(self):
         # TODO Only hide the short break early notification if the late notification is not the next state....
@@ -360,6 +362,80 @@ class WaitingAfterShortAfk(sm.State):
         pass
 
 
+# ##############  Set up long break state sub-classes
+class WaitingForLongBreak(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "Waiting for a long break"
+
+    def on_entry(self):
+        set_timer_for_long_break()
+
+    def on_exit(self):
+        clear_timeout_timer()
+
+
+class ShowingLongBreakEarlyNotif(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "Showing the long break early notification"
+
+    def on_entry(self):
+        show_long_break_early_notification()
+
+    def on_exit(self):
+        # TODO Only hide the short break early notification if the late notification is not the next state....
+        #  This currently shows a blink when transistioning to the late
+        #  notification.  It's not a deal-breaker, but it's a distraction and a
+        #  little detail that makes a difference.
+        glowy.hide()
+
+
+class ShowingLongBreakLateNotif(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "Showing the long break late notification"
+
+    def on_entry(self):
+        show_long_break_late_notification()
+
+    def on_exit(self):
+        glowy.hide()
+
+
+class LongBreakInProgress(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "long break in progress"
+
+    def on_entry(self):
+        show_long_break_screen_countdown()
+
+    def on_exit(self):
+        reset_next_long_break_time()
+
+
+class LongBreakFinished(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "long break finished"
+
+    def on_entry(self):
+        show_long_break_screen_finished()
+
+    def on_exit(self):
+        reset_next_long_break_time()
+
+
+class WaitingAfterLongAfk(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "Waiting after AFK for long duration"
+
+    def on_exit(self):
+        reset_next_long_break_time()
+
+
 # ##############  States
 # fmt: off
 waiting_for_short_break         = WaitingForShortBreak()
@@ -368,12 +444,12 @@ showing_short_break_late_notif  = ShowingShortBreakLateNotif()
 short_break_in_progress         = ShortBreakInProgress()
 waiting_after_short_afk         = WaitingAfterShortAfk()
 
-waiting_for_long_break          = sm.State("Waiting for a long break")
-showing_long_break_early_notif  = sm.State("Showing the long break early notification")
-showing_long_break_late_notif   = sm.State("Showing the long break late notification")
-long_break_in_progress          = sm.State("long break in progress")
-long_break_finished             = sm.State("long break finished")
-waiting_after_long_afk          = sm.State("Waiting after AFK for long duration")
+waiting_for_long_break          = WaitingForLongBreak()
+showing_long_break_early_notif  = ShowingLongBreakEarlyNotif()
+showing_long_break_late_notif   = ShowingLongBreakLateNotif()
+long_break_in_progress          = LongBreakInProgress()
+long_break_finished             = LongBreakFinished()
+waiting_after_long_afk          = WaitingAfterLongAfk()
 
 test_for_next_break             = sm.ConditionalJunction(
                                       waiting_for_long_break,
@@ -384,20 +460,6 @@ test_for_next_break             = sm.ConditionalJunction(
 
 # ##############  Assigning functions to actions
 # fmt: off
-waiting_for_long_break.on_entry             = set_timer_for_long_break
-waiting_for_long_break.on_exit              = clear_timeout_timer
-
-showing_long_break_early_notif.on_entry     = long_early_notification_pulse
-
-showing_long_break_late_notif.on_entry      = long_late_notification_pulse
-
-long_break_in_progress.on_entry             = show_long_break_screen_countdown
-long_break_in_progress.on_exit              = reset_next_long_break_time
-
-long_break_finished.on_entry                = show_long_break_screen_finished
-long_break_finished.on_exit                 = reset_next_long_break_time
-
-waiting_after_long_afk.on_exit              = reset_next_long_break_time
 
 
 test_for_next_break.add_condition(
