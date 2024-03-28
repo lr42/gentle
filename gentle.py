@@ -295,6 +295,18 @@ def reset_next_long_break_time():
 
 
 # ##############  State sub classes
+class WaitingForShortBreak(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "Waiting for a short break"
+
+    def on_entry(self):
+        set_timer_for_short_break()
+
+    def on_exit(self):
+        clear_timeout_timer()
+
+
 class ShowingShortBreakEarlyNotif(sm.State):
     def __init__(self):
         super().__init__()
@@ -325,7 +337,7 @@ class ShowingShortBreakLateNotif(sm.State):
 
 # ##############  States
 # fmt: off
-waiting_for_short_break         = sm.State("Waiting for a short break")
+waiting_for_short_break         = WaitingForShortBreak()
 showing_short_break_early_notif = ShowingShortBreakEarlyNotif()
 showing_short_break_late_notif  = ShowingShortBreakLateNotif()
 short_break_in_progress         = sm.State("Short break in progress")
@@ -347,9 +359,6 @@ test_for_next_break             = sm.ConditionalJunction(
 
 # ##############  Assigning functions to actions
 # fmt: off
-waiting_for_short_break.on_entry            = set_timer_for_short_break
-waiting_for_short_break.on_exit             = clear_timeout_timer
-
 short_break_in_progress.on_entry            = show_short_break_screen
 short_break_in_progress.on_exit             = hide_short_break_screen
 
