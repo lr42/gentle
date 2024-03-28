@@ -149,7 +149,7 @@ def clear_timeout_timer():
     global_timer.stop()
 
 
-def short_early_notification_pulse():
+def show_short_early_notification_pulse():
     glowy.set_main_color(config["colors"]["short"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
@@ -179,6 +179,8 @@ def short_early_notification_pulse():
 def show_short_break_late_notification():
     glowy.set_main_color(config["colors"]["short"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
+
+    glowy.show()
 
     my_iterable = gb.steady_pulse(
         config["general"]["steady_pulse_period"] / 2,
@@ -293,6 +295,22 @@ def reset_next_long_break_time():
 
 
 # ##############  State sub classes
+class ShowingShortBreakEarlyNotif(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "Showing the short break early notification"
+
+    def on_entry(self):
+        show_short_early_notification_pulse()
+
+    def on_exit(self):
+        # TODO Only hide the short break early notification if the late notification is not the next state....
+        #  This currently shows a blink when transistioning to the late
+        #  notification.  It's not a deal-breaker, but it's a distraction and a
+        #  little detail that makes a difference.
+        glowy.hide()
+
+
 class ShowingShortBreakLateNotif(sm.State):
     def __init__(self):
         super().__init__()
@@ -308,7 +326,7 @@ class ShowingShortBreakLateNotif(sm.State):
 # ##############  States
 # fmt: off
 waiting_for_short_break         = sm.State("Waiting for a short break")
-showing_short_break_early_notif = sm.State("Showing the short break early notification")
+showing_short_break_early_notif = ShowingShortBreakEarlyNotif()
 showing_short_break_late_notif  = ShowingShortBreakLateNotif()
 short_break_in_progress         = sm.State("Short break in progress")
 waiting_after_short_afk         = sm.State("Waiting after AFK for short duration")
@@ -331,8 +349,6 @@ test_for_next_break             = sm.ConditionalJunction(
 # fmt: off
 waiting_for_short_break.on_entry            = set_timer_for_short_break
 waiting_for_short_break.on_exit             = clear_timeout_timer
-
-showing_short_break_early_notif.on_entry    = short_early_notification_pulse
 
 short_break_in_progress.on_entry            = show_short_break_screen
 short_break_in_progress.on_exit             = hide_short_break_screen
