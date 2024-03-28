@@ -436,6 +436,17 @@ class WaitingAfterLongAfk(sm.State):
         reset_next_long_break_time()
 
 
+# ##############  Set up junctions
+class TestForNextBreak(sm.ConditionalJunction):
+    def __init__(self):
+        super().__init__(
+            default_state=waiting_for_long_break, name="Testing for next break"
+        )
+        self.add_condition(
+            has_short_break_before_long_break, waiting_for_short_break
+        )
+
+
 # ##############  States
 # fmt: off
 waiting_for_short_break         = WaitingForShortBreak()
@@ -451,25 +462,10 @@ long_break_in_progress          = LongBreakInProgress()
 long_break_finished             = LongBreakFinished()
 waiting_after_long_afk          = WaitingAfterLongAfk()
 
-test_for_next_break             = sm.ConditionalJunction(
-                                      waiting_for_long_break,
-                                      "Testing for next break",
-                                  )
-# fmt: on
-
-
-# ##############  Assigning functions to actions
-# fmt: off
-
-
-test_for_next_break.add_condition(
-    has_short_break_before_long_break, waiting_for_short_break
-)
-# fmt: on
+test_for_next_break             = TestForNextBreak()
 
 
 # ##############  Short break transitions
-# fmt: off
 waiting_for_short_break.transitions = {
     time_out:                showing_short_break_early_notif,
     afk_short_period_ended:  waiting_after_short_afk,
