@@ -27,32 +27,18 @@ import breakscreen as bs
 import afk_worker as aw
 
 
-# ##############  States
-
+# ##############  Events for the state machine
 # fmt: off
-waiting_for_short_break         = sm.State("Waiting for a short break")
-showing_short_break_early_notif = sm.State("Showing the short break early notification")
-showing_short_break_late_notif  = sm.State("Showing the short break late notification")
-short_break_in_progress         = sm.State("Short break in progress")
-waiting_after_short_afk         = sm.State("Waiting after AFK for short duration")
-
-waiting_for_long_break          = sm.State("Waiting for a long break")
-showing_long_break_early_notif  = sm.State("Showing the long break early notification")
-showing_long_break_late_notif   = sm.State("Showing the long break late notification")
-long_break_in_progress          = sm.State("long break in progress")
-long_break_finished             = sm.State("long break finished")
-waiting_after_long_afk          = sm.State("Waiting after AFK for long duration")
-
-test_for_next_break             = sm.ConditionalJunction(
-                                      waiting_for_long_break,
-                                      "Testing for next break",
-                                  )
+time_out                = sm.Event("Time out")
+break_started           = sm.Event("Break started")
+break_ended             = sm.Event("Break ended")
+afk_short_period_ended  = sm.Event("Short AFK period ended")
+afk_long_period_ended   = sm.Event("Long AFK period ended")
+returned_to_computer    = sm.Event("User returned to computer")
 # fmt: on
 
 
 # ##############  Set up conditional junction
-
-
 def has_short_break_before_long_break():
     global next_long_break_unix_time
     secs_to_long_break = next_long_break_unix_time - time.time()
@@ -71,112 +57,7 @@ def has_short_break_before_long_break():
     return False
 
 
-test_for_next_break.add_condition(
-    has_short_break_before_long_break, waiting_for_short_break
-)
-
-
-# ##############  Events for the state machine
-
-# fmt: off
-time_out                = sm.Event("Time out")
-break_started           = sm.Event("Break started")
-break_ended             = sm.Event("Break ended")
-afk_short_period_ended  = sm.Event("Short AFK period ended")
-afk_long_period_ended   = sm.Event("Long AFK period ended")
-returned_to_computer    = sm.Event("User returned to computer")
-# fmt: on
-
-
-# ##############  Short break transitions
-
-# fmt: off
-waiting_for_short_break.transitions = {
-    time_out:                showing_short_break_early_notif,
-    afk_short_period_ended:  waiting_after_short_afk,
-    returned_to_computer:    None,
-}
-
-showing_short_break_early_notif.transitions = {
-    time_out:                   showing_short_break_late_notif,
-    break_started:              short_break_in_progress,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     waiting_after_short_afk,
-    returned_to_computer:       None,
-}
-
-showing_short_break_late_notif.transitions = {
-    break_started:              short_break_in_progress,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     waiting_after_short_afk,
-    returned_to_computer:       None,
-}
-
-short_break_in_progress.transitions = {
-    break_ended:                test_for_next_break,
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      None,  # TODO
-    returned_to_computer:       None,  # TODO
-}
-
-waiting_after_short_afk.transitions = {
-    time_out:                   None,
-    afk_long_period_ended:      waiting_after_long_afk,
-    returned_to_computer:       test_for_next_break,
-}
-
-
-# ##############  Long break transitions
-
-waiting_for_long_break.transitions = {
-    time_out:                   showing_long_break_early_notif,
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      waiting_after_long_afk,
-    returned_to_computer:       None,
-}
-
-showing_long_break_early_notif.transitions = {
-    time_out:                   showing_long_break_late_notif,
-    break_started:              long_break_in_progress,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      waiting_after_long_afk,
-    returned_to_computer:       None,
-}
-
-showing_long_break_late_notif.transitions = {
-    break_started:              long_break_in_progress,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      waiting_after_long_afk,
-    returned_to_computer:       None,
-}
-
-long_break_in_progress.transitions = {
-    time_out:                   long_break_finished,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      None,
-    returned_to_computer:       None,  # TODO
-}
-
-long_break_finished.transitions = {
-    break_ended:                test_for_next_break,
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      None,
-    returned_to_computer:       None,  # TODO
-}
-
-waiting_after_long_afk.transitions = {
-    time_out:                   None,
-    returned_to_computer:       test_for_next_break,
-}
-# fmt:on
-
-
 # ##############  Short break state actions
-
-
 def set_timer_for_short_break():
     # TODO This function (and probably others) is too long.  It needs to be
     #  refactored.
@@ -295,7 +176,7 @@ def short_early_notification_pulse():
     )
 
 
-def short_late_notification_pulse():
+def show_short_break_late_notification():
     glowy.set_main_color(config["colors"]["short"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
@@ -316,8 +197,6 @@ def hide_short_break_screen():
 
 
 # ##############  Long break state actions
-
-
 def set_timer_for_long_break():
     global next_long_break_unix_time
     secs_to_long_break = next_long_break_unix_time - time.time()
@@ -413,15 +292,47 @@ def reset_next_long_break_time():
     )
 
 
-# ##############  Assigning functions to actions
+# ##############  State sub classes
+class ShowingShortBreakLateNotif(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "Showing the short break late notification"
 
+    def on_entry(self):
+        show_short_break_late_notification()
+
+    def on_exit(self):
+        glowy.hide()
+
+
+# ##############  States
+# fmt: off
+waiting_for_short_break         = sm.State("Waiting for a short break")
+showing_short_break_early_notif = sm.State("Showing the short break early notification")
+showing_short_break_late_notif  = ShowingShortBreakLateNotif()
+short_break_in_progress         = sm.State("Short break in progress")
+waiting_after_short_afk         = sm.State("Waiting after AFK for short duration")
+
+waiting_for_long_break          = sm.State("Waiting for a long break")
+showing_long_break_early_notif  = sm.State("Showing the long break early notification")
+showing_long_break_late_notif   = sm.State("Showing the long break late notification")
+long_break_in_progress          = sm.State("long break in progress")
+long_break_finished             = sm.State("long break finished")
+waiting_after_long_afk          = sm.State("Waiting after AFK for long duration")
+
+test_for_next_break             = sm.ConditionalJunction(
+                                      waiting_for_long_break,
+                                      "Testing for next break",
+                                  )
+# fmt: on
+
+
+# ##############  Assigning functions to actions
 # fmt: off
 waiting_for_short_break.on_entry            = set_timer_for_short_break
 waiting_for_short_break.on_exit             = clear_timeout_timer
 
 showing_short_break_early_notif.on_entry    = short_early_notification_pulse
-
-showing_short_break_late_notif.on_entry     = short_late_notification_pulse
 
 short_break_in_progress.on_entry            = show_short_break_screen
 short_break_in_progress.on_exit             = hide_short_break_screen
@@ -441,12 +352,99 @@ long_break_finished.on_entry                = show_long_break_screen_finished
 long_break_finished.on_exit                 = reset_next_long_break_time
 
 waiting_after_long_afk.on_exit              = reset_next_long_break_time
+
+
+test_for_next_break.add_condition(
+    has_short_break_before_long_break, waiting_for_short_break
+)
 # fmt: on
 
 
+# ##############  Short break transitions
+# fmt: off
+waiting_for_short_break.transitions = {
+    time_out:                showing_short_break_early_notif,
+    afk_short_period_ended:  waiting_after_short_afk,
+    returned_to_computer:    None,
+}
+
+showing_short_break_early_notif.transitions = {
+    time_out:                   showing_short_break_late_notif,
+    break_started:              short_break_in_progress,
+    break_ended:                test_for_next_break,  # Skipping the break
+    afk_short_period_ended:     waiting_after_short_afk,
+    returned_to_computer:       None,
+}
+
+showing_short_break_late_notif.transitions = {
+    break_started:              short_break_in_progress,
+    break_ended:                test_for_next_break,  # Skipping the break
+    afk_short_period_ended:     waiting_after_short_afk,
+    returned_to_computer:       None,
+}
+
+short_break_in_progress.transitions = {
+    break_ended:                test_for_next_break,
+    afk_short_period_ended:     None,
+    afk_long_period_ended:      None,  # TODO
+    returned_to_computer:       None,  # TODO
+}
+
+waiting_after_short_afk.transitions = {
+    time_out:                   None,
+    afk_long_period_ended:      waiting_after_long_afk,
+    returned_to_computer:       test_for_next_break,
+}
+
+
+# ##############  Long break transitions
+waiting_for_long_break.transitions = {
+    time_out:                   showing_long_break_early_notif,
+    afk_short_period_ended:     None,
+    afk_long_period_ended:      waiting_after_long_afk,
+    returned_to_computer:       None,
+}
+
+showing_long_break_early_notif.transitions = {
+    time_out:                   showing_long_break_late_notif,
+    break_started:              long_break_in_progress,
+    break_ended:                test_for_next_break,  # Skipping the break
+    afk_short_period_ended:     None,
+    afk_long_period_ended:      waiting_after_long_afk,
+    returned_to_computer:       None,
+}
+
+showing_long_break_late_notif.transitions = {
+    break_started:              long_break_in_progress,
+    break_ended:                test_for_next_break,  # Skipping the break
+    afk_short_period_ended:     None,
+    afk_long_period_ended:      waiting_after_long_afk,
+    returned_to_computer:       None,
+}
+
+long_break_in_progress.transitions = {
+    time_out:                   long_break_finished,
+    break_ended:                test_for_next_break,  # Skipping the break
+    afk_short_period_ended:     None,
+    afk_long_period_ended:      None,
+    returned_to_computer:       None,  # TODO
+}
+
+long_break_finished.transitions = {
+    break_ended:                test_for_next_break,
+    afk_short_period_ended:     None,
+    afk_long_period_ended:      None,
+    returned_to_computer:       None,  # TODO
+}
+
+waiting_after_long_afk.transitions = {
+    time_out:                   None,
+    returned_to_computer:       test_for_next_break,
+}
+# fmt:on
+
+
 # ##############  Functions used in __main__
-
-
 def deep_update(a, b):
     if isinstance(b, dict):
         for key in b:
@@ -460,7 +458,6 @@ def deep_update(a, b):
 
 
 # ##############  Main
-
 if __name__ == "__main__":
     # ##############  Logging
     logger = logging.getLogger()
