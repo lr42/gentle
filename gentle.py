@@ -38,7 +38,7 @@ returned_to_computer    = sm.Event("User returned to computer")
 # fmt: on
 
 
-# ##############  Set up conditional junction
+# ##############  Set up conditional junction boolean
 def has_short_break_before_long_break():
     global next_long_break_unix_time
     secs_to_long_break = next_long_break_unix_time - time.time()
@@ -144,10 +144,6 @@ def set_timer_for_short_break():
     )
 
 
-def clear_timeout_timer():
-    global_timer.stop()
-
-
 def show_short_break_early_notification():
     glowy.set_main_color(config["colors"]["short"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
@@ -187,14 +183,6 @@ def show_short_break_late_notification():
         config["colors"]["late"],
     )
     glowy.transition_color_over_iterable(my_iterable, None)
-
-
-def show_short_break_screen():
-    shorty.showFullScreen()
-
-
-def hide_short_break_screen():
-    shorty.hide()
 
 
 # ##############  Long break state actions
@@ -271,19 +259,6 @@ def show_long_break_late_notification():
     glowy.transition_color_over_iterable(my_iterable, None)
 
 
-def show_long_break_screen_countdown():
-    global next_long_break_unix_time
-    next_long_break_unix_time = time.time()
-    longy.set_layout_to_countdown()
-    longy.showFullScreen()
-
-
-def show_long_break_screen_finished():
-    longy.set_layout_to_finished()
-    longy.showFullScreen()
-    long_break_chime.play()
-
-
 def reset_next_long_break_time():
     global next_long_break_unix_time
     next_long_break_unix_time = (
@@ -305,7 +280,7 @@ class WaitingForShortBreak(sm.State):
         set_timer_for_short_break()
 
     def on_exit(self):
-        clear_timeout_timer()
+        global_timer.stop()
 
 
 class ShowingShortBreakEarlyNotif(sm.State):
@@ -316,11 +291,11 @@ class ShowingShortBreakEarlyNotif(sm.State):
     def on_entry(self):
         show_short_break_early_notification()
 
+    # TODO Only hide the short break early notification if the late notification is not the next state....
+    #  This currently shows a blink when transistioning to the late
+    #  notification.  It's not a deal-breaker, but it's a distraction and a
+    #  little detail that makes a difference.
     def on_exit(self):
-        # TODO Only hide the short break early notification if the late notification is not the next state....
-        #  This currently shows a blink when transistioning to the late
-        #  notification.  It's not a deal-breaker, but it's a distraction and a
-        #  little detail that makes a difference.
         glowy.hide()
 
 
@@ -342,10 +317,10 @@ class ShortBreakInProgress(sm.State):
         self.name = "Short break in progress"
 
     def on_entry(self):
-        show_short_break_screen()
+        shorty.showFullScreen()
 
     def on_exit(self):
-        hide_short_break_screen()
+        shorty.hide()
 
 
 class WaitingAfterShortAfk(sm.State):
@@ -354,11 +329,9 @@ class WaitingAfterShortAfk(sm.State):
         self.name = "Waiting after a short AFK timeout"
 
     def on_entry(self):
-        # There's currently nothing we need to do in entering this state.
         pass
 
     def on_exit(self):
-        # There's currently nothing we need to do in exiting this state.
         pass
 
 
@@ -372,7 +345,7 @@ class WaitingForLongBreak(sm.State):
         set_timer_for_long_break()
 
     def on_exit(self):
-        clear_timeout_timer()
+        global_timer.stop()
 
 
 class ShowingLongBreakEarlyNotif(sm.State):
@@ -406,10 +379,12 @@ class ShowingLongBreakLateNotif(sm.State):
 class LongBreakInProgress(sm.State):
     def __init__(self):
         super().__init__()
-        self.name = "long break in progress"
+        self.name = "Long break in progress"
 
     def on_entry(self):
-        show_long_break_screen_countdown()
+        next_long_break_unix_time = time.time()
+        longy.set_layout_to_countdown()
+        longy.showFullScreen()
 
     def on_exit(self):
         reset_next_long_break_time()
@@ -418,10 +393,12 @@ class LongBreakInProgress(sm.State):
 class LongBreakFinished(sm.State):
     def __init__(self):
         super().__init__()
-        self.name = "long break finished"
+        self.name = "Long break finished"
 
     def on_entry(self):
-        show_long_break_screen_finished()
+        longy.set_layout_to_finished()
+        longy.showFullScreen()
+        long_break_chime.play()
 
     def on_exit(self):
         reset_next_long_break_time()
@@ -431,6 +408,9 @@ class WaitingAfterLongAfk(sm.State):
     def __init__(self):
         super().__init__()
         self.name = "Waiting after AFK for long duration"
+
+    def on_entry(self):
+        pass
 
     def on_exit(self):
         reset_next_long_break_time()
@@ -467,9 +447,9 @@ test_for_next_break             = TestForNextBreak()
 
 # ##############  Short break transitions
 waiting_for_short_break.transitions = {
-    time_out:                showing_short_break_early_notif,
-    afk_short_period_ended:  waiting_after_short_afk,
-    returned_to_computer:    None,
+    time_out:                   showing_short_break_early_notif,
+    afk_short_period_ended:     waiting_after_short_afk,
+    returned_to_computer:       None,
 }
 
 showing_short_break_early_notif.transitions = {
@@ -537,7 +517,7 @@ long_break_in_progress.transitions = {
 long_break_finished.transitions = {
     break_ended:                test_for_next_break,
     afk_short_period_ended:     None,
-    afk_long_period_ended:      None,
+    afk_long_period_ended:      None,  # TODO
     returned_to_computer:       None,  # TODO
 }
 
