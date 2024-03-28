@@ -335,13 +335,39 @@ class ShowingShortBreakLateNotif(sm.State):
         glowy.hide()
 
 
+class ShortBreakInProgress(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "Short break in progress"
+
+    def on_entry(self):
+        show_short_break_screen()
+
+    def on_exit(self):
+        hide_short_break_screen()
+
+
+class WaitingAfterShortAfk(sm.State):
+    def __init__(self):
+        super().__init__()
+        self.name = "Waiting after a short AFK timeout"
+
+    def on_entry(self):
+        # There's currently nothing we need to do in entering this state.
+        pass
+
+    def on_exit(self):
+        # There's currently nothing we need to do in exiting this state.
+        pass
+
+
 # ##############  States
 # fmt: off
 waiting_for_short_break         = WaitingForShortBreak()
 showing_short_break_early_notif = ShowingShortBreakEarlyNotif()
 showing_short_break_late_notif  = ShowingShortBreakLateNotif()
-short_break_in_progress         = sm.State("Short break in progress")
-waiting_after_short_afk         = sm.State("Waiting after AFK for short duration")
+short_break_in_progress         = ShortBreakInProgress()
+waiting_after_short_afk         = WaitingAfterShortAfk()
 
 waiting_for_long_break          = sm.State("Waiting for a long break")
 showing_long_break_early_notif  = sm.State("Showing the long break early notification")
@@ -359,10 +385,6 @@ test_for_next_break             = sm.ConditionalJunction(
 
 # ##############  Assigning functions to actions
 # fmt: off
-short_break_in_progress.on_entry            = show_short_break_screen
-short_break_in_progress.on_exit             = hide_short_break_screen
-
-
 waiting_for_long_break.on_entry             = set_timer_for_long_break
 waiting_for_long_break.on_exit              = clear_timeout_timer
 
