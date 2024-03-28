@@ -29,7 +29,6 @@ import afk_worker as aw
 
 # ##############  States
 
-
 # fmt: off
 waiting_for_short_break         = sm.State("Waiting for a short break")
 showing_short_break_early_notif = sm.State("Showing the short break early notification")
@@ -79,7 +78,6 @@ test_for_next_break.add_condition(
 
 # ##############  Events for the state machine
 
-
 # fmt: off
 time_out                = sm.Event("Time out")
 break_started           = sm.Event("Break started")
@@ -91,7 +89,6 @@ returned_to_computer    = sm.Event("User returned to computer")
 
 
 # ##############  Short break transitions
-
 
 # fmt: off
 waiting_for_short_break.transitions = {
@@ -130,7 +127,6 @@ waiting_after_short_afk.transitions = {
 
 
 # ##############  Long break transitions
-
 
 waiting_for_long_break.transitions = {
     time_out:                   showing_long_break_early_notif,
@@ -419,7 +415,6 @@ def reset_next_long_break_time():
 
 # ##############  Assigning functions to actions
 
-
 # fmt: off
 waiting_for_short_break.on_entry            = set_timer_for_short_break
 waiting_for_short_break.on_exit             = clear_timeout_timer
@@ -465,7 +460,6 @@ def deep_update(a, b):
 
 
 # ##############  Main
-
 
 if __name__ == "__main__":
     # ##############  Logging
