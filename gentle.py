@@ -675,16 +675,20 @@ if __name__ == "__main__":
     #  Otherwise we end up in a situation where we can be in a "Waiting after
     #  AFK for long duration" state when we receive a "Short AFK period ended"
     #  event, which the first is not set up to handle.
-    # TODO Make AFK times settable in the config.
-    scheduled_events = {
-        2 * 60: lambda: machine.process_event(afk_short_period_ended),
-        10 * 60: lambda: machine.process_event(afk_long_period_ended),
-    }
+    scheduled_events = {}
+    if config["away_from_keyboard"]["short_break_timeout"] > 0:
+        scheduled_events[
+            config["away_from_keyboard"]["short_break_timeout"]
+        ] = lambda: machine.process_event(afk_short_period_ended)
+
+    if config["away_from_keyboard"]["long_break_timeout"] > 0:
+        scheduled_events[
+            config["away_from_keyboard"]["long_break_timeout"]
+        ] = lambda: machine.process_event(afk_long_period_ended)
 
     afk_thread = QThread()
+    # TODO Make AFK and limbo times settable in the config.
     afk_worker = aw.AFKWorker(
-        # input_timeout = 1,
-        # limbo_timeout_to_back = 1,
         scheduled_timeouts=list(scheduled_events.keys()),
     )
 

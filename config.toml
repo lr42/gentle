@@ -1,6 +1,6 @@
 [general]
 
-    # Determines the pulsing speed of the glow box when a break is due.
+    # The pulsing speed of the glow box when a break is due.
     #  A speed of 1000 milliseconds (or one second) means that the glow
     #  box will transition from its main color to its alternate color
     #  and back again, all in one second.
@@ -19,14 +19,14 @@
     spacing             = 3000  # in seconds
 
     # The length of the break.
-    length              = 600   # in seconds
+    length              = 600  # in seconds
 
-    # This determines how early a notification is shown before a break
-    #  is due.  This does not effect the timing of the breaks.  For
-    #  example: if a break is scheduled every 50 minutes, and a
-    #  notification is set to appear two minutes early, the notification
-    #  will appear 48 minutes after the last break, but the break will
-    #  still be due 50 minutes after the last break.
+    # How early a notification is shown before a break is due.
+    #  This does not effect the timing of the breaks.  For example: if a
+    #  break is scheduled every 50 minutes, and a notification is set to
+    #  appear two minutes early, the notification will appear 48 minutes
+    #  after the last break, but the break will still be due 50 minutes
+    #  after the last break.
     early_notification  = 120   # in seconds
 
 
@@ -36,14 +36,15 @@
     #  screen.  Most of these match the similar options for the regular
     #  breaks, except where noted.
 
-    # The maximum spacing of short breaks.  Short breaks will be spaced
-    #  evenly between long breaks, and not necessarily exactly to this
-    #  value, but will never be longer than this spacing.
+    # The maximum spacing of short breaks.
+    #  Short breaks will be spaced evenly between long breaks, and not
+    #  necessarily exactly to this value, but will never be longer than
+    #  this spacing.
     max_spacing         = 1200  # in seconds
 
-    length              = 20    # in seconds
+    length              = 20  # in seconds
 
-    early_notification  = 30    # in seconds
+    early_notification  = 30  # in seconds
 
 
 [colors]
@@ -64,4 +65,15 @@
 
     early   = "white"
     late    = "yellow"
+
+
+[away_from_keyboard]
+    # Gentle break reminder can count time spent away from the keyboard
+    #  (AFK, or when the user is not using the computer) as a break.
+    #  The values below indicate how long a to wait for inactivity
+    #  before considering a break as completed.  To disable this
+    #  functionality for either break, simply set its value to 0.
+
+    short_break_timeout = 120  # in seconds
+    long_break_timeout  = 600  # in seconds
 
