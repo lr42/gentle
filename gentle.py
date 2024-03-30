@@ -451,6 +451,7 @@ test_for_next_break             = TestForNextBreak()
 waiting_for_short_break.transitions = {
     short_break_due_timeout:            showing_short_break_early_notif,
     afk_short_period_ended:             waiting_after_short_afk,
+    afk_long_period_ended:              waiting_after_long_afk,
     returned_to_computer:               None,
 }
 
@@ -459,6 +460,7 @@ showing_short_break_early_notif.transitions = {
     break_started:                      short_break_in_progress,
     break_ended:                        test_for_next_break,  # Skipping the break
     afk_short_period_ended:             waiting_after_short_afk,
+    afk_long_period_ended:              waiting_after_long_afk,
     returned_to_computer:               None,
 }
 
@@ -466,6 +468,7 @@ showing_short_break_late_notif.transitions = {
     break_started:                      short_break_in_progress,
     break_ended:                        test_for_next_break,  # Skipping the break
     afk_short_period_ended:             waiting_after_short_afk,
+    afk_long_period_ended:              waiting_after_long_afk,
     returned_to_computer:               None,
 }
 
@@ -676,7 +679,14 @@ if __name__ == "__main__":
     #  AFK for long duration" state when we receive a "Short AFK period ended"
     #  event, which the first is not set up to handle.
     scheduled_events = {}
-    if config["away_from_keyboard"]["short_break_timeout"] > 0:
+    if (
+        config["away_from_keyboard"]["short_break_timeout"]
+        > config["away_from_keyboard"]["long_break_timeout"]
+    ):
+        logger.error(
+            "The short break AFK timeout is set to be longer than the long break AFK timeout.  This makes no sense, and the AFK short break timeout will not be set."
+        )
+    elif config["away_from_keyboard"]["short_break_timeout"] > 0:
         scheduled_events[
             config["away_from_keyboard"]["short_break_timeout"]
         ] = lambda: machine.process_event(afk_short_period_ended)
