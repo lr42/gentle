@@ -144,10 +144,7 @@ def set_timer_for_short_break():
     )
 
     # ##############  Start timer
-    global_timer.singleShot(
-        secs_to_notification * 1000,
-        lambda: machine.process_event(short_break_due_timeout),
-    )
+    short_break_timer.start(secs_to_notification * 1000)
 
 
 def show_short_break_early_notification():
@@ -220,10 +217,7 @@ def set_timer_for_long_break():
     logger.info(tooltip_next_break)
     tray_icon.setToolTip(TOOLTIP_TITLE + "\n" + tooltip_next_break)
 
-    global_timer.singleShot(
-        secs_to_notification * 1000,
-        lambda: machine.process_event(long_break_due_timeout),
-    )
+    long_break_timer.start(secs_to_notification * 1000)
 
 
 def show_long_break_early_notification():
@@ -289,7 +283,7 @@ class WaitingForShortBreak(sm.State):
         set_timer_for_short_break()
 
     def on_exit(self):
-        global_timer.stop()
+        short_break_timer.stop()
 
 
 class ShowingShortBreakEarlyNotif(sm.State):
@@ -354,7 +348,7 @@ class WaitingForLongBreak(sm.State):
         set_timer_for_long_break()
 
     def on_exit(self):
-        global_timer.stop()
+        long_break_timer.stop()
 
 
 class ShowingLongBreakEarlyNotif(sm.State):
@@ -615,7 +609,14 @@ if __name__ == "__main__":
         )
 
     # ##############  Set up concurrent activities
-    global_timer = QTimer()
+    short_break_timer = QTimer(
+        singleShot=True,
+        timeout=lambda: machine.process_event(short_break_due_timeout),
+    )
+    long_break_timer = QTimer(
+        singleShot=True,
+        timeout=lambda: machine.process_event(long_break_due_timeout),
+    )
 
     reset_next_long_break_time()
 
