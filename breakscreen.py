@@ -34,7 +34,7 @@ class BaseBreakScreen(QWidget):
 
         self._run_on_completion = run_on_completion
 
-        # # # # # # # #   Initialize the countdown timer
+        # #############   Initialize the countdown timer
         self._remaining_time = QTime(0, 0)
 
         self.countdown_timer = QTimer()
@@ -44,7 +44,7 @@ class BaseBreakScreen(QWidget):
         self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
         self.setWindowFlag(Qt.FramelessWindowHint, True)
 
-        # # # # # # # #   Set dark background and light text
+        # ##############  Set dark background and light text
         # TODO Make this customizable
         palette = self.palette()
         palette.setColor(QPalette.Window, QColor("black"))
@@ -77,7 +77,7 @@ class ShortBreakScreen(BaseBreakScreen):
     def __init__(self, timeout_length, run_on_completion, run_on_skip=None):
         super().__init__(timeout_length, run_on_completion)
 
-        # # # # # # # #   Create the layout
+        # ##############  Create the layout
         self.layout = QVBoxLayout()
 
         self.big_text_label = QLabel()
@@ -96,7 +96,7 @@ class ShortBreakScreen(BaseBreakScreen):
         self.big_text_label.setFont(font)
         self.layout.addWidget(self.big_text_label)
 
-        # # # # # # # #   Add "skip break" button
+        # ##############  Add "skip break" button
         if run_on_skip is not None:
             skip_button = QPushButton("Skip this break.  :-(")
             skip_button.clicked.connect(run_on_skip)
@@ -116,7 +116,7 @@ class LongBreakScreen(BaseBreakScreen):
     ):
         super().__init__(timeout_length, run_on_completion)
 
-        # # # # # # # #   Create the countdown layout
+        # ##############  Create the countdown layout
         self.countdown_layout_widget = QWidget()
         self.countdown_layout = QVBoxLayout()
 
@@ -144,7 +144,7 @@ class LongBreakScreen(BaseBreakScreen):
 
         self.countdown_layout_widget.setLayout(self.countdown_layout)
 
-        # # # # # # # #   Create the finished layout
+        # ##############  Create the finished layout
         self.finished_layout_widget = QWidget()
         self.finished_layout = QVBoxLayout()
 
@@ -165,7 +165,7 @@ class LongBreakScreen(BaseBreakScreen):
 
         self.finished_layout_widget.setLayout(self.finished_layout)
 
-        # # # # # # # #   Stack the layouts so we can switch between them
+        # ##############  Stack the layouts so we can switch between them
         self.stacked_layout = QStackedLayout()
         self.stacked_layout.addWidget(self.countdown_layout_widget)
         self.stacked_layout.addWidget(self.finished_layout_widget)
