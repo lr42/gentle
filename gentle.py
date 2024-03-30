@@ -29,12 +29,16 @@ import afk_worker as aw
 
 # ##############  Events for the state machine
 # fmt: off
-time_out                = sm.Event("Time out")
-break_started           = sm.Event("Break started")
-break_ended             = sm.Event("Break ended")
-afk_short_period_ended  = sm.Event("Short AFK period ended")
-afk_long_period_ended   = sm.Event("Long AFK period ended")
-returned_to_computer    = sm.Event("User returned to computer")
+short_break_due_timeout         = sm.Event("Short break due timeout")
+short_break_early_notif_timeout = sm.Event("Short break early notification timeout")
+long_break_due_timeout          = sm.Event("Long break due timeout")
+long_break_early_notif_timeout  = sm.Event("Long break early notification timeout")
+long_break_finished_timeout     = sm.Event("Long break finished")
+break_started                   = sm.Event("Break started")
+break_ended                     = sm.Event("Break ended")
+afk_short_period_ended          = sm.Event("Short AFK period ended")
+afk_long_period_ended           = sm.Event("Long AFK period ended")
+returned_to_computer            = sm.Event("User returned to computer")
 # fmt: on
 
 
@@ -60,6 +64,7 @@ def has_short_break_before_long_break():
 # ##############  Short break state actions
 def set_timer_for_short_break():
     # TODO This function (and probably others) is too long.  It needs to be refactored.
+    global next_long_break_unix_time
     secs_to_long_break = next_long_break_unix_time - time.time()
     logger.debug("secs_to_long_break:  %s", secs_to_long_break)
 
@@ -140,7 +145,8 @@ def set_timer_for_short_break():
 
     # ##############  Start timer
     global_timer.singleShot(
-        secs_to_notification * 1000, lambda: machine.process_event(time_out)
+        secs_to_notification * 1000,
+        lambda: machine.process_event(short_break_due_timeout),
     )
 
 
@@ -167,7 +173,8 @@ def show_short_break_early_notification():
     )
 
     glowy.transition_color_over_iterable(
-        my_iterable, lambda: machine.process_event(time_out)
+        my_iterable,
+        lambda: machine.process_event(short_break_early_notif_timeout),
     )
 
 
@@ -214,7 +221,8 @@ def set_timer_for_long_break():
     tray_icon.setToolTip(TOOLTIP_TITLE + "\n" + tooltip_next_break)
 
     global_timer.singleShot(
-        secs_to_notification * 1000, lambda: machine.process_event(time_out)
+        secs_to_notification * 1000,
+        lambda: machine.process_event(long_break_due_timeout),
     )
 
 
@@ -241,7 +249,8 @@ def show_long_break_early_notification():
     )
 
     glowy.transition_color_over_iterable(
-        my_iterable, lambda: machine.process_event(time_out)
+        my_iterable,
+        lambda: machine.process_event(long_break_early_notif_timeout),
     )
 
 
@@ -296,7 +305,7 @@ class ShowingShortBreakEarlyNotif(sm.State):
     #  notification.  It's not a deal-breaker, but it's a distraction and a
     #  little detail that makes a difference.
     def on_exit(self):
-        glowy.hide()
+        glowy.close_and_save_geometry()
 
 
 class ShowingShortBreakLateNotif(sm.State):
@@ -308,7 +317,7 @@ class ShowingShortBreakLateNotif(sm.State):
         show_short_break_late_notification()
 
     def on_exit(self):
-        glowy.hide()
+        glowy.close_and_save_geometry()
 
 
 class ShortBreakInProgress(sm.State):
@@ -361,7 +370,7 @@ class ShowingLongBreakEarlyNotif(sm.State):
         #  This currently shows a blink when transistioning to the late
         #  notification.  It's not a deal-breaker, but it's a distraction and a
         #  little detail that makes a difference.
-        glowy.hide()
+        glowy.close_and_save_geometry()
 
 
 class ShowingLongBreakLateNotif(sm.State):
@@ -373,7 +382,7 @@ class ShowingLongBreakLateNotif(sm.State):
         show_long_break_late_notification()
 
     def on_exit(self):
-        glowy.hide()
+        glowy.close_and_save_geometry()
 
 
 class LongBreakInProgress(sm.State):
@@ -382,7 +391,6 @@ class LongBreakInProgress(sm.State):
         self.name = "Long break in progress"
 
     def on_entry(self):
-        next_long_break_unix_time = time.time()
         longy.set_layout_to_countdown()
         longy.showFullScreen()
 
@@ -407,7 +415,7 @@ class LongBreakFinished(sm.State):
 class WaitingAfterLongAfk(sm.State):
     def __init__(self):
         super().__init__()
-        self.name = "Waiting after AFK for long duration"
+        self.name = "Waiting after a long AFK timeout"
 
     def on_entry(self):
         pass
@@ -447,83 +455,85 @@ test_for_next_break             = TestForNextBreak()
 
 # ##############  Short break transitions
 waiting_for_short_break.transitions = {
-    time_out:                   showing_short_break_early_notif,
-    afk_short_period_ended:     waiting_after_short_afk,
-    returned_to_computer:       None,
+    short_break_due_timeout:            showing_short_break_early_notif,
+    afk_short_period_ended:             waiting_after_short_afk,
+    returned_to_computer:               None,
 }
 
 showing_short_break_early_notif.transitions = {
-    time_out:                   showing_short_break_late_notif,
-    break_started:              short_break_in_progress,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     waiting_after_short_afk,
-    returned_to_computer:       None,
+    short_break_early_notif_timeout:    showing_short_break_late_notif,
+    break_started:                      short_break_in_progress,
+    break_ended:                        test_for_next_break,  # Skipping the break
+    afk_short_period_ended:             waiting_after_short_afk,
+    returned_to_computer:               None,
 }
 
 showing_short_break_late_notif.transitions = {
-    break_started:              short_break_in_progress,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     waiting_after_short_afk,
-    returned_to_computer:       None,
+    break_started:                      short_break_in_progress,
+    break_ended:                        test_for_next_break,  # Skipping the break
+    afk_short_period_ended:             waiting_after_short_afk,
+    returned_to_computer:               None,
 }
 
 short_break_in_progress.transitions = {
-    break_ended:                test_for_next_break,
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      None,  # TODO
-    returned_to_computer:       None,  # TODO
+    break_ended:                        test_for_next_break,
+    afk_short_period_ended:             None,
+    afk_long_period_ended:              None,  # TODO
+    returned_to_computer:               None,  # TODO
 }
 
 waiting_after_short_afk.transitions = {
-    time_out:                   None,
-    afk_long_period_ended:      waiting_after_long_afk,
-    returned_to_computer:       test_for_next_break,
+    short_break_due_timeout:            None,
+    long_break_due_timeout:             None,
+    afk_long_period_ended:              waiting_after_long_afk,
+    returned_to_computer:               test_for_next_break,
 }
 
 
 # ##############  Long break transitions
 waiting_for_long_break.transitions = {
-    time_out:                   showing_long_break_early_notif,
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      waiting_after_long_afk,
-    returned_to_computer:       None,
+    long_break_due_timeout:             showing_long_break_early_notif,
+    afk_short_period_ended:             None,
+    afk_long_period_ended:              waiting_after_long_afk,
+    returned_to_computer:               None,
 }
 
 showing_long_break_early_notif.transitions = {
-    time_out:                   showing_long_break_late_notif,
-    break_started:              long_break_in_progress,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      waiting_after_long_afk,
-    returned_to_computer:       None,
+    long_break_early_notif_timeout:     showing_long_break_late_notif,
+    break_started:                      long_break_in_progress,
+    break_ended:                        test_for_next_break,  # Skipping the break
+    afk_short_period_ended:             None,
+    afk_long_period_ended:              waiting_after_long_afk,
+    returned_to_computer:               None,
 }
 
 showing_long_break_late_notif.transitions = {
-    break_started:              long_break_in_progress,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      waiting_after_long_afk,
-    returned_to_computer:       None,
+    break_started:                      long_break_in_progress,
+    break_ended:                        test_for_next_break,  # Skipping the break
+    afk_short_period_ended:             None,
+    afk_long_period_ended:              waiting_after_long_afk,
+    returned_to_computer:               None,
 }
 
 long_break_in_progress.transitions = {
-    time_out:                   long_break_finished,
-    break_ended:                test_for_next_break,  # Skipping the break
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      None,
-    returned_to_computer:       None,  # TODO
+    long_break_finished_timeout:        long_break_finished,
+    break_ended:                        test_for_next_break,  # Skipping the break
+    afk_short_period_ended:             None,
+    afk_long_period_ended:              None,
+    returned_to_computer:               None,  # TODO
 }
 
 long_break_finished.transitions = {
-    break_ended:                test_for_next_break,
-    afk_short_period_ended:     None,
-    afk_long_period_ended:      None,  # TODO
-    returned_to_computer:       None,  # TODO
+    break_ended:                        test_for_next_break,
+    afk_short_period_ended:             None,
+    afk_long_period_ended:              None,  # TODO
+    returned_to_computer:               None,  # TODO
 }
 
 waiting_after_long_afk.transitions = {
-    time_out:                   None,
-    returned_to_computer:       test_for_next_break,
+    short_break_due_timeout:            None,
+    long_break_due_timeout:             None,
+    returned_to_computer:               test_for_next_break,
 }
 # fmt:on
 
@@ -607,13 +617,7 @@ if __name__ == "__main__":
     # ##############  Set up concurrent activities
     global_timer = QTimer()
 
-    next_long_break_unix_time = (
-        time.time() + config["regular_break"]["spacing"]
-    )
-    logger.debug(
-        "Setting next long break to:  %s",
-        time.strftime("%H:%M:%S", time.localtime(next_long_break_unix_time)),
-    )
+    reset_next_long_break_time()
 
     # ##############  Set up Qt
     app = QApplication(sys.argv)
@@ -634,7 +638,7 @@ if __name__ == "__main__":
 
     longy = bs.LongBreakScreen(
         config["regular_break"]["length"],
-        lambda: machine.process_event(time_out),
+        lambda: machine.process_event(long_break_finished_timeout),
         lambda: machine.process_event(break_ended),
         lambda: machine.process_event(break_ended),
     )
