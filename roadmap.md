@@ -14,8 +14,6 @@ Bugs
 Maintenance
 ------------------------------------------------------------------------
 
-- [ ] Figure out if a window has focus, or if this is even an possible
-  to do with QT/PySide.
 
 
 Up next  (v0.1.0-beta)
@@ -27,6 +25,10 @@ Features
 - [ ] Show a intro wizard on first run.  Introduce the glow box and
   allow moving it to wherever the user would like.  (Introducing the
   glow box is an idea from Matt.)
+- [ ] Show the time to the next break in the tool tip for the task bar
+  icon.  (Also mentioned by Brenden.)
+- [ ] Show a tool tip over the glow box which indicates which break this
+  is for.  Make this optional.  (From Matt.)
 - [x] Monitor keyboard and mouse activity to reset breaks after a
   certain amount of time.
 - [x] Add a tool tip/title to the task bar icon.
@@ -45,9 +47,13 @@ Bugs
 Maintenance
 ------------------------------------------------------------------------
 
+- [ ] Include an actual bell.
 - [ ] Move issue tracking over to a proper issue tracker.
 - [ ] Package into an installer.
 - [ ] More linting.
+- [ ] Set up a website for this thing.
+- [ ] Change console logging to only print information relevant to the
+  end user.
 - [x] Create a GitHub repository for the project.
 - [x] Include the `stama` library.
 - [x] Get a proper icon.
@@ -68,8 +74,6 @@ Features
 ------------------------------------------------------------------------
 
 - [ ] Secret, secret!  I've got a secret!
-- [ ] Show the time to the next break in the tool tip for the task bar
-  icon.  (Also mentioned by Brenden.)
 - [ ] Allow taking a short break or long break from the task bar icon.
 - [ ] Allow skipping a break from the context menu of glow box.
 - [ ] Internationalization.
@@ -81,14 +85,14 @@ Features
 - [ ] Add a command line option to allow the user to specify which level
   of logging to show in the terminal.
 - [ ] Make the program run on start-up/login.
-- [ ] Show a tool tip over the glow box which indicates which break this
-  is for.  Make this optional.  (From Matt.)
 - [ ] Add a progress bar to the break screens.
 - [ ] Make the text font size of items on the break screen adjust
   automatically to fill the space that they exist in.  I've got a Python
   script in my extras folder where I was experimenting with this, but
   set it aside in the interest of time, so I shouldn't have to start
   completely from scratch.
+- [ ] Change the color/icon of the taskbar icon depending on if the user
+  is AFK or in limbo.
 - [x] Add a notification sound to indicate when the break is done.
 - [x] Show a skip break button on the short break screen.  (From
   Matt.)  Make this optional, possibly with the default to off.
@@ -123,6 +127,7 @@ Maintenance
       supported versions of Python.  It would be nice to automate
       something like this, but that's not something I'm knowledgeable of
       right now.
+- [ ] Set up automatic builds whenever a commit is tagged as a release.
 
 
 Someday
@@ -136,6 +141,10 @@ Features
   computer.
 - [ ] Send a ntfy notification, so when you are wandering around on your
   phone you know when your break is done.
+- [ ] Figure out if a window has focus, or if this is even an possible
+  to do with QT/PySide.  If a break window looses focus, either pause it
+  or count it as finished (depending on if the break is in-progress or
+  finished).
 
 
 Bugs
