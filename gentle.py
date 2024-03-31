@@ -27,6 +27,10 @@ import breakscreen as bs
 import afk_worker as aw
 
 
+# TODO Make the clock time format configurable.
+TIME_FORMAT = "%-I:%M:%S %p"
+
+
 # ##############  Events for the state machine
 # fmt: off
 short_break_due_timeout         = sm.Event("Short break due timeout")
@@ -127,10 +131,10 @@ def set_timer_for_short_break():
     )
 
     next_short_break_per_clock = time.strftime(
-        "%H:%M:%S", time.localtime(next_short_break_unix_time)
+        TIME_FORMAT, time.localtime(next_short_break_unix_time)
     )
     next_long_break_per_clock = time.strftime(
-        "%H:%M:%S", time.localtime(next_long_break_unix_time)
+        TIME_FORMAT, time.localtime(next_long_break_unix_time)
     )
 
     logger.info("Next break (short): " + next_short_break_per_clock)
@@ -206,7 +210,7 @@ def set_timer_for_long_break():
     )
 
     next_long_break_per_clock = time.strftime(
-        "%H:%M:%S", time.localtime(next_long_break_unix_time)
+        TIME_FORMAT, time.localtime(next_long_break_unix_time)
     )
 
     logger.info("Next break (long): " + next_long_break_per_clock)
@@ -265,7 +269,7 @@ def reset_next_long_break_time():
     )
     logger.debug(
         "Resetting next long break to:  %s",
-        time.strftime("%H:%M:%S", time.localtime(next_long_break_unix_time)),
+        time.strftime(TIME_FORMAT, time.localtime(next_long_break_unix_time)),
     )
 
 
@@ -576,9 +580,8 @@ def set_system_tray_tool_tip_text():
 
     next_long_break_relative = get_relative_due_time(secs_to_long_break)
 
-    # TODO Make the clock time format configurable.
     next_long_break_per_clock = time.strftime(
-                    "%H:%M:%S", time.localtime(next_long_break_unix_time)
+                    TIME_FORMAT, time.localtime(next_long_break_unix_time)
                         )
 
     tray_icon.setToolTip(TOOLTIP_TITLE + "\n\n" + next_long_break_message + "\n" + next_long_break_relative + "\n(" + next_long_break_per_clock + ")")
