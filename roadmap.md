@@ -22,13 +22,13 @@ Up next  (v0.1.0-beta)
 Features
 ------------------------------------------------------------------------
 
-- [ ] Show a intro wizard on first run.  Introduce the glow box and
-  allow moving it to wherever the user would like.  (Introducing the
-  glow box is an idea from Matt.)
 - [ ] Show the time to the next break in the tool tip for the task bar
   icon.  (Also mentioned by Brenden.)
 - [ ] Show a tool tip over the glow box which indicates which break this
   is for.  Make this optional.  (From Matt.)
+- [ ] Show a intro wizard on first run.  Introduce the glow box and
+  allow moving it to wherever the user would like.  (Introducing the
+  glow box is an idea from Matt.)
 - [x] Monitor keyboard and mouse activity to reset breaks after a
   certain amount of time.
 - [x] Add a tool tip/title to the task bar icon.
@@ -49,10 +49,10 @@ Maintenance
 
 - [ ] Include an actual bell.
 - [ ] Move issue tracking over to a proper issue tracker.
+- [ ] Change console logging to only print information relevant to the
 - [ ] Package into an installer.
 - [ ] More linting.
 - [ ] Set up a website for this thing.
-- [ ] Change console logging to only print information relevant to the
   end user.
 - [x] Create a GitHub repository for the project.
 - [x] Include the `stama` library.
@@ -93,6 +93,11 @@ Features
   completely from scratch.
 - [ ] Change the color/icon of the taskbar icon depending on if the user
   is AFK or in limbo.
+- [ ] Add a reminder to drink water a certain (configurable) amount of
+  time before a long break.  (I find my self drinking water during a
+  long break and then taking a "forced" break before the next long
+  break.  It would be nice if these "forced breaks would roughly
+  correspond with the scheduled long breaks.)
 - [x] Add a notification sound to indicate when the break is done.
 - [x] Show a skip break button on the short break screen.  (From
   Matt.)  Make this optional, possibly with the default to off.

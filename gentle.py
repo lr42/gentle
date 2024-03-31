@@ -133,15 +133,10 @@ def set_timer_for_short_break():
         "%H:%M:%S", time.localtime(next_long_break_unix_time)
     )
 
-    tooltip_next_break = "Next break (short): " + next_short_break_per_clock
-    tooltip_next_long = "Next long break: " + next_long_break_per_clock
+    logger.info("Next break (short): " + next_short_break_per_clock)
+    logger.info("Next long break: " + next_long_break_per_clock)
 
-    logger.info(tooltip_next_break)
-    logger.info(tooltip_next_long)
-
-    tray_icon.setToolTip(
-        TOOLTIP_TITLE + "\n" + tooltip_next_break + "\n" + tooltip_next_long
-    )
+    set_system_tray_tool_tip_text()
 
     # ##############  Start timer
     short_break_timer.start(secs_to_notification * 1000)
@@ -213,9 +208,10 @@ def set_timer_for_long_break():
     next_long_break_per_clock = time.strftime(
         "%H:%M:%S", time.localtime(next_long_break_unix_time)
     )
-    tooltip_next_break = "Next break (long): " + next_long_break_per_clock
-    logger.info(tooltip_next_break)
-    tray_icon.setToolTip(TOOLTIP_TITLE + "\n" + tooltip_next_break)
+
+    logger.info("Next break (long): " + next_long_break_per_clock)
+
+    set_system_tray_tool_tip_text()
 
     long_break_timer.start(secs_to_notification * 1000)
 
@@ -547,6 +543,40 @@ def deep_update(a, b):
         a = b
     return a
 
+def set_system_tray_tool_tip_text():
+    global next_long_break_unix_time
+    secs_to_long_break = next_long_break_unix_time - time.time()
+    half_minutes_to_long_break = secs_to_long_break // 30
+    next_long_break_relative = "Next long break:\n"
+
+    if half_minutes_to_long_break == -1:
+        next_long_break_relative += "Due right now"
+    elif half_minutes_to_long_break == -2:
+        next_long_break_relative += "Past due by 30 seconds"
+    elif half_minutes_to_long_break == -3:
+        next_long_break_relative += "Past due by 1 minute"
+    elif half_minutes_to_long_break < -3:
+        past_due_minutes = str(int(abs((half_minutes_to_long_break // 2) + 1)))
+        if (half_minutes_to_long_break + 1) % 2:
+            past_due_minutes += "½"
+        next_long_break_relative += "Past due by {} minutes".format(past_due_minutes)
+    elif half_minutes_to_long_break == 0:
+        next_long_break_relative += "In less than 30 seconds"
+    elif half_minutes_to_long_break == 1:
+        next_long_break_relative += "In less than 1 minute"
+    else:
+        minutes_to = str((half_minutes_to_long_break + 1) // 2)
+        if (half_minutes_to_long_break + 1) % 2:
+            minutes_to += "½"
+        next_long_break_relative += "In {} minutes".format(minutes_to)
+
+    next_long_break_per_clock = time.strftime(
+                    "%H:%M:%S", time.localtime(next_long_break_unix_time)
+                        )
+
+    tray_icon.setToolTip(TOOLTIP_TITLE + "\n" + next_long_break_relative + "\n(" + next_long_break_per_clock + ")")
+    tray_icon.show()
+
 
 # ##############  Main
 if __name__ == "__main__":
@@ -669,6 +699,10 @@ if __name__ == "__main__":
     tray_icon.setToolTip(TOOLTIP_TITLE)
 
     tray_icon.show()
+
+    # ##############  Set up system tray icon tool tip timer
+    tooltip_update_timer = QTimer(timeout=set_system_tray_tool_tip_text)
+    tooltip_update_timer.start(2000)
 
     # ##############  Start state machine
     machine = sm.StateMachine(waiting_for_short_break)
