@@ -30,6 +30,7 @@ import afk_worker as aw
 # TODO Make the clock time format configurable.
 TIME_FORMAT = "%-I:%M:%S %p"
 TOOLTIP_TITLE = "Gentle Break Reminder"
+TOOLTIP_TIMER_INTERVAL = 3000  # in ms
 
 
 # ##############  Logging
@@ -159,7 +160,10 @@ def set_timer_for_short_break():
     logger.info("Next break (short): " + next_short_break_per_clock)
     logger.info("Next long break: " + next_long_break_per_clock)
 
+    # ##############  Set system tray tool tip
     set_system_tray_tool_tip_text()
+    global tooltip_update_timer
+    tooltip_update_timer.start(TOOLTIP_TIMER_INTERVAL)
 
     # ##############  Start timer
     global short_break_timer
@@ -238,6 +242,8 @@ def set_timer_for_long_break():
     logger.info("Next break (long): " + next_long_break_per_clock)
 
     set_system_tray_tool_tip_text()
+    global tooltip_update_timer
+    tooltip_update_timer.start(TOOLTIP_TIMER_INTERVAL)
 
     global long_break_timer
     long_break_timer.start(secs_to_notification * 1000)
@@ -297,6 +303,13 @@ def reset_next_long_break_time():
     )
 
 
+# ##############  Generic state actions
+def set_static_tool_tip_text(text):
+    global tray_icon, tooltip_update_timer
+    tooltip_update_timer.stop()
+    tray_icon.setToolTip(TOOLTIP_TITLE + "\n\n" + text)
+
+
 # ##############  Set up short break state sub-classes
 class WaitingForShortBreak(sm.State):
     def __init__(self):
@@ -346,6 +359,7 @@ class ShortBreakInProgress(sm.State):
     def on_entry(self):
         global shorty
         shorty.showFullScreen()
+        set_static_tool_tip_text("Short break in progress")
 
     def on_exit(self):
         shorty.hide()
@@ -357,7 +371,8 @@ class WaitingAfterShortAfk(sm.State):
         self.name = "Waiting after a short AFK timeout"
 
     def on_entry(self):
-        pass
+        global tray_icon
+        set_static_tool_tip_text("Away from keyboard (short)")
 
     def on_exit(self):
         pass
@@ -413,6 +428,7 @@ class LongBreakInProgress(sm.State):
         global longy
         longy.set_layout_to_countdown()
         longy.showFullScreen()
+        set_static_tool_tip_text("Long break in progess")
 
     def on_exit(self):
         reset_next_long_break_time()
@@ -424,10 +440,11 @@ class LongBreakFinished(sm.State):
         self.name = "Long break finished"
 
     def on_entry(self):
+        global long_break_chime
         longy.set_layout_to_finished()
         longy.showFullScreen()
-        global long_break_chime
         long_break_chime.play()
+        set_static_tool_tip_text("Long break finished")
 
     def on_exit(self):
         reset_next_long_break_time()
@@ -439,7 +456,7 @@ class WaitingAfterLongAfk(sm.State):
         self.name = "Waiting after a long AFK timeout"
 
     def on_entry(self):
-        pass
+        set_static_tool_tip_text("Away from keyboard (long)")
 
     def on_exit(self):
         reset_next_long_break_time()
@@ -738,8 +755,9 @@ def main():
     tray_icon.show()
 
     # ##############  Set up system tray icon tool tip timer
+    global tooltip_update_timer
     tooltip_update_timer = QTimer(timeout=set_system_tray_tool_tip_text)
-    tooltip_update_timer.start(2000)
+    tooltip_update_timer.start(TOOLTIP_TIMER_INTERVAL)
 
     # ##############  Start state machine
     global machine
@@ -753,10 +771,10 @@ def main():
     scheduled_events = {}
     if (
         config["away_from_keyboard"]["short_break_timeout"]
-        > config["away_from_keyboard"]["long_break_timeout"]
+        >= config["away_from_keyboard"]["long_break_timeout"]
     ):
         logger.error(
-            "The short break AFK timeout is set to be longer than the long break AFK timeout.  This makes no sense, and the AFK short break timeout will not be set."
+            "The short break AFK timeout is set to be the same as or longer than the long break AFK timeout.  This makes no sense, and the AFK short break timeout will not be set."
         )
     elif config["away_from_keyboard"]["short_break_timeout"] > 0:
         scheduled_events[
