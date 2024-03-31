@@ -29,6 +29,24 @@ import afk_worker as aw
 
 # TODO Make the clock time format configurable.
 TIME_FORMAT = "%-I:%M:%S %p"
+TOOLTIP_TITLE = "Gentle Break Reminder"
+
+
+# ##############  Logging
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+# For logging to the console
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+logger.addHandler(console_handler)
+
+# For logging to cutelog
+socket_handler = SocketHandler("127.0.0.1", 19996)
+socket_handler.setLevel(logging.DEBUG)
+logger.addHandler(socket_handler)
+
+logger.debug("Logging initialized")
 
 
 # ##############  Events for the state machine
@@ -144,10 +162,12 @@ def set_timer_for_short_break():
     set_system_tray_tool_tip_text()
 
     # ##############  Start timer
+    global short_break_timer
     short_break_timer.start(secs_to_notification * 1000)
 
 
 def show_short_break_early_notification():
+    global glowy
     glowy.set_main_color(config["colors"]["short"])
     glowy.run_on_click = lambda: machine.process_event(break_started)
 
@@ -169,6 +189,7 @@ def show_short_break_early_notification():
         config["colors"]["early"],
     )
 
+    global machine
     glowy.transition_color_over_iterable(
         my_iterable,
         lambda: machine.process_event(short_break_early_notif_timeout),
@@ -218,6 +239,7 @@ def set_timer_for_long_break():
 
     set_system_tray_tool_tip_text()
 
+    global long_break_timer
     long_break_timer.start(secs_to_notification * 1000)
 
 
@@ -265,6 +287,7 @@ def show_long_break_late_notification():
 
 def reset_next_long_break_time():
     global next_long_break_unix_time
+    global config
     next_long_break_unix_time = (
         time.time() + config["regular_break"]["spacing"]
     )
@@ -321,6 +344,7 @@ class ShortBreakInProgress(sm.State):
         self.name = "Short break in progress"
 
     def on_entry(self):
+        global shorty
         shorty.showFullScreen()
 
     def on_exit(self):
@@ -386,6 +410,7 @@ class LongBreakInProgress(sm.State):
         self.name = "Long break in progress"
 
     def on_entry(self):
+        global longy
         longy.set_layout_to_countdown()
         longy.showFullScreen()
 
@@ -401,6 +426,7 @@ class LongBreakFinished(sm.State):
     def on_entry(self):
         longy.set_layout_to_finished()
         longy.showFullScreen()
+        global long_break_chime
         long_break_chime.play()
 
     def on_exit(self):
@@ -585,6 +611,7 @@ def set_system_tray_tool_tip_text():
         TIME_FORMAT, time.localtime(next_long_break_unix_time)
     )
 
+    global tray_icon
     tray_icon.setToolTip(
         TOOLTIP_TITLE
         + "\n\n"
@@ -598,24 +625,9 @@ def set_system_tray_tool_tip_text():
 
 
 # ##############  Main
-if __name__ == "__main__":
-    # ##############  Logging
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-
-    # For logging to the console
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    logger.addHandler(console_handler)
-
-    # For logging to cutelog
-    socket_handler = SocketHandler("127.0.0.1", 19996)
-    socket_handler.setLevel(logging.DEBUG)
-    logger.addHandler(socket_handler)
-
-    logger.debug("Logging initialized")
-
+def main():
     # ##############  Default configuration
+    global config
     config = {
         "general": {
             "steady_pulse_period": 1_000,
@@ -661,10 +673,12 @@ if __name__ == "__main__":
         )
 
     # ##############  Set up concurrent activities
+    global short_break_timer
     short_break_timer = QTimer(
         singleShot=True,
         timeout=lambda: machine.process_event(short_break_due_timeout),
     )
+    global long_break_timer
     long_break_timer = QTimer(
         singleShot=True,
         timeout=lambda: machine.process_event(long_break_due_timeout),
@@ -675,8 +689,10 @@ if __name__ == "__main__":
     # ##############  Set up Qt
     app = QApplication(sys.argv)
 
+    global glowy
     glowy = gb.GlowBox()
 
+    global shorty
     if config["general"]["allow_skipping_short_breaks"]:
         shorty = bs.ShortBreakScreen(
             config["short_break"]["length"],
@@ -689,6 +705,7 @@ if __name__ == "__main__":
             lambda: machine.process_event(break_ended),
         )
 
+    global longy
     longy = bs.LongBreakScreen(
         config["regular_break"]["length"],
         lambda: machine.process_event(long_break_finished_timeout),
@@ -701,11 +718,13 @@ if __name__ == "__main__":
     # TODO Stop the chime when the user clicks "Let me get back to work".
     long_break_chime_file = "singing_bowl.wav"
     long_break_chime_volume = 0.5
+    global long_break_chime
     long_break_chime = QSoundEffect()
     long_break_chime.setSource(QUrl.fromLocalFile(long_break_chime_file))
     long_break_chime.setVolume(long_break_chime_volume)
 
     # ##############  Add tray icon
+    global tray_icon
     tray_icon = QSystemTrayIcon(QIcon(config["general"]["icon"]))
 
     tray_menu = QMenu()
@@ -714,7 +733,6 @@ if __name__ == "__main__":
     tray_menu.addAction(action)
     tray_icon.setContextMenu(tray_menu)
 
-    TOOLTIP_TITLE = "Gentle Break Reminder"
     tray_icon.setToolTip(TOOLTIP_TITLE)
 
     tray_icon.show()
@@ -724,6 +742,7 @@ if __name__ == "__main__":
     tooltip_update_timer.start(2000)
 
     # ##############  Start state machine
+    global machine
     machine = sm.StateMachine(waiting_for_short_break)
 
     # ##############  Set up AFK listener
@@ -779,3 +798,7 @@ if __name__ == "__main__":
 
     # ##############  Exit on QT app close
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
