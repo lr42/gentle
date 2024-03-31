@@ -582,10 +582,19 @@ def set_system_tray_tool_tip_text():
     next_long_break_relative = get_relative_due_time(secs_to_long_break)
 
     next_long_break_per_clock = time.strftime(
-                    TIME_FORMAT, time.localtime(next_long_break_unix_time)
-                        )
+        TIME_FORMAT, time.localtime(next_long_break_unix_time)
+    )
 
-    tray_icon.setToolTip(TOOLTIP_TITLE + "\n\n" + next_long_break_message + "\n" + next_long_break_relative + "\n(" + next_long_break_per_clock + ")")
+    tray_icon.setToolTip(
+        TOOLTIP_TITLE
+        + "\n\n"
+        + next_long_break_message
+        + "\n"
+        + next_long_break_relative
+        + "\n("
+        + next_long_break_per_clock
+        + ")"
+    )
 
 
 # ##############  Main
