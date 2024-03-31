@@ -104,6 +104,7 @@ def set_timer_for_short_break():
     )
     logger.debug("secs_to_short_break:  %s", secs_to_short_break)
 
+    global next_short_break_unix_time
     next_short_break_unix_time = time.time() + secs_to_short_break
 
     secs_to_notification = (
@@ -758,7 +759,7 @@ if __name__ == "__main__":
     # ##############  Clean up AFK thread on exit
     def cleanup():
         """
-        Stop timers and threads, before exiting the application.  (Otherwise we
+        Stop timers and threads before exiting the application.  (Otherwise we
         get errors complaining that we didn't.)
         """
         afk_worker.stopTimerSignal.emit()
