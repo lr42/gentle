@@ -543,39 +543,45 @@ def deep_update(a, b):
         a = b
     return a
 
+
+def get_relative_due_time(seconds):
+    half_minutes = seconds // 30
+    if half_minutes == -1:
+        return "Due right now"
+    elif half_minutes == -2:
+        return "Past due by over half a minute"
+    elif half_minutes == -3:
+        return "Past due by over 1 minute"
+    elif half_minutes < -3:
+        past_due_minutes = str(int(abs((half_minutes // 2) + 1)))
+        if (half_minutes + 1) % 2:
+            past_due_minutes += "½"
+        return "Past due by over {} minutes".format(past_due_minutes)
+    elif half_minutes == 0:
+        return "In less than half a minute"
+    elif half_minutes == 1:
+        return "In less than 1 minute"
+    else:
+        minutes_to = str((half_minutes + 1) // 2)
+        if (half_minutes + 1) % 2:
+            minutes_to += "½"
+        return "In less than {} minutes".format(minutes_to)
+
+
 def set_system_tray_tool_tip_text():
     global next_long_break_unix_time
     secs_to_long_break = next_long_break_unix_time - time.time()
-    half_minutes_to_long_break = secs_to_long_break // 30
-    next_long_break_relative = "Next long break:\n"
 
-    if half_minutes_to_long_break == -1:
-        next_long_break_relative += "Due right now"
-    elif half_minutes_to_long_break == -2:
-        next_long_break_relative += "Past due by 30 seconds"
-    elif half_minutes_to_long_break == -3:
-        next_long_break_relative += "Past due by 1 minute"
-    elif half_minutes_to_long_break < -3:
-        past_due_minutes = str(int(abs((half_minutes_to_long_break // 2) + 1)))
-        if (half_minutes_to_long_break + 1) % 2:
-            past_due_minutes += "½"
-        next_long_break_relative += "Past due by {} minutes".format(past_due_minutes)
-    elif half_minutes_to_long_break == 0:
-        next_long_break_relative += "In less than 30 seconds"
-    elif half_minutes_to_long_break == 1:
-        next_long_break_relative += "In less than 1 minute"
-    else:
-        minutes_to = str((half_minutes_to_long_break + 1) // 2)
-        if (half_minutes_to_long_break + 1) % 2:
-            minutes_to += "½"
-        next_long_break_relative += "In {} minutes".format(minutes_to)
+    next_long_break_message = "Next long break:"
 
+    next_long_break_relative = get_relative_due_time(secs_to_long_break)
+
+    # TODO Make the clock time format configurable.
     next_long_break_per_clock = time.strftime(
                     "%H:%M:%S", time.localtime(next_long_break_unix_time)
                         )
 
-    tray_icon.setToolTip(TOOLTIP_TITLE + "\n" + next_long_break_relative + "\n(" + next_long_break_per_clock + ")")
-    tray_icon.show()
+    tray_icon.setToolTip(TOOLTIP_TITLE + "\n\n" + next_long_break_message + "\n" + next_long_break_relative + "\n(" + next_long_break_per_clock + ")")
 
 
 # ##############  Main
