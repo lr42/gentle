@@ -1,15 +1,6 @@
 """Detects AFK status based on mouse and keyboard activity."""
 
 # TODO Test for weird timings and raise a warning if one is found.
-# TODO Move logger "Emitting" statements to a slot.
-# TODO The scheduled events should be monitored separately from limbo....
-#  Once we've entered an AFK state, scheduled events should be scheduled since
-#  the las input before AFK status, not the last input that was done (perhaps
-#  in 'limbo' status).  This was causing issues where I'd enter AFK status, I
-#  should've gotten a scheduled timeout, but I went into limbo right before.
-#  That ended up completely reseting scheduled events.  Maybe make this a
-#  user-settable option?
-
 
 import time
 from typing import List, Optional
@@ -129,6 +120,24 @@ class AFKWorker(QObject):
             self._timer.timeout.connect(self._monitor_status)
             self.stopTimerSignal.connect(self._stop_worker)
 
+        # ##############  Log signals being emitted
+        self.afk_signal.connect(
+            lambda t: logger.info(
+                "AFK since %s", time.strftime("%H:%M:%S", time.localtime(t))
+            )
+        )
+        self.at_computer_signal.connect(
+            lambda t: logger.info(
+                "At computer since %s",
+                time.strftime("%H:%M:%S", time.localtime(t)),
+            )
+        )
+        self.in_limbo_signal.connect(lambda: logger.info("In limbo"))
+        self.leaving_limbo_signal.connect(lambda: logger.info("Leaving limbo"))
+        self.scheduled_signal.connect(
+            lambda t: logger.info("Scheduled event (%s)", t)
+        )
+
     # pylint: disable=unused-argument
     def _on_input(self, *args):
         """Runs whenever mouse or keyboard activity is detected."""
@@ -139,23 +148,18 @@ class AFKWorker(QObject):
                 if self._status == self._AFK:
                     self._status = self._IN_LIMBO
                     self._entered_limbo_time = time.time()
-                    logger.info("Emitting 'in limbo'")
                     self.in_limbo_signal.emit()
                 elif self._status == self._IN_LIMBO:
                     elapsed_limbo_time = time.time() - self._entered_limbo_time
                     if elapsed_limbo_time > self._limbo_timeout_to_back:
                         self._status = self._AT_COMPUTER
-                        logger.info("Emitting 'leaving limbo'")
                         self.leaving_limbo_signal.emit()
-                        logger.info("Emitting 'at computer'")
                         self.at_computer_signal.emit(self._entered_limbo_time)
             else:
                 if self._status == self._AFK:
                     self._status = self._AT_COMPUTER
-                    logger.info("Emitting 'at computer'")
                     self.at_computer_signal.emit(time.time())
         else:
-            logger.info("Emitting 'at computer'")
             self.at_computer_signal.emit(time.time())
 
         if self._status == self._AT_COMPUTER:
@@ -171,7 +175,6 @@ class AFKWorker(QObject):
             and elapsed_input_time > self._limbo_timeout_to_afk
         ):
             self._status = self._AFK
-            logger.info("Emitting 'leaving limbo'")
             self.leaving_limbo_signal.emit()
         elif (
             self._status == self._AT_COMPUTER
@@ -179,7 +182,6 @@ class AFKWorker(QObject):
         ):
             self._status = self._AFK
             self._last_input_before_afk = self._last_input_time
-            logger.info("Emitting 'AFK'")
             self.afk_signal.emit(self._last_input_time)
 
         while True:
@@ -194,7 +196,6 @@ class AFKWorker(QObject):
             ):
                 elapsed_input_time = time.time() - self._last_input_before_afk
             if elapsed_input_time > current_scheduled_time:
-                logger.info("Emitting 'scheduled event'")
                 self.scheduled_signal.emit(current_scheduled_time)
                 self._scheduled_current_index += 1
             else:
