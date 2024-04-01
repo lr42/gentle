@@ -30,7 +30,7 @@ import afk_worker as aw
 # TODO Make the clock time format configurable.
 TIME_FORMAT = "%-I:%M:%S %p"
 TOOLTIP_TITLE = "Gentle Break Reminder"
-TOOLTIP_TIMER_INTERVAL = 3000  # in ms
+TOOLTIP_TIMER_INTERVAL = 2000  # in ms
 
 
 # ##############  Logging
@@ -596,10 +596,9 @@ def get_relative_due_time(seconds):
 
 
 def set_system_tray_tool_tip_text():
-    global next_long_break_unix_time
-    secs_to_long_break = next_long_break_unix_time - time.time()
+    global next_long_break_unix_time, next_short_break_unix_time
 
-    NEXT_LONG_BREAK_MESSAGE = "Next long break:"
+    secs_to_long_break = next_long_break_unix_time - time.time()
 
     next_long_break_relative = get_relative_due_time(secs_to_long_break)
 
@@ -607,18 +606,32 @@ def set_system_tray_tool_tip_text():
         TIME_FORMAT, time.localtime(next_long_break_unix_time)
     )
 
+    tooltip_message = ""
+
+    if next_short_break_unix_time is not None:
+        secs_to_short_break = next_short_break_unix_time - time.time()
+
+        next_short_break_relative = get_relative_due_time(secs_to_short_break)
+
+        next_short_break_per_clock = time.strftime(
+            TIME_FORMAT, time.localtime(next_short_break_unix_time)
+        )
+
+        tooltip_message += "<u>Next break (short):</u><br>"
+        tooltip_message += next_short_break_relative
+        tooltip_message += "<br>({})<br>".format(next_short_break_per_clock)
+
+        tooltip_message += "<u>Next long break:</u><br>"
+        tooltip_message += next_long_break_relative
+        tooltip_message += "<br>({})".format(next_long_break_per_clock)
+    else:
+        tooltip_message += "<u>Next break (long):</u><br>"
+        tooltip_message += next_long_break_relative
+        tooltip_message += "<br>({})".format(next_long_break_per_clock)
+
     global tray_icon
-    tray_icon.setToolTip(
-        "<b>"
-        + TOOLTIP_TITLE
-        + "</b><br><u>"
-        + NEXT_LONG_BREAK_MESSAGE
-        + "</u><br>"
-        + next_long_break_relative
-        + "<br>("
-        + next_long_break_per_clock
-        + ")"
-    )
+    tray_icon.show()
+    tray_icon.setToolTip("<b>" + TOOLTIP_TITLE + "</b><br>" + tooltip_message)
 
 
 # ##############  Functions used in __main__
