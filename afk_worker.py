@@ -1,7 +1,5 @@
 """Detects AFK status based on mouse and keyboard activity."""
 
-# TODO Test for weird timings and raise a warning if one is found.
-
 import time
 from typing import List, Optional
 import logging
@@ -42,7 +40,9 @@ class AFKWorker(QObject):
         scheduled_timeouts: Optional[List[float]] = None,
         monitor_interval: float = 100,
         resets_scheduled_events_on_limbo: bool = False,
+        allows_scheduled_events_before_afk: bool = False,
     ):
+        # TODO Fill in missing argument documentation.
         """
         Constructs the AFKWorker object.
 
@@ -71,6 +71,9 @@ class AFKWorker(QObject):
 
             monitor_interval: How frequently (in milliseconds) to monitor and
                 update the status.
+
+            resets_scheduled_events_on_limbo: TODO
+            allows_scheduled_events_before_afk: TODO
         """
 
         super().__init__()
@@ -78,6 +81,20 @@ class AFKWorker(QObject):
         self._status = self._AT_COMPUTER
 
         self._input_timeout = input_timeout
+        if (
+            not allows_scheduled_events_before_afk
+            and scheduled_timeouts is not None
+        ):
+            earliest_scheduled_timeout = min(scheduled_timeouts)
+            if earliest_scheduled_timeout < input_timeout:
+                self._input_timeout = earliest_scheduled_timeout
+                logger.warning(
+                    # pylint: disable=line-too-long
+                    "You've scheduled an event to happen before the AFK period begins.  In general, this is discouraged, as it can lead to weird behavior.  The AFK period will be set to match your earliest scheduled timeout instead.  If you don't want this to happen, set `allows_scheduled_events_before_afk=True`.  Earliest scheduled timeout: %s.  Previous input_timeout: %s",
+                    earliest_scheduled_timeout,
+                    input_timeout,
+                )
+
         self._limbo_timeout_to_back = limbo_timeout_to_back
 
         if limbo_timeout_to_afk is not None:
