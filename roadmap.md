@@ -22,10 +22,15 @@ Up next  (v0.1.0-beta)
 Features
 ------------------------------------------------------------------------
 
-- [ ] Show the time to the next break in the tool tip for the task bar
+- [x] Show the time to the next break in the tool tip for the task bar
   icon.  (Also mentioned by Brenden.)
+	- [ ] Allow configuring which type of time is shown in the tool tip,
+	  the absolute time, the relative time, or both (or even possilby
+	  neither).
 - [ ] Show a tool tip over the glow box which indicates which break this
   is for.  Make this optional.  (From Matt.)
+- [ ] Add a splash screen.
+- [ ] Make the program run on start-up/login.
 - [ ] Show a intro wizard on first run.  Introduce the glow box and
   allow moving it to wherever the user would like.  (Introducing the
   glow box is an idea from Matt.)
@@ -50,10 +55,16 @@ Maintenance
 - [ ] Include an actual bell.
 - [ ] Move issue tracking over to a proper issue tracker.
 - [ ] Change console logging to only print information relevant to the
+  end user.
+- [ ] Make things that should depend on the config file actually depend
+  on the config file, instead of being hard-coded.
+- [ ] Change 'regular' to 'long' in the config files (for consistency).
+- [ ] Set the window title of the break screen, so it doesn't show up as
+  `gentle.py` or whatever it shows as.
 - [ ] Package into an installer.
 - [ ] More linting.
 - [ ] Set up a website for this thing.
-  end user.
+- [ ] Refactor functions to be shorter.
 - [x] Create a GitHub repository for the project.
 - [x] Include the `stama` library.
 - [x] Get a proper icon.
@@ -84,7 +95,6 @@ Features
   `cutelog` or maybe Grafana or something similar.
 - [ ] Add a command line option to allow the user to specify which level
   of logging to show in the terminal.
-- [ ] Make the program run on start-up/login.
 - [ ] Add a progress bar to the break screens.
 - [ ] Make the text font size of items on the break screen adjust
   automatically to fill the space that they exist in.  I've got a Python
