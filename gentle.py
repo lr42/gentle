@@ -593,27 +593,18 @@ def deep_update(a, b):
 
 
 def get_relative_due_time(seconds):
-    half_minutes = seconds // 30
-    if half_minutes == -1:
+    # TODO Doc tests.
+    closest_minute = (seconds + 30) // 60
+    if closest_minute == 0:
         return "Due right now"
-    elif half_minutes == -2:
-        return "Past due by over half a minute"
-    elif half_minutes == -3:
-        return "Past due by over 1 minute"
-    elif half_minutes < -3:
-        past_due_minutes = str(int(abs((half_minutes // 2) + 1)))
-        if (half_minutes + 1) % 2:
-            past_due_minutes += "½"
-        return "Past due by over {} minutes".format(past_due_minutes)
-    elif half_minutes == 0:
-        return "In less than half a minute"
-    elif half_minutes == 1:
-        return "In less than 1 minute"
-    else:
-        minutes_to = str(int((half_minutes + 1) // 2))
-        if (half_minutes + 1) % 2:
-            minutes_to += "½"
-        return "In less than {} minutes".format(minutes_to)
+    elif closest_minute == -1:
+        return "Past due by about 1 minute"
+    elif closest_minute < -1:
+        return "Past due by about {} minutes".format(-closest_minute)
+    elif closest_minute == 1:
+        return "In about 1 minute"
+    elif closest_minute > 1:
+        return "In about {} minutes".format(closest_minute)
 
 
 def set_system_tray_tool_tip_text():
