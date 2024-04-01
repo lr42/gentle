@@ -610,7 +610,7 @@ def get_relative_due_time(seconds):
     elif half_minutes == 1:
         return "In less than 1 minute"
     else:
-        minutes_to = str((half_minutes + 1) // 2)
+        minutes_to = str(int((half_minutes + 1) // 2))
         if (half_minutes + 1) % 2:
             minutes_to += "½"
         return "In less than {} minutes".format(minutes_to)
