@@ -600,11 +600,11 @@ def get_relative_due_time(seconds):
     elif closest_minute == -1:
         return "Past due by about 1 minute"
     elif closest_minute < -1:
-        return "Past due by about {} minutes".format(-closest_minute)
+        return "Past due by about {:.0f} minutes".format(-closest_minute)
     elif closest_minute == 1:
         return "In about 1 minute"
     elif closest_minute > 1:
-        return "In about {} minutes".format(closest_minute)
+        return "In about {:.0f} minutes".format(closest_minute)
 
 
 def set_system_tray_tool_tip_text():
