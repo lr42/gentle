@@ -307,7 +307,7 @@ def reset_next_long_break_time():
 def set_static_tool_tip_text(text):
     global tray_icon, tooltip_update_timer
     tooltip_update_timer.stop()
-    tray_icon.setToolTip(TOOLTIP_TITLE + "\n\n" + text)
+    tray_icon.setToolTip("<b>" + TOOLTIP_TITLE + "</b><br>" + text)
 
 
 # ##############  Set up short break state sub-classes
@@ -620,7 +620,7 @@ def set_system_tray_tool_tip_text():
     global next_long_break_unix_time
     secs_to_long_break = next_long_break_unix_time - time.time()
 
-    next_long_break_message = "Next long break:"
+    NEXT_LONG_BREAK_MESSAGE = "Next long break:"
 
     next_long_break_relative = get_relative_due_time(secs_to_long_break)
 
@@ -630,12 +630,13 @@ def set_system_tray_tool_tip_text():
 
     global tray_icon
     tray_icon.setToolTip(
-        TOOLTIP_TITLE
-        + "\n\n"
-        + next_long_break_message
-        + "\n"
+        "<b>"
+        + TOOLTIP_TITLE
+        + "</b><br><u>"
+        + NEXT_LONG_BREAK_MESSAGE
+        + "</u><br>"
         + next_long_break_relative
-        + "\n("
+        + "<br>("
         + next_long_break_per_clock
         + ")"
     )
