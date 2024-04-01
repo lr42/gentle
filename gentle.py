@@ -65,25 +65,6 @@ returned_to_computer            = sm.Event("User returned to computer")
 # fmt: on
 
 
-# ##############  Set up conditional junction boolean
-def has_short_break_before_long_break():
-    global next_long_break_unix_time
-    secs_to_long_break = next_long_break_unix_time - time.time()
-    if config["short_break"]["max_spacing"] < secs_to_long_break:
-        logger.debug(
-            "has_short_break_before_long_break is True: %s < %s",
-            config["short_break"]["max_spacing"],
-            secs_to_long_break,
-        )
-        return True
-    logger.debug(
-        "has_short_break_before_long_break is False: %s >= %s",
-        config["short_break"]["max_spacing"],
-        secs_to_long_break,
-    )
-    return False
-
-
 # ##############  Short break state actions
 def set_timer_for_short_break():
     # TODO This function (and probably others) is too long.  It needs to be refactored.
@@ -462,6 +443,25 @@ class WaitingAfterLongAfk(sm.State):
         reset_next_long_break_time()
 
 
+# ##############  Set up conditional junction boolean
+def has_short_break_before_long_break():
+    global next_long_break_unix_time
+    secs_to_long_break = next_long_break_unix_time - time.time()
+    if config["short_break"]["max_spacing"] < secs_to_long_break:
+        logger.debug(
+            "has_short_break_before_long_break is True: %s < %s",
+            config["short_break"]["max_spacing"],
+            secs_to_long_break,
+        )
+        return True
+    logger.debug(
+        "has_short_break_before_long_break is False: %s >= %s",
+        config["short_break"]["max_spacing"],
+        secs_to_long_break,
+    )
+    return False
+
+
 # ##############  Set up junctions
 class TestForNextBreak(sm.ConditionalJunction):
     def __init__(self):
@@ -579,19 +579,7 @@ waiting_after_long_afk.transitions = {
 # fmt:on
 
 
-# ##############  Functions used in __main__
-def deep_update(a, b):
-    if isinstance(b, dict):
-        for key in b:
-            if key in a and isinstance(a[key], dict):
-                a[key] = deep_update(a[key], b[key])
-            else:
-                a[key] = b[key]
-    else:
-        a = b
-    return a
-
-
+# ##############  Functions repeating on a timed interval
 def get_relative_due_time(seconds):
     # TODO Doc tests.
     closest_minute = (seconds + 30) // 60
@@ -631,6 +619,19 @@ def set_system_tray_tool_tip_text():
         + next_long_break_per_clock
         + ")"
     )
+
+
+# ##############  Functions used in __main__
+def deep_update(a, b):
+    if isinstance(b, dict):
+        for key in b:
+            if key in a and isinstance(a[key], dict):
+                a[key] = deep_update(a[key], b[key])
+            else:
+                a[key] = b[key]
+    else:
+        a = b
+    return a
 
 
 # ##############  Main
@@ -681,7 +682,7 @@ def main():
             CONFIGURATION_FILE,
         )
 
-    # ##############  Set up concurrent activities
+    # ##############  Set up concurrent timers
     global short_break_timer
     short_break_timer = QTimer(
         singleShot=True,
