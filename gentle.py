@@ -207,7 +207,7 @@ def set_timer_for_long_break():
     global next_long_break_unix_time
     secs_to_long_break = next_long_break_unix_time - time.time()
     secs_to_notification = (
-        secs_to_long_break - config["regular_break"]["early_notification"]
+        secs_to_long_break - config["long_break"]["early_notification"]
     )
 
     secs_to_notification = max(secs_to_notification, 0)
@@ -254,7 +254,7 @@ def show_long_break_early_notification():
         starting_fade_multiplier,
         ending_fade_interval,
         # This needs to be part of the GlowBox object.
-        config["regular_break"]["early_notification"],
+        config["long_break"]["early_notification"],
         # TODO These need to be in the main program
         config["colors"]["regular"],
         config["colors"]["early"],
@@ -283,9 +283,7 @@ def show_long_break_late_notification():
 def reset_next_long_break_time():
     global next_long_break_unix_time
     global config
-    next_long_break_unix_time = (
-        time.time() + config["regular_break"]["spacing"]
-    )
+    next_long_break_unix_time = time.time() + config["long_break"]["spacing"]
     logger.debug(
         "Resetting next long break to:  %s",
         time.strftime(TIME_FORMAT, time.localtime(next_long_break_unix_time)),
@@ -676,7 +674,7 @@ def main():
             "allow_skipping_short_breaks": True,
             "icon": "flower.png",
         },
-        "regular_break": {
+        "long_break": {
             "spacing": 3000,
             "length": 600,
             "early_notification": 120,
@@ -749,7 +747,7 @@ def main():
 
     global longy
     longy = bs.LongBreakScreen(
-        config["regular_break"]["length"],
+        config["long_break"]["length"],
         lambda: machine.process_event(long_break_finished_timeout),
         lambda: machine.process_event(break_ended),
         lambda: machine.process_event(break_ended),

@@ -59,13 +59,13 @@ Maintenance
 - [ ] Move issue tracking over to a proper issue tracker.
 - [ ] Make things that should depend on the config file actually depend
   on the config file, instead of being hard-coded.
-- [ ] Change 'regular' to 'long' in the config files (for consistency).
 - [ ] Set the window title of the break screen, so it doesn't show up as
   `gentle.py` or whatever it shows as.
 - [ ] Package into an installer.
 - [ ] More linting.
 - [ ] Set up a website for this thing.
 - [ ] Refactor functions to be shorter.
+- [x] Change 'regular' to 'long' in the config files (for consistency).
 - [x] Change console logging to only print information relevant to the
   end user.
 - [x] Create a GitHub repository for the project.

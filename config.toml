@@ -10,10 +10,10 @@
     allow_skipping_short_breaks = true
 
 
-[regular_break]
-    # All of these values pertain to regular (longer) breaks, where the
-    #  user is meant to stretch their legs and get away from the
-    #  computer for a bit.
+[long_break]
+	# All of these values pertain to long breaks, where the user is
+	#  meant to stretch their legs and get away from the computer for a
+	#  bit.
 
     # How far apart breaks will be spaced from each other.
     spacing             = 3000  # in seconds
