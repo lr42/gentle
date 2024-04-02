@@ -222,8 +222,9 @@ def set_timer_for_long_break():
 
     logger.info("Next break (long): " + next_long_break_per_clock)
 
+    global tooltip_update_timer, next_short_break_unix_time
+    next_short_break_unix_time = None
     set_system_tray_tool_tip_text()
-    global tooltip_update_timer
     tooltip_update_timer.start(TOOLTIP_TIMER_INTERVAL)
 
     global long_break_timer
@@ -761,7 +762,8 @@ def main():
     tray_icon.show()
 
     # ##############  Set up system tray icon tool tip timer
-    global tooltip_update_timer
+    global tooltip_update_timer, next_short_break_unix_time
+    next_short_break_unix_time = None
     tooltip_update_timer = QTimer(timeout=set_system_tray_tool_tip_text)
     tooltip_update_timer.start(TOOLTIP_TIMER_INTERVAL)
 
