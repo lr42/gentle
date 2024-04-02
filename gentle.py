@@ -34,17 +34,24 @@ TOOLTIP_TIMER_INTERVAL = 2000  # in ms
 
 
 # ##############  Logging
+SUCCESS = 25
+logging.addLevelName(25, "SUCCESS")
+
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 # For logging to the console
+console_formatter = logging.Formatter(
+    fmt="%(asctime)s - %(message)s", datefmt="%a %I:%M:%S %p"
+)
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(console_formatter)
+console_handler.setLevel(SUCCESS)
 logger.addHandler(console_handler)
 
 # For logging to cutelog
 socket_handler = SocketHandler("127.0.0.1", 19996)
-socket_handler.setLevel(logging.DEBUG)
+socket_handler.setLevel(0)
 logger.addHandler(socket_handler)
 
 logger.debug("Logging initialized")
@@ -138,8 +145,8 @@ def set_timer_for_short_break():
         TIME_FORMAT, time.localtime(next_long_break_unix_time)
     )
 
-    logger.info("Next break (short): " + next_short_break_per_clock)
-    logger.info("Next long break: " + next_long_break_per_clock)
+    logger.log(SUCCESS, "Next break (short): %s", next_short_break_per_clock)
+    logger.log(SUCCESS, "Next long break: %s", next_long_break_per_clock)
 
     # ##############  Set system tray tool tip
     set_system_tray_tool_tip_text()
@@ -220,7 +227,7 @@ def set_timer_for_long_break():
         TIME_FORMAT, time.localtime(next_long_break_unix_time)
     )
 
-    logger.info("Next break (long): " + next_long_break_per_clock)
+    logger.log(SUCCESS, "Next break (long): %s", next_long_break_per_clock)
 
     global tooltip_update_timer, next_short_break_unix_time
     next_short_break_unix_time = None
@@ -342,9 +349,11 @@ class ShortBreakInProgress(sm.State):
         global shorty
         shorty.showFullScreen()
         set_static_tool_tip_text("Short break in progress")
+        logger.log(SUCCESS, "Taking a short break.")
 
     def on_exit(self):
         shorty.hide()
+        logger.log(SUCCESS, "Short break finished.")
 
 
 class WaitingAfterShortAfk(sm.State):
@@ -355,6 +364,9 @@ class WaitingAfterShortAfk(sm.State):
     def on_entry(self):
         global tray_icon
         set_static_tool_tip_text("Away from keyboard (short)")
+        logger.log(
+            SUCCESS, "Away from the computer enough to reset the short break."
+        )
 
     def on_exit(self):
         pass
@@ -411,6 +423,7 @@ class LongBreakInProgress(sm.State):
         longy.set_layout_to_countdown()
         longy.showFullScreen()
         set_static_tool_tip_text("Long break in progess")
+        logger.log(SUCCESS, "Taking a long break.")
 
     def on_exit(self):
         reset_next_long_break_time()
@@ -430,6 +443,7 @@ class LongBreakFinished(sm.State):
 
     def on_exit(self):
         reset_next_long_break_time()
+        logger.log(SUCCESS, "Getting back to work!")
 
 
 class WaitingAfterLongAfk(sm.State):
@@ -439,9 +453,13 @@ class WaitingAfterLongAfk(sm.State):
 
     def on_entry(self):
         set_static_tool_tip_text("Away from keyboard (long)")
+        logger.log(
+            SUCCESS, "Away from the computer enough to reset the long break."
+        )
 
     def on_exit(self):
         reset_next_long_break_time()
+        logger.log(SUCCESS, "Back at the computer.")
 
 
 # ##############  Set up conditional junction boolean
@@ -768,6 +786,8 @@ def main():
     tooltip_update_timer.start(TOOLTIP_TIMER_INTERVAL)
 
     # ##############  Start state machine
+    logger.log(SUCCESS, "Welcome to the Gentle Break Reminder!")
+
     global machine
     machine = sm.StateMachine(waiting_for_short_break)
 

@@ -29,6 +29,9 @@ Features
 	  neither).
 - [ ] Show a tool tip over the glow box which indicates which break this
   is for.  Make this optional.  (From Matt.)
+- [ ] Set up proper file logging and log rotations.  Preferably the logs
+  file logs would be in JSON format, so they could easily be read with
+  `cutelog` or maybe Grafana or something similar.
 - [ ] Add a splash screen.
 - [ ] Make the program run on start-up/login.
 - [ ] Show a intro wizard on first run.  Introduce the glow box and
@@ -54,8 +57,6 @@ Maintenance
 
 - [ ] Include an actual bell.
 - [ ] Move issue tracking over to a proper issue tracker.
-- [ ] Change console logging to only print information relevant to the
-  end user.
 - [ ] Make things that should depend on the config file actually depend
   on the config file, instead of being hard-coded.
 - [ ] Change 'regular' to 'long' in the config files (for consistency).
@@ -65,6 +66,8 @@ Maintenance
 - [ ] More linting.
 - [ ] Set up a website for this thing.
 - [ ] Refactor functions to be shorter.
+- [x] Change console logging to only print information relevant to the
+  end user.
 - [x] Create a GitHub repository for the project.
 - [x] Include the `stama` library.
 - [x] Get a proper icon.
@@ -90,9 +93,6 @@ Features
 - [ ] Internationalization.
 - [ ] If you are late to taking a regular break, allow the option of
   extending the break length up to a certain amount.
-- [ ] Set up proper file logging and log rotations.  Preferably the logs
-  file logs would be in JSON format, so they could easily be read with
-  `cutelog` or maybe Grafana or something similar.
 - [ ] Add a command line option to allow the user to specify which level
   of logging to show in the terminal.
 - [ ] Add a progress bar to the break screens.
@@ -108,6 +108,9 @@ Features
   long break and then taking a "forced" break before the next long
   break.  It would be nice if these "forced breaks would roughly
   correspond with the scheduled long breaks.)
+- [ ] Show time stamps with AFK events that are printed to the console.
+  I.e. "You've been away from the computer since 12:34:56, long
+  enough ... blah blah blah".
 - [x] Add a notification sound to indicate when the break is done.
 - [x] Show a skip break button on the short break screen.  (From
   Matt.)  Make this optional, possibly with the default to off.
