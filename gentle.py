@@ -27,10 +27,9 @@ import breakscreen as bs
 import afk_worker as aw
 
 
-# TODO Make the clock time format configurable.
 TIME_FORMAT = "%-I:%M:%S %p"
 TOOLTIP_TITLE = "Gentle Break Reminder"
-TOOLTIP_TIMER_INTERVAL = 2000  # in ms
+TOOLTIP_TIMER_INTERVAL = 3000  # in ms
 
 
 # ##############  Logging
@@ -42,7 +41,7 @@ logger.setLevel(logging.DEBUG)
 
 # For logging to the console
 console_formatter = logging.Formatter(
-    fmt="%(asctime)s - %(message)s", datefmt="%a %I:%M:%S %p"
+    fmt="%(asctime)s - %(message)s", datefmt=TIME_FORMAT
 )
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(console_formatter)
@@ -139,10 +138,12 @@ def set_timer_for_short_break():
     )
 
     next_short_break_per_clock = time.strftime(
-        TIME_FORMAT, time.localtime(next_short_break_unix_time)
+        config["general"]["time_format"],
+        time.localtime(next_short_break_unix_time),
     )
     next_long_break_per_clock = time.strftime(
-        TIME_FORMAT, time.localtime(next_long_break_unix_time)
+        config["general"]["time_format"],
+        time.localtime(next_long_break_unix_time),
     )
 
     logger.log(SUCCESS, "Next break (short): %s", next_short_break_per_clock)
@@ -224,7 +225,8 @@ def set_timer_for_long_break():
     )
 
     next_long_break_per_clock = time.strftime(
-        TIME_FORMAT, time.localtime(next_long_break_unix_time)
+        config["general"]["time_format"],
+        time.localtime(next_long_break_unix_time),
     )
 
     logger.log(SUCCESS, "Next break (long): %s", next_long_break_per_clock)
@@ -286,7 +288,10 @@ def reset_next_long_break_time():
     next_long_break_unix_time = time.time() + config["long_break"]["spacing"]
     logger.debug(
         "Resetting next long break to:  %s",
-        time.strftime(TIME_FORMAT, time.localtime(next_long_break_unix_time)),
+        time.strftime(
+            config["general"]["time_format"],
+            time.localtime(next_long_break_unix_time),
+        ),
     )
 
 
@@ -620,7 +625,8 @@ def set_system_tray_tool_tip_text():
     next_long_break_relative = get_relative_due_time(secs_to_long_break)
 
     next_long_break_per_clock = time.strftime(
-        TIME_FORMAT, time.localtime(next_long_break_unix_time)
+        config["general"]["time_format"],
+        time.localtime(next_long_break_unix_time),
     )
 
     tooltip_message = ""
@@ -631,7 +637,8 @@ def set_system_tray_tool_tip_text():
         next_short_break_relative = get_relative_due_time(secs_to_short_break)
 
         next_short_break_per_clock = time.strftime(
-            TIME_FORMAT, time.localtime(next_short_break_unix_time)
+            config["general"]["time_format"],
+            time.localtime(next_short_break_unix_time),
         )
 
         tooltip_message += "<u>Next break (short):</u><br>"
@@ -673,6 +680,7 @@ def main():
             "steady_pulse_period": 1_000,
             "allow_skipping_short_breaks": True,
             "icon": "flower.png",
+            "time_format": TIME_FORMAT,
         },
         "long_break": {
             "spacing": 3000,
@@ -711,6 +719,13 @@ def main():
             "Configuration file (%s) not found, using defaults.",
             CONFIGURATION_FILE,
         )
+
+    # ##############  Adjust console logger with configured time format
+    console_formatter = logging.Formatter(
+        fmt="%(asctime)s - %(message)s",
+        datefmt=config["general"]["time_format"],
+    )
+    console_handler.setFormatter(console_formatter)
 
     # ##############  Set up concurrent timers
     global short_break_timer
