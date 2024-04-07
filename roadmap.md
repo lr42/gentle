@@ -24,8 +24,8 @@ Features
 
 - [ ] Show a tool tip over the glow box which indicates which break this
   is for.  Make this optional.  (From Matt.)
-- [ ] Set up proper file logging and log rotations.  Preferably the logs
-  file logs would be in JSON format, so they could easily be read with
+- [ ] Set up proper file logging and log rotations.  Preferably the file
+  logs would be in JSON format, so they could easily be read with
   `cutelog` or maybe Grafana or something similar.
 - [ ] Add a splash screen.
 - [ ] Make the program run on start-up/login.
@@ -46,6 +46,8 @@ Features
 Bugs
 ------------------------------------------------------------------------
 
+- [ ] Set the window title of the break screen, so it doesn't show up as
+  `gentle.py` or whatever it shows as.
 - [x] The countdown timer glitches/shows the wrong value when the long
   break screen is shown.
 - [x] Remove the context menus from the glow box, or at least the
@@ -56,8 +58,6 @@ Maintenance
 ------------------------------------------------------------------------
 
 - [ ] Move issue tracking over to a proper issue tracker.
-- [ ] Set the window title of the break screen, so it doesn't show up as
-  `gentle.py` or whatever it shows as.
 - [ ] Package into an installer.
 - [ ] More linting.
 - [ ] Set up a website for this thing.
@@ -111,6 +111,13 @@ Features
 - [ ] Show time stamps with AFK events that are printed to the console.
   I.e. "You've been away from the computer since 12:34:56, long
   enough ... blah blah blah".
+- [ ] Track how long on average it takes the user to click on a long
+  break notification, and then allow the option of automatically setting
+  the early notification to show up that amount of time before the long
+  break is due.  You could do this for the short break as well, but I
+  don't know if it would make as much of a difference.  I'll often delay
+  taking a long break until after I've gotten to a good stopping point,
+  which sometimes can be several minutes.
 - [x] Add a notification sound to indicate when the break is done.
 - [x] Show a skip break button on the short break screen.  (From
   Matt.)  Make this optional, possibly with the default to off.

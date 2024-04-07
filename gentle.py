@@ -174,9 +174,7 @@ def show_short_break_early_notification():
     my_iterable = gb.intervals_decreasing_over_total_time(
         starting_fade_multiplier,
         ending_fade_interval,
-        # This needs to be part of the GlowBox object.
         config["short_break"]["early_notification"],
-        # TODO These need to be in the main program
         config["colors"]["short"],
         config["colors"]["early"],
     )
@@ -253,9 +251,7 @@ def show_long_break_early_notification():
     my_iterable = gb.intervals_decreasing_over_total_time(
         starting_fade_multiplier,
         ending_fade_interval,
-        # This needs to be part of the GlowBox object.
         config["long_break"]["early_notification"],
-        # TODO These need to be in the main program
         config["colors"]["regular"],
         config["colors"]["early"],
     )
@@ -581,14 +577,24 @@ long_break_in_progress.transitions = {
     break_ended:                        test_for_next_break,  # Skipping the break
     afk_short_period_ended:             None,
     afk_long_period_ended:              None,
-    returned_to_computer:               None,  # TODO
+    # TODO If the user starts uses the computer during a break, pause the break....
+    #  However, this should be handled by the AFK status, not by the
+    #  returned_to_computer State in the general state machine.
+    returned_to_computer:               None,
 }
 
 long_break_finished.transitions = {
     break_ended:                        test_for_next_break,
     afk_short_period_ended:             None,
-    afk_long_period_ended:              None,  # TODO
-    returned_to_computer:               None,  # TODO
+    afk_long_period_ended:              None,
+    # TODO If the user starts uses the computer after a break is finished, consider the break as done....
+    #  However, this should probably be handled by the AFK status, not by the
+    #  returned_to_computer State in the general state machine.  (But I see no
+    #  reason why doing both would break anything.  Of course it's the AFK
+    #  state the triggers the returned_to_computer state.  Maybe I could use
+    #  returned_to_computer as a stopgap until I set it up to use the AFK
+    #  status?
+    returned_to_computer:               None,
 }
 
 waiting_after_long_afk.transitions = {
@@ -601,7 +607,7 @@ waiting_after_long_afk.transitions = {
 
 # ##############  Functions repeating on a timed interval
 def get_relative_due_time(seconds):
-    # TODO Doc tests.
+    # TODO Use doc tests in this function.
     closest_minute = (seconds + 30) // 60
     if closest_minute == 0:
         return "Due right now"
