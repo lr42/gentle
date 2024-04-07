@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import math
 import time
 import logging
@@ -9,13 +11,14 @@ import tomlkit
 from PySide6.QtCore import QTimer, QUrl, QThread
 
 # pylint: disable=import-error
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtGui import QAction, QIcon, QPixmap
 
 # pylint: disable=import-error
 from PySide6.QtWidgets import (
     QApplication,
     QMenu,
     QSystemTrayIcon,
+    QSplashScreen,
 )
 
 # pylint: disable=import-error
@@ -698,6 +701,13 @@ def deep_update(a, b):
     return a
 
 
+def show_splash_screen(image, timeout=4000):
+    pixmap = QPixmap(image)
+    splash = QSplashScreen(pixmap)
+    splash.show()
+    QTimer.singleShot(timeout, lambda: splash.close())
+
+
 # ##############  Main
 def main():
     # ##############  Default configuration
@@ -774,6 +784,8 @@ def main():
 
     # ##############  Set up Qt
     app = QApplication(sys.argv)
+
+    show_splash_screen("splash_screen.png")
 
     global glowy
     glowy = gb.GlowBox()

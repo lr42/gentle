@@ -223,15 +223,21 @@ Not tested
 Credits
 ========================================================================
 
-The [flower icon](https://www.flaticon.com/free-icon/flower_346218) in
-the system tray is used under the Flaticon license.  Please see [Flower
-icons created by Freepik -
-Flaticon](https://www.flaticon.com/free-icons/flower) for more
-information.
+The [flower icon][1] in the system tray is used under the Flaticon
+license.  Please see [Flower icons created by Freepik - Flaticon][2]
+for more information.
 
-The [long chime sound](https://freesound.org/s/449951/) is used under a
-Creative Commons 0 license:
+The [long chime sound][3] is used under a [Creative Commons 0
+license][4]:
 
 > Singing Bowl Male Frequency by steffcaffrey --
-> https://freesound.org/s/449951/ -- License: Creative Commons 0
+> https://freesound.org/s/44991/ -- License: Creative Commons 0
 
+The [image used in the splash screen][5] is used under a [Creative
+Commons 0 license][4].
+
+ 1:   https://www.flaticon.com/free-icon/flower_346218
+ 2:   https://www.flaticon.com/free-icons/flower
+ 3:   https://freesound.org/s/44991/
+ 4:   https://creativecommons.org/public-domain/cc0/
+ 5:   https://commons.wikimedia.org/wiki/File:Levi_XU_2016_%28Unsplash%29.jpg
