@@ -167,7 +167,6 @@ def show_short_break_early_notification():
     # TODO Should this include the color to show it as?
     glowy.show()
 
-    # TODO Needs to come from configuration
     ending_fade_interval = config["general"]["steady_pulse_period"] / 2 / 1_000
     logger.debug("ending_fade_interval: %s", ending_fade_interval)
     starting_fade_multiplier = 5
@@ -247,7 +246,6 @@ def show_long_break_early_notification():
 
     glowy.show()
 
-    # TODO Needs to come from configuration
     ending_fade_interval = config["general"]["steady_pulse_period"] / 2 / 1_000
     logger.debug("ending_fade_interval: %s", ending_fade_interval)
     starting_fade_multiplier = 5
@@ -686,6 +684,7 @@ def main():
             "spacing": 3000,
             "length": 600,
             "early_notification": 120,
+            "chime": "singing_bowl.wav",
         },
         "short_break": {
             "max_spacing": 1200,
@@ -700,6 +699,7 @@ def main():
             "early": "white",
             "late": "yellow",
         },
+        "afk_options": {},
     }
 
     # ##############  Load configuration from file
@@ -769,9 +769,8 @@ def main():
     )
 
     # ##############  Add chime
-    # TODO Make the chime settable in the configuration.
     # TODO Stop the chime when the user clicks "Let me get back to work".
-    long_break_chime_file = "singing_bowl.wav"
+    long_break_chime_file = config["long_break"]["chime"]
     long_break_chime_volume = 0.5
     global long_break_chime
     long_break_chime = QSoundEffect()
@@ -828,9 +827,9 @@ def main():
         ] = lambda: machine.process_event(afk_long_period_ended)
 
     afk_thread = QThread()
-    # TODO Make AFK and limbo times settable in the config.
     afk_worker = aw.AFKWorker(
         scheduled_timeouts=list(scheduled_events.keys()),
+        **config["afk_options"],
     )
 
     afk_worker.scheduled_signal.connect(lambda t: scheduled_events[t]())
