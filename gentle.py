@@ -684,7 +684,7 @@ def main():
             "spacing": 3000,
             "length": 600,
             "early_notification": 120,
-            "chime": "singing_bowl.wav",
+            "chime": "long_chime.wav",
         },
         "short_break": {
             "max_spacing": 1200,

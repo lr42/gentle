@@ -229,3 +229,9 @@ icons created by Freepik -
 Flaticon](https://www.flaticon.com/free-icons/flower) for more
 information.
 
+The [long chime sound](https://freesound.org/s/449951/) is used under a
+Creative Commons 0 license:
+
+> Singing Bowl Male Frequency by steffcaffrey --
+> https://freesound.org/s/449951/ -- License: Creative Commons 0
+

@@ -55,7 +55,6 @@ Bugs
 Maintenance
 ------------------------------------------------------------------------
 
-- [ ] Include an actual bell.
 - [ ] Move issue tracking over to a proper issue tracker.
 - [ ] Set the window title of the break screen, so it doesn't show up as
   `gentle.py` or whatever it shows as.
@@ -63,6 +62,7 @@ Maintenance
 - [ ] More linting.
 - [ ] Set up a website for this thing.
 - [ ] Refactor functions to be shorter.
+- [x] Include an actual bell.
 - [x] Make things that should depend on the config file actually depend
   on the config file, instead of being hard-coded.
 - [x] Change 'regular' to 'long' in the config files (for consistency).
