@@ -22,11 +22,6 @@ Up next  (v0.1.0-beta)
 Features
 ------------------------------------------------------------------------
 
-- [x] Show the time to the next break in the tool tip for the task bar
-  icon.  (Also mentioned by Brenden.)
-	- [ ] Allow configuring which type of time is shown in the tool tip,
-	  the absolute time, the relative time, or both (or even possilby
-	  neither).
 - [ ] Show a tool tip over the glow box which indicates which break this
   is for.  Make this optional.  (From Matt.)
 - [ ] Set up proper file logging and log rotations.  Preferably the logs
@@ -37,6 +32,11 @@ Features
 - [ ] Show a intro wizard on first run.  Introduce the glow box and
   allow moving it to wherever the user would like.  (Introducing the
   glow box is an idea from Matt.)
+- [x] Show the time to the next break in the tool tip for the task bar
+  icon.  (Also mentioned by Brenden.)
+	- [x] Allow configuring which type of time is shown in the tool tip,
+	  the absolute time, the relative time, or both (or even possilby
+	  neither).
 - [x] Monitor keyboard and mouse activity to reset breaks after a
   certain amount of time.
 - [x] Add a tool tip/title to the task bar icon.

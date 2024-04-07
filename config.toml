@@ -9,6 +9,13 @@
     # Whether to show the "Skip break" button on the short break screen.
     allow_skipping_short_breaks = true
 
+    # Whether to show the relative time to the scheduled breaks in the
+    #  system tray icon tool tip.
+    show_relative_times = true
+
+    # Whether to show the time according to the clock for the scheduled
+    #  breaks, in the system tray icon tool tip.
+    show_clock_times    = false
 
 [long_break]
     # All of these values pertain to long breaks, where the user is
@@ -27,8 +34,7 @@
     #  appear two minutes early, the notification will appear 48 minutes
     #  after the last break, but the break will still be due 50 minutes
     #  after the last break.
-    early_notification  = 120   # in seconds
-
+    early_notification  = 120  # in seconds
 
 [short_break]
     # All of these values pertain to shorter breaks, where the user
@@ -45,7 +51,6 @@
     length              = 20  # in seconds
 
     early_notification  = 30  # in seconds
-
 
 [colors]
     # Colors can be formatted either as hex values or named colors.  To
@@ -65,7 +70,6 @@
 
     early   = "white"
     late    = "yellow"
-
 
 [away_from_keyboard]
     # Gentle break reminder can count time spent away from the keyboard

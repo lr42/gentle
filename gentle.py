@@ -615,45 +615,68 @@ def get_relative_due_time(seconds):
         return "In about {:.0f} minutes".format(closest_minute)
 
 
+def get_tooltip_break_message(
+    next_break_unix_time, time_format, show_clock_times, show_relative_times
+):
+    secs_to_break = next_break_unix_time - time.time()
+
+    if show_clock_times:
+        next_break_per_clock = time.strftime(
+            time_format,
+            time.localtime(next_break_unix_time),
+        )
+        if show_relative_times:
+            next_break_relative = get_relative_due_time(secs_to_break)
+            return "<br>{}<br>({})".format(
+                next_break_relative, next_break_per_clock
+            )
+        else:
+            return "<br>{}".format(next_break_per_clock)
+    else:
+        if show_relative_times:
+            next_break_relative = get_relative_due_time(secs_to_break)
+            return "<br>{}".format(next_break_relative)
+        else:
+            return ""
+
+
 def set_system_tray_tool_tip_text():
     global next_long_break_unix_time, next_short_break_unix_time
 
-    secs_to_long_break = next_long_break_unix_time - time.time()
-
-    next_long_break_relative = get_relative_due_time(secs_to_long_break)
-
-    next_long_break_per_clock = time.strftime(
+    next_long_break_message = get_tooltip_break_message(
+        next_long_break_unix_time,
         config["general"]["time_format"],
-        time.localtime(next_long_break_unix_time),
+        config["general"]["show_clock_times"],
+        config["general"]["show_relative_times"],
     )
 
     tooltip_message = ""
 
-    if next_short_break_unix_time is not None:
-        secs_to_short_break = next_short_break_unix_time - time.time()
-
-        next_short_break_relative = get_relative_due_time(secs_to_short_break)
-
-        next_short_break_per_clock = time.strftime(
+    if not (
+        config["general"]["show_clock_times"]
+        or config["general"]["show_relative_times"]
+    ):
+        tooltip_message = ""
+    elif next_short_break_unix_time is not None:
+        next_short_break_message = get_tooltip_break_message(
+            next_short_break_unix_time,
             config["general"]["time_format"],
-            time.localtime(next_short_break_unix_time),
+            config["general"]["show_clock_times"],
+            config["general"]["show_relative_times"],
         )
 
-        tooltip_message += "<u>Next break (short):</u><br>"
-        tooltip_message += next_short_break_relative
-        tooltip_message += "<br>({})<br>".format(next_short_break_per_clock)
+        tooltip_message += "<br><u>Next break (short):</u>"
+        tooltip_message += next_short_break_message
 
-        tooltip_message += "<u>Next long break:</u><br>"
-        tooltip_message += next_long_break_relative
-        tooltip_message += "<br>({})".format(next_long_break_per_clock)
+        tooltip_message += "<br><u>Next long break:</u>"
+        tooltip_message += next_long_break_message
     else:
-        tooltip_message += "<u>Next break (long):</u><br>"
-        tooltip_message += next_long_break_relative
-        tooltip_message += "<br>({})".format(next_long_break_per_clock)
+        tooltip_message += "<br><u>Next break (long):</u>"
+        tooltip_message += next_long_break_message
 
     global tray_icon
     tray_icon.show()
-    tray_icon.setToolTip("<b>" + TOOLTIP_TITLE + "</b><br>" + tooltip_message)
+    tray_icon.setToolTip("<b>" + TOOLTIP_TITLE + "</b>" + tooltip_message)
 
 
 # ##############  Functions used in __main__
@@ -679,6 +702,8 @@ def main():
             "allow_skipping_short_breaks": True,
             "icon": "flower.png",
             "time_format": TIME_FORMAT,
+            "show_relative_times": True,
+            "show_clock_times": False,
         },
         "long_break": {
             "spacing": 3000,
