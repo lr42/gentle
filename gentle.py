@@ -422,7 +422,7 @@ class LongBreakInProgress(sm.State):
         global longy
         longy.set_layout_to_countdown()
         longy.showFullScreen()
-        set_static_tool_tip_text("Long break in progess")
+        set_static_tool_tip_text("Long break in progress")
         logger.log(SUCCESS, "Taking a long break.")
 
     def on_exit(self):
