@@ -27,11 +27,12 @@ Features
 - [ ] Set up proper file logging and log rotations.  Preferably the file
   logs would be in JSON format, so they could easily be read with
   `cutelog` or maybe Grafana or something similar.
-- [ ] Add a splash screen.
 - [ ] Make the program run on start-up/login.
 - [ ] Show a intro wizard on first run.  Introduce the glow box and
   allow moving it to wherever the user would like.  (Introducing the
   glow box is an idea from Matt.)
+- [x] Add a splash screen.
+	- [x] Make this optional in the config.
 - [x] Show the time to the next break in the tool tip for the task bar
   icon.  (Also mentioned by Brenden.)
 	- [x] Allow configuring which type of time is shown in the tool tip,
@@ -118,6 +119,9 @@ Features
   don't know if it would make as much of a difference.  I'll often delay
   taking a long break until after I've gotten to a good stopping point,
   which sometimes can be several minutes.
+- [ ] Make the splash screen not show up if the program is started on
+  log in.
+- [ ] Allow setting the opacity of the glowbox.
 - [x] Add a notification sound to indicate when the break is done.
 - [x] Show a skip break button on the short break screen.  (From
   Matt.)  Make this optional, possibly with the default to off.

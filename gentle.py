@@ -720,6 +720,7 @@ def main():
             "time_format": TIME_FORMAT,
             "show_relative_times": True,
             "show_clock_times": False,
+            "show_splash_screen": True,
         },
         "long_break": {
             "spacing": 3000,
@@ -785,7 +786,8 @@ def main():
     # ##############  Set up Qt
     app = QApplication(sys.argv)
 
-    show_splash_screen("splash_screen.png")
+    if config["general"]["show_splash_screen"]:
+        show_splash_screen("splash_screen.png")
 
     global glowy
     glowy = gb.GlowBox()
