@@ -31,6 +31,7 @@ Features
 - [ ] Show a intro wizard on first run.  Introduce the glow box and
   allow moving it to wherever the user would like.  (Introducing the
   glow box is an idea from Matt.)
+- [ ] Add an about entry to the system tray icon.
 - [x] Add a splash screen.
 	- [x] Make this optional in the config.
 - [x] Show the time to the next break in the tool tip for the task bar

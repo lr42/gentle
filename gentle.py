@@ -701,7 +701,7 @@ def deep_update(a, b):
     return a
 
 
-def show_splash_screen(image, timeout=4000):
+def show_splash_screen(image, timeout=3000):
     pixmap = QPixmap(image)
     splash = QSplashScreen(pixmap)
     splash.show()
@@ -720,16 +720,16 @@ def main():
             "time_format": TIME_FORMAT,
             "show_relative_times": True,
             "show_clock_times": False,
-            "show_splash_screen": True,
+            "splash_screen_timeout": 5_000,
         },
         "long_break": {
-            "spacing": 3000,
-            "length": 600,
-            "early_notification": 120,
+            "spacing": 50 * 60,
+            "length": 10 * 60,
+            "early_notification": 2 * 60,
             "chime": "long_chime.wav",
         },
         "short_break": {
-            "max_spacing": 1200,
+            "max_spacing": 20 * 60,
             "length": 20,
             "early_notification": 30,
         },
@@ -786,8 +786,10 @@ def main():
     # ##############  Set up Qt
     app = QApplication(sys.argv)
 
-    if config["general"]["show_splash_screen"]:
-        show_splash_screen("splash_screen.png")
+    if config["general"]["splash_screen_timeout"] > 0:
+        show_splash_screen(
+            "splash_screen.png", config["general"]["splash_screen_timeout"]
+        )
 
     global glowy
     glowy = gb.GlowBox()

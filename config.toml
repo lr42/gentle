@@ -17,6 +17,10 @@
     #  breaks, in the system tray icon tool tip.
     show_clock_times    = false
 
+    # How long to show the splash screen for.
+    #  To disable the splash screen, set this to zero.
+    #splash_screen_timeout   = 0  # in milliseconds
+
 [long_break]
     # All of these values pertain to long breaks, where the user is
     #  meant to stretch their legs and get away from the computer for a
