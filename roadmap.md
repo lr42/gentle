@@ -123,6 +123,8 @@ Features
 - [ ] Make the splash screen not show up if the program is started on
   log in.
 - [ ] Allow setting the opacity of the glowbox.
+- [ ] Allow setting times with a time format, i.e. "50m" or "T0:50:00"
+  or something similar.
 - [x] Add a notification sound to indicate when the break is done.
 - [x] Show a skip break button on the short break screen.  (From
   Matt.)  Make this optional, possibly with the default to off.

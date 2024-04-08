@@ -14,7 +14,7 @@ What is this?
 ========================================================================
 
 Gentle Break Reminder is a cross-platform program for Windows and Linux
-which will remind you to take regular breaks, in a very gentle way.
+which will remind you to take long breaks, in a very gentle way.
 
 When it's getting close to time to take a break, a glowing, colorful,
 semi-transparent, pulsing box will appear on your screen.  You can move
@@ -27,8 +27,8 @@ blue), you can click on the box and a full screen window will appear for
 follows the 20-20-20 rule:  At least every 20 minutes, look at something
 20 meters away or more, for at least 20 seconds.
 
-When it's time to take a regular break (indicated by the box pulsing
-purple), clicking on the box will bring up a five-minute timer, during
+When it's time to take a long break (indicated by the box pulsing
+purple), clicking on the box will bring up a ten-minute timer, during
 which time you should get away from your computer for a bit.  When you
 are done with your break, click on the "Let me get back to work" button
 at the bottom of the screen to reset the break timers and continue using
