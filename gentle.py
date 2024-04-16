@@ -19,6 +19,10 @@ from PySide6.QtWidgets import (
     QMenu,
     QSystemTrayIcon,
     QSplashScreen,
+    QDialog,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
 )
 
 # pylint: disable=import-error
@@ -708,6 +712,26 @@ def show_splash_screen(image, timeout=3000):
     QTimer.singleShot(timeout, lambda: splash.close())
 
 
+class AboutWindow(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("About Gentle Break Reminder")
+
+        layout = QVBoxLayout()
+
+        layout.addWidget(
+            QLabel(
+                '<h1>Gentle Break Reminder</h1><p>An awesome little program for reminding you to take breaks.</p><p>See <a href="https://www.google.com/">the website</a> for more information.</p>'
+            )
+        )
+
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(self.hide)
+        layout.addWidget(close_button)
+
+        self.setLayout(layout)
+
+
 # ##############  Main
 def main():
     # ##############  Default configuration
@@ -829,9 +853,18 @@ def main():
     tray_icon = QSystemTrayIcon(QIcon(config["general"]["icon"]))
 
     tray_menu = QMenu()
-    action = QAction("Exit", tray_icon)
-    action.triggered.connect(app.quit)
-    tray_menu.addAction(action)
+
+    about_window = AboutWindow()
+    about_window.setHidden(True)
+
+    about_action = QAction("About", tray_icon)
+    about_action.triggered.connect(about_window.show())
+    tray_menu.addAction(about_action)
+
+    exit_action = QAction("Exit", tray_icon)
+    exit_action.triggered.connect(app.quit)
+    tray_menu.addAction(exit_action)
+
     tray_icon.setContextMenu(tray_menu)
 
     tray_icon.setToolTip(TOOLTIP_TITLE)
