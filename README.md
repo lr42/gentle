@@ -14,7 +14,7 @@ What is this?
 ========================================================================
 
 Gentle Break Reminder is a cross-platform program for Windows and Linux
-which will remind you to take regular breaks, in a very gentle way.
+which will remind you to take long breaks, in a very gentle way.
 
 When it's getting close to time to take a break, a glowing, colorful,
 semi-transparent, pulsing box will appear on your screen.  You can move
@@ -27,8 +27,8 @@ blue), you can click on the box and a full screen window will appear for
 follows the 20-20-20 rule:  At least every 20 minutes, look at something
 20 meters away or more, for at least 20 seconds.
 
-When it's time to take a regular break (indicated by the box pulsing
-purple), clicking on the box will bring up a five-minute timer, during
+When it's time to take a long break (indicated by the box pulsing
+purple), clicking on the box will bring up a ten-minute timer, during
 which time you should get away from your computer for a bit.  When you
 are done with your break, click on the "Let me get back to work" button
 at the bottom of the screen to reset the break timers and continue using
@@ -223,9 +223,22 @@ Not tested
 Credits
 ========================================================================
 
-The [flower icon](https://www.flaticon.com/free-icon/flower_346218) in
-the system tray is used under the Flaticon license.  Please see [Flower
-icons created by Freepik -
-Flaticon](https://www.flaticon.com/free-icons/flower) for more
-information.
+The [flower icon][1] in the system tray is used under the Flaticon
+license.  Please see [Flower icons created by Freepik - Flaticon][2]
+for more information.
+
+The [long chime sound][3] is used under a [Creative Commons 0
+license][4]:
+
+> Singing Bowl Male Frequency by steffcaffrey --
+> https://freesound.org/s/44991/ -- License: Creative Commons 0
+
+The [image used in the splash screen][5] is used under a [Creative
+Commons 0 license][4].
+
+ [1]:   https://www.flaticon.com/free-icon/flower_346218
+ [2]:   https://www.flaticon.com/free-icons/flower
+ [3]:   https://freesound.org/s/44991/
+ [4]:   https://creativecommons.org/public-domain/cc0/
+ [5]:   https://commons.wikimedia.org/wiki/File:Levi_XU_2016_%28Unsplash%29.jpg
 

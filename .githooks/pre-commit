@@ -1,20 +1,36 @@
 #!/bin/bash
 
+exit_code=0
+
 if ! diff <(cat requirements.txt | sed 's/[>=]=[0-9].*//' | sort) <(pip freeze | sed 's/[>=]=[0-9].*//' | sort) ; then
 	echo \'pip freeze\' and \'requirements.txt\' differ in their modules specified.
-	echo Please fix this by running:
+	echo
+	echo "You can reset your virtual environment to match the \'requirements.txt\'"
+	echo "file (if you've, for example, switched branches) by running:"
+	echo "pip install -r requirements.txt && pip freeze | sed 's/==/>=/' | grep -v -f requirements.txt | xargs pip uninstall -y"
+	echo
+	echo ... OR you can update the requirements file by running:
 	echo "pip freeze | sed 's/==/>=/' >| requirements.txt"
 	echo
-	exit 1
+	exit_code=$((exit_code+1))
 fi
 
 if black --version | grep -q Python ; then
 	if ! black -l 79 --check -q ./*.py ; then
+		black -l 79 --check -v ./*.py 2>&1 | grep -e "^would reformat "
 		echo Please format your files with:
-		echo black -l 79 ./*.py
+		echo 'black -l 79 ./*.py'
 		echo \(You may need to install \'black\' first, if you haven\'t already.\)
 		echo
-		exit 2
+		exit_code=$((exit_code+2))
 	fi
 fi
 
+if [ $exit_code -gt 0 ] ; then
+	echo Exit code:  $exit_code
+	echo To commit without running this check, use:
+	echo git commit --no-verify
+else
+	echo All is well\!
+fi
+exit $exit_code

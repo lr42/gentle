@@ -6,3 +6,5 @@ config-testing.toml
 geometry-testing.json
 gentle.tar.gz
 gentle.dist
+singing_bowl.wav
+*.backup
