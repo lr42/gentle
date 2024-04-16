@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QLabel,
     QPushButton,
+    QWidget,
 )
 
 # pylint: disable=import-error
@@ -712,10 +713,11 @@ def show_splash_screen(image, timeout=3000):
     QTimer.singleShot(timeout, lambda: splash.close())
 
 
-class AboutWindow(QDialog):
+class AboutWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("About Gentle Break Reminder")
+        self.setHidden(True)
 
         layout = QVBoxLayout()
 
@@ -839,6 +841,9 @@ def main():
         lambda: machine.process_event(break_ended),
     )
 
+    about_window = AboutWindow()
+    about_window.hide()
+
     # ##############  Add chime
     # TODO Stop the chime when the user clicks "Let me get back to work".
     long_break_chime_file = config["long_break"]["chime"]
@@ -853,9 +858,6 @@ def main():
     tray_icon = QSystemTrayIcon(QIcon(config["general"]["icon"]))
 
     tray_menu = QMenu()
-
-    about_window = AboutWindow()
-    about_window.setHidden(True)
 
     about_action = QAction("About", tray_icon)
     about_action.triggered.connect(about_window.show())
