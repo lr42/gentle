@@ -721,11 +721,11 @@ class AboutWindow(QWidget):
 
         layout = QVBoxLayout()
 
-        layout.addWidget(
-            QLabel(
-                '<h1>Gentle Break Reminder</h1><p>An awesome little program for reminding you to take breaks.</p><p>See <a href="https://www.google.com/">the website</a> for more information.</p>'
-            )
+        label = QLabel(
+            '<h1>Gentle Break Reminder</h1><p>An awesome little program for reminding you to take breaks.</p><p>See <a href="https://github.com/lr42/gentle">the website</a> for more information.</p>'
         )
+        label.setOpenExternalLinks(True)
+        layout.addWidget(label)
 
         close_button = QPushButton("Close")
         close_button.clicked.connect(self.hide)
