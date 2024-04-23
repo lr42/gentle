@@ -48,11 +48,11 @@ Features
 Bugs
 ------------------------------------------------------------------------
 
-- [ ] When the "about" window is closed using the window decoration
-  close button, it exits the entire program.  It should just close the
-  "about" window.
 - [ ] Set the window title of the break screen, so it doesn't show up as
   `gentle.py` or whatever it shows as.
+- [x] When the "about" window is closed using the window decoration
+  close button, it exits the entire program.  It should just close the
+  "about" window.
 - [x] The countdown timer glitches/shows the wrong value when the long
   break screen is shown.
 - [x] Remove the context menus from the glow box, or at least the

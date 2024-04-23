@@ -811,6 +811,7 @@ def main():
 
     # ##############  Set up Qt
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
 
     if config["general"]["splash_screen_timeout"] > 0:
         show_splash_screen(
