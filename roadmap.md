@@ -22,6 +22,7 @@ Up next  (v0.1.0-beta)
 Features
 ------------------------------------------------------------------------
 
+- [x] Add an about entry to the system tray icon.
 - [ ] Show a tool tip over the glow box which indicates which break this
   is for.  Make this optional.  (From Matt.)
 - [ ] Set up proper file logging and log rotations.  Preferably the file
@@ -31,7 +32,6 @@ Features
 - [ ] Show a intro wizard on first run.  Introduce the glow box and
   allow moving it to wherever the user would like.  (Introducing the
   glow box is an idea from Matt.)
-- [ ] Add an about entry to the system tray icon.
 - [x] Add a splash screen.
 	- [x] Make this optional in the config.
 - [x] Show the time to the next break in the tool tip for the task bar
@@ -48,6 +48,9 @@ Features
 Bugs
 ------------------------------------------------------------------------
 
+- [ ] When the "about" window is closed using the window decoration
+  close button, it exits the entire program.  It should just close the
+  "about" window.
 - [ ] Set the window title of the break screen, so it doesn't show up as
   `gentle.py` or whatever it shows as.
 - [x] The countdown timer glitches/shows the wrong value when the long

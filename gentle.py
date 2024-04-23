@@ -841,9 +841,6 @@ def main():
         lambda: machine.process_event(break_ended),
     )
 
-    about_window = AboutWindow()
-    about_window.hide()
-
     # ##############  Add chime
     # TODO Stop the chime when the user clicks "Let me get back to work".
     long_break_chime_file = config["long_break"]["chime"]
@@ -859,8 +856,10 @@ def main():
 
     tray_menu = QMenu()
 
+    about_window = AboutWindow()
+
     about_action = QAction("About", tray_icon)
-    about_action.triggered.connect(about_window.show())
+    about_action.triggered.connect(about_window.show)
     tray_menu.addAction(about_action)
 
     exit_action = QAction("Exit", tray_icon)
