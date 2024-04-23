@@ -32,6 +32,9 @@ class BaseBreakScreen(QWidget):
 
         self.FONT_SIZE = 72
 
+        self.WINDOW_NAME = "Gentle Break Reminder"
+        self.setWindowTitle(self.WINDOW_NAME)
+
         self._run_on_completion = run_on_completion
 
         # #############   Initialize the countdown timer
