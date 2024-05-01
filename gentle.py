@@ -713,10 +713,10 @@ def show_splash_screen(image, timeout=3000):
     QTimer.singleShot(timeout, lambda: splash.close())
 
 
-class AboutWindow(QWidget):
+class AboutWindow(QDialog):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("About Gentle Break Reminder")
+        self.setWindowTitle("About")
         self.setHidden(True)
 
         layout = QVBoxLayout()

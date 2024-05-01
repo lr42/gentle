@@ -1,6 +1,20 @@
 Unsorted
 ========================================================================
 
+- [ ] I had a case where after a short break AFK time out, it gave me
+  ten minutes until the next short break.
+    - This is actually the correct behavior I think, because the time to
+      the next long break was just over 20 minutes.  See the following
+      log to see what I'm talking about:
+
+````````````````````````text
+7:33:36 PM - Welcome to the Gentle Break Reminder!
+7:33:36 PM - Next break (short): 7:50:02 PM
+7:33:36 PM - Next long break: 8:23:35 PM
+8:03:23 PM - Away from the computer enough to reset the short break.
+8:03:26 PM - Next break (short): 8:13:21 PM
+8:03:26 PM - Next long break: 8:23:35 PM
+````````````````````````
 
 
 Up next  (v0.1.0-beta)
