@@ -1,6 +1,5 @@
 # coding: utf-8
 
-import sys
 from PySide6.QtWidgets import (
     QVBoxLayout,
     QApplication,
@@ -14,27 +13,27 @@ class IntroWizard(QWizard):
     def __init__(self):
         super().__init__()
 
-        p1 = QWizardPage()
-        v1 = QVBoxLayout()
-        l1 = QLabel()
-        l1.setText("<big>Welcome to Gentle Break Reminder!</big>")
-        v1.addWidget(l1)
-        p1.setLayout(v1)
-        self.addPage(p1)
+        self._add_page("<big>Welcome to Gentle Break Reminder!</big>")
 
-        p2 = QWizardPage()
-        v2 = QVBoxLayout()
-        l2 = QLabel()
-        l2.setText(
+        self._add_page(
             "Gentle Break Reminder will remind you to take breaks in a very gentle way.  This will be a quick introduction to how it works."
         )
-        l2.setWordWrap(True)
-        v2.addWidget(l2)
-        p2.setLayout(v2)
-        self.addPage(p2)
+
+    def _add_page(self, text):
+        p = QWizardPage()
+        v = QVBoxLayout()
+        l = QLabel()
+        l.setWordWrap(True)
+        l.setText(text)
+        v.addWidget(l)
+        p.setLayout(v)
+        self.addPage(p)
 
 
 if __name__ == "__main__":
+    import sys
+    from PySide6.QtWidgets import QApplication
+
     app = QApplication()
     w = IntroWizard()
     w.show()
