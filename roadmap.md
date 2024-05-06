@@ -129,6 +129,9 @@ Features
 - [ ] Allow setting the opacity of the glowbox.
 - [ ] Allow setting times with a time format, i.e. "50m" or "T0:50:00"
   or something similar.
+- [ ] When logging/printing to the console (for the normal user) add
+  a date header if the date changes, and maybe when the program starts
+  as well.
 - [x] Add a notification sound to indicate when the break is done.
 - [x] Show a skip break button on the short break screen.  (From
   Matt.)  Make this optional, possibly with the default to off.
